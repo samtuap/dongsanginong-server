@@ -1,0 +1,58 @@
+server:
+  port: 8080
+spring:
+  config:
+    activate:
+      on-profile: local
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: 'http://localhost:8081'
+            allow-credentials: true
+            allowedHeaders: '*'
+            allowedMethods:
+              - PUT
+              - GET
+              - POST
+              - DELETE
+              - OPTIONS
+      routes:
+        - id: product-service
+          # /proeuct-service? ???? url ??? ??? ??? ??
+          predicates:
+            - Path=/product-service/**
+          filters:
+            # filter?? ??? ??? ?, product-service ???? ?? ? product-service ??? ??
+            - StripPrefix=1
+          # ?? uri? eureka? ??? ??? ???. ? ??? ?? spring.application.name? ????.
+          uri: lb://product-service
+        - id: member-service
+          predicates:
+            - Path=/member-service/**
+          filters:
+            - StripPrefix=1
+          uri: lb://member-service
+        - id: order-service
+          predicates:
+            - Path=/order-service/**
+          filters:
+            - StripPrefix=1
+          uri: lb://order-service
+        - id: live-service
+          predicates:
+            - Path=/live-service/**
+          filters:
+            - StripPrefix=1
+          uri: lb://live-service
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
