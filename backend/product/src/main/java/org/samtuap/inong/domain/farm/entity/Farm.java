@@ -21,9 +21,11 @@ public class Farm extends BaseEntity {
     private String farmName;
 
     @NotNull
+    @Column(columnDefinition = "varchar(5000)")
     private String bannerImageUrl;
 
     @NotNull
+    @Column(columnDefinition = "varchar(5000)")
     private String profileImageUrl;
 
     private String farmIntro;

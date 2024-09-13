@@ -8,6 +8,7 @@ import org.samtuap.inong.domain.order.entity.Ordering;
 
 import java.time.LocalDateTime;
 
+@Entity
 @SQLDelete(sql = "UPDATE receipt SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 public class Receipt extends BaseEntity {
