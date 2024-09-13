@@ -1,14 +1,14 @@
-package org.samtuap.inong.domain.member.api;
+package org.samtuap.inong.domain.product.api;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/member")
+@RequestMapping("/product")
 @RestController
-public class MemberController {
+public class ProductController {
     @GetMapping
     public String testApi() {
-        return "hello world!!!";
+        return "product-test!!";
     }
 }

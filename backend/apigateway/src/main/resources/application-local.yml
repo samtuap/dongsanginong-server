@@ -24,13 +24,10 @@ spring:
               - OPTIONS
       routes:
         - id: product-service
-          # /proeuct-service? ???? url ??? ??? ??? ??
           predicates:
             - Path=/product-service/**
           filters:
-            # filter?? ??? ??? ?, product-service ???? ?? ? product-service ??? ??
             - StripPrefix=1
-          # ?? uri? eureka? ??? ??? ???. ? ??? ?? spring.application.name? ????.
           uri: lb://product-service
         - id: member-service
           predicates:
@@ -51,8 +48,28 @@ spring:
             - StripPrefix=1
           uri: lb://live-service
 
-
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+# swagger-ui
+springdoc:
+  enable-native-support: true
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+#    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /member-service/v3/api-docs
+        name: member-service
+      - url: /product-service/v3/api-docs
+        name: product-service
+      - url: /order-service/v3/api-docs
+        name: order-service
+      - url: /live-service/v3/api-docs
+        name: live-service
+
+
