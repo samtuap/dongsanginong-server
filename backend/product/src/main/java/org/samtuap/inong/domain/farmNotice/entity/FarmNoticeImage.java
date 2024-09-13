@@ -19,6 +19,6 @@ public class FarmNoticeImage extends BaseEntity {
     @JoinColumn(name = "notice_id")
     private FarmNotice farmNotice;
 
-    @Column(columnDefinition = "varchar(32779)")
+    @Column(columnDefinition = "varchar(5000)")
     private String imageUrl;
 }

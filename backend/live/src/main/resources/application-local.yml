@@ -19,7 +19,7 @@ spring:
     database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
     generate-ddl: true
-    defer-datasource-initialization: true
+#    defer-datasource-initialization: true
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+9

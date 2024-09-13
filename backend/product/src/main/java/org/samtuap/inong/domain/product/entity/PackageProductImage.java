@@ -12,6 +12,6 @@ public class PackageProductImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "varchar(32779)")
+    @Column(columnDefinition = "varchar(5000)")
     private String imageUrl;
 }
