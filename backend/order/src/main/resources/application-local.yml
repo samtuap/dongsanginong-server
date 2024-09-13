@@ -30,7 +30,6 @@ spring:
 eureka:
   client:
     serviceUrl:
-      # eureka? member ????? ?? ??
       defaultZone: http://localhost:8761/eureka/
 
 logging:
