@@ -23,11 +23,5 @@ public abstract class BaseEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @NotNull
-    @ColumnDefault(value = "'N'")
-    private String delYn;
-
-    public void deleteData(){
-        this.delYn = "N";
-    }
+    private LocalDateTime deletedAt;
 }

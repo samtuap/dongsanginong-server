@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.coupon.entity;
+package org.samtuap.inong.domain.farmNotice.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -6,24 +6,20 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 
-import java.time.LocalDateTime;
-
-
 @Entity
-@SQLDelete(sql = "UPDATE coupon SET deleted_at = now() WHERE id = ?")
+@SQLDelete(sql = "UPDATE notice_comment SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
-public class Coupon extends BaseEntity {
+public class NoticeComment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    private String couponName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "notice_id")
+    private FarmNotice farmNotice;
 
     @NotNull
-    private Integer discountPercentage;
-
-    @NotNull
-    private LocalDateTime expiration;
+    @Column(columnDefinition = "varchar(300)")
+    private String contents;
 
 }

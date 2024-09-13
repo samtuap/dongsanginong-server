@@ -1,10 +1,14 @@
-package org.samtuap.inong.domain.favorite.entity;
+package org.samtuap.inong.domain.favorites.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 import org.samtuap.inong.domain.member.entity.Member;
 
 @Entity
+@SQLDelete(sql = "UPDATE favorites SET deleted_at = now() WHERE id = ?")
+@SQLRestriction("deleted_at is NULL")
 public class Favorites extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,7 +16,7 @@ public class Favorites extends BaseEntity {
 
     private Long farmId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 }

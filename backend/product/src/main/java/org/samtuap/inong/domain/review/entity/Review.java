@@ -10,7 +10,7 @@ import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 
 @Entity
-@SQLDelete(sql = "UPDATE review SET delYn = 'Y' WHERE id = ?")
+@SQLDelete(sql = "UPDATE review SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 public class Review extends BaseEntity {
     @Id

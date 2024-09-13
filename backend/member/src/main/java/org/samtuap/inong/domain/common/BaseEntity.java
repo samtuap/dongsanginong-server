@@ -21,9 +21,5 @@ public abstract class BaseEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    private String delYn;
-
-    public void deleteData(){
-        this.delYn = "N";
-    }
+    private LocalDateTime deletedAt;
 }
