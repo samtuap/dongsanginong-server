@@ -27,6 +27,12 @@ spring:
     init:
       mode: always
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: member-group
+      auto-offset-reset: earliest
+
 eureka:
   client:
     serviceUrl:
