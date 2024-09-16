@@ -9,4 +9,5 @@ import java.util.List;
 public interface FarmNoticeRepository extends JpaRepository<FarmNotice, Long> {
 
     List<FarmNotice> findByFarm(Farm farm);
+    FarmNotice findByIdAndFarm(Long id, Farm farm);
 }
