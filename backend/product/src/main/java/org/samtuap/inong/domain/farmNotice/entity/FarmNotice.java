@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
+import org.samtuap.inong.domain.farm.entity.Farm;
 
 @Entity
 @SQLDelete(sql = "UPDATE farm_notice SET deleted_at = now() WHERE id = ?")
@@ -19,4 +20,8 @@ public class FarmNotice extends BaseEntity {
 
     @Column(columnDefinition = "varchar(5000)")
     private String contents;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "farm_id")
+    private Farm farm; // 농장 id 추가
 }
