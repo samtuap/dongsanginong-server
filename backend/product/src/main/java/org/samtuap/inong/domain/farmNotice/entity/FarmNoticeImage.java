@@ -1,12 +1,9 @@
 package org.samtuap.inong.domain.farmNotice.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 import org.samtuap.inong.domain.common.BaseEntity;
 
 @Entity
@@ -20,7 +17,6 @@ public class FarmNoticeImage extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notice_id")
-    @JsonIgnore // 직렬화에서 FarmNotice 제외
     private FarmNotice farmNotice;
 
     @Column(columnDefinition = "varchar(5000)")
