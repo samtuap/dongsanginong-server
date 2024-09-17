@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.farmNotice.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.farmNotice.dto.CommentCreateRequest;
+import org.samtuap.inong.domain.farmNotice.dto.CommentListResponse;
 import org.samtuap.inong.domain.farmNotice.dto.NoticeDetailResponse;
 import org.samtuap.inong.domain.farmNotice.dto.NoticeListResponse;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
@@ -46,5 +47,15 @@ public class FarmNoticeController {
                               @RequestBody CommentCreateRequest dto) {
 
         farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
+    }
+
+    /**
+     * 공지에 달린 댓글 조회
+     */
+    @GetMapping("/{farm_id}/notice/{notice_id}/comment")
+    public List<CommentListResponse> commentList(@PathVariable("farm_id") Long farmId,
+                                                 @PathVariable("notice_id") Long noticeId) {
+
+        return farmNoticeService.commentList(farmId, noticeId);
     }
 }
