@@ -1,13 +1,11 @@
 package org.samtuap.inong.domain.farmNotice.api;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.domain.farmNotice.dto.CommentCreateRequest;
 import org.samtuap.inong.domain.farmNotice.dto.NoticeDetailResponse;
 import org.samtuap.inong.domain.farmNotice.dto.NoticeListResponse;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,8 +30,21 @@ public class FarmNoticeController {
      */
     @GetMapping("/{farm_id}/notice/{notice_id}")
     public NoticeDetailResponse noticeDetail(@PathVariable("farm_id") Long farmId,
-                                           @PathVariable("notice_id") Long noticeId) {
+                                             @PathVariable("notice_id") Long noticeId) {
 
         return farmNoticeService.noticeDetail(farmId, noticeId);
+    }
+
+    /**
+     * 유저가 공지글에 댓글 작성
+     * 나중에 수정할 예정이기 때문에 memberId만 requestParam으로 받았음
+     */
+    @PostMapping("/{farm_id}/notice/{notice_id}/comment/create")
+    public void commentCreate(@PathVariable("farm_id") Long farmId,
+                              @PathVariable("notice_id") Long noticeId,
+                              @RequestParam("memberId") Long memberId,
+                              @RequestBody CommentCreateRequest dto) {
+
+        farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
     }
 }
