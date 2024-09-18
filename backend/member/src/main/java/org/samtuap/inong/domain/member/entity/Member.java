@@ -1,16 +1,21 @@
 package org.samtuap.inong.domain.member.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Builder
 @SQLDelete(sql = "UPDATE member SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 public class Member extends BaseEntity {
@@ -35,4 +40,12 @@ public class Member extends BaseEntity {
 
     @NotNull
     private String zipcode;
+
+    @NotNull
+    @Enumerated(value = EnumType.STRING)
+    private SocialType socialType;
+
+    @NotNull
+    private String socialId;
+
 }

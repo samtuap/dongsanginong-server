@@ -1,11 +1,11 @@
 server:
-  port: 0
+  port: 9090
 
 spring:
   config:
     activate:
       on-profile: local
-    import: application-secret.properties
+    import: application-secret.yml
   application:
     name: member-service
   datasource:
@@ -43,7 +43,7 @@ logging:
     org.hibernate.sql: debug
     org.hibernate.type: info
 
-## swagger
+### swagger
 #springdoc:
 #  api-docs:
 #    path: /member-service/v3/api-docs

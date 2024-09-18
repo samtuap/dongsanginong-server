@@ -4,6 +4,7 @@ spring:
   config:
     activate:
       on-profile: local
+    import: application-secret.yml
   application:
     name: api-gateway
   cloud:
