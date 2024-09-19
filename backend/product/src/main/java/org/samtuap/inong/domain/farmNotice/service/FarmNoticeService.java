@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.farmNotice.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.farmNotice.dto.*;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -139,7 +142,7 @@ public class FarmNoticeService {
     @Transactional
     public void createNotice(Long farmId, NoticeCreateRequest dto) {
         Farm farm = farmRepository.findById(farmId).orElseThrow(
-                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+                () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         FarmNotice farmNotice = NoticeCreateRequest.toEntity(dto, farm);
@@ -155,12 +158,12 @@ public class FarmNoticeService {
     @Transactional
     public void updateNotice(Long farmId, Long noticeId, NoticeUpdateRequest dto) {
         Farm farm = farmRepository.findById(farmId).orElseThrow(
-                () -> new EntityNotFoundException("해당 농장이 존재하지 않습니다.")
+                () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         if (farmNotice == null) {
-            throw new EntityNotFoundException("해당 공지가 존재하지 않습니다.");
+            throw new BaseCustomException(NOTICE_NOT_FOUND);
         }
 
         updateFarmNoticeFields(farmNotice, dto);
@@ -181,7 +184,7 @@ public class FarmNoticeService {
             contentsField.setAccessible(true);
             contentsField.set(farmNotice, dto.content());
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException("필드를 업데이트할 수 없습니다.", e);
+            throw new BaseCustomException(FIELD_NOT_FOUND);
         }
     }
 
@@ -192,6 +195,32 @@ public class FarmNoticeService {
     public void saveNoticeImages(FarmNotice farmNotice, List<String> imageUrls) {
         List<FarmNoticeImage> farmNoticeImages = NoticeCreateRequest.toImageEntityList(farmNotice, imageUrls);
         farmNoticeImageRepository.saveAll(farmNoticeImages);
+    }
+
+    /**
+     * 공지 삭제 (판매자가 공지 삭제)
+     */
+    @Transactional
+    public void deleteNotice(Long farmId, Long noticeId) {
+        // 해당 id에 일치하는 농장 가져오기
+        Farm farm = farmRepository.findById(farmId).orElseThrow(
+                () -> new BaseCustomException(FARM_NOT_FOUND)
+        );
+
+        // 해당 농장에 속하는 공지 가져오기
+        FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
+        if (farmNotice == null) {
+            throw new BaseCustomException(NOTICE_NOT_FOUND);
+        }
+
+        // 관련 이미지 삭제
+        farmNoticeImageRepository.deleteByFarmNotice(farmNotice);
+
+        // 관련 댓글 삭제
+        noticeCommentRepository.deleteByFarmNotice(farmNotice);
+
+        // 공지 삭제
+        farmNoticeRepository.delete(farmNotice);
     }
 
 

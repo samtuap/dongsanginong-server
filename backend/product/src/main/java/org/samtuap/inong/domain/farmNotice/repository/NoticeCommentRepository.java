@@ -11,4 +11,6 @@ import java.util.List;
 public interface NoticeCommentRepository extends JpaRepository<NoticeComment, Long> {
 
     List<NoticeComment> findByFarmNotice(FarmNotice farmNotice);
+
+    void deleteByFarmNotice(FarmNotice farmNotice);
 }
