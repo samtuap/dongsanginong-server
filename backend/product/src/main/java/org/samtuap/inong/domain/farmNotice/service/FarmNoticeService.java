@@ -16,6 +16,7 @@ import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,4 +136,67 @@ public class FarmNoticeService {
         return dtoList;
 
     }
+
+    /**
+     * 공지 생성 (판매자가 공지 등록)
+     */
+    @Transactional
+    public void createNotice(Long farmId, NoticeCreateRequest dto) {
+        Farm farm = farmRepository.findById(farmId).orElseThrow(
+                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+        );
+
+        FarmNotice farmNotice = NoticeCreateRequest.toEntity(dto, farm);
+        farmNoticeRepository.save(farmNotice);
+
+        // 이미지 저장
+        saveNoticeImages(farmNotice, dto.imageUrls());
+    }
+
+    /**
+     * 공지 수정 (판매자가 공지 수정)
+     */
+    @Transactional
+    public void updateNotice(Long farmId, Long noticeId, NoticeUpdateRequest dto) {
+        Farm farm = farmRepository.findById(farmId).orElseThrow(
+                () -> new EntityNotFoundException("해당 농장이 존재하지 않습니다.")
+        );
+
+        FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
+        if (farmNotice == null) {
+            throw new EntityNotFoundException("해당 공지가 존재하지 않습니다.");
+        }
+
+        updateFarmNoticeFields(farmNotice, dto);
+
+        // 기존 이미지 삭제 및 새로운 이미지 저장
+        farmNoticeImageRepository.deleteByFarmNotice(farmNotice);
+        saveNoticeImages(farmNotice, dto.imageUrls());
+    }
+
+    private void updateFarmNoticeFields(FarmNotice farmNotice, NoticeUpdateRequest dto) {
+        // 리플렉션을 통해 title과 contents 필드를 업데이트
+        try {
+            Field titleField = FarmNotice.class.getDeclaredField("title");
+            titleField.setAccessible(true);
+            titleField.set(farmNotice, dto.title());
+
+            Field contentsField = FarmNotice.class.getDeclaredField("contents");
+            contentsField.setAccessible(true);
+            contentsField.set(farmNotice, dto.content());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException("필드를 업데이트할 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 공지 이미지 저장
+     */
+    @Transactional
+    public void saveNoticeImages(FarmNotice farmNotice, List<String> imageUrls) {
+        List<FarmNoticeImage> farmNoticeImages = NoticeCreateRequest.toImageEntityList(farmNotice, imageUrls);
+        farmNoticeImageRepository.saveAll(farmNoticeImages);
+    }
+
+
 }

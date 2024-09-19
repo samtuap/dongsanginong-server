@@ -1,10 +1,7 @@
 package org.samtuap.inong.domain.farmNotice.api;
 
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.farmNotice.dto.CommentCreateRequest;
-import org.samtuap.inong.domain.farmNotice.dto.CommentListResponse;
-import org.samtuap.inong.domain.farmNotice.dto.NoticeDetailResponse;
-import org.samtuap.inong.domain.farmNotice.dto.NoticeListResponse;
+import org.samtuap.inong.domain.farmNotice.dto.*;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,4 +55,24 @@ public class FarmNoticeController {
 
         return farmNoticeService.commentList(farmId, noticeId);
     }
+
+    /**
+     * 공지 생성 (판매자가 공지 등록)
+     */
+    @PostMapping("/{farm_id}/notice/create")
+    public void createNotice(@PathVariable("farm_id") Long farmId,
+                             @RequestBody NoticeCreateRequest dto) {
+        farmNoticeService.createNotice(farmId, dto);
+    }
+
+    /**
+     * 공지 수정 (판매자가 공지 수정)
+     */
+    @PutMapping("/{farm_id}/notice/{notice_id}/update")
+    public void updateNotice(@PathVariable("farm_id") Long farmId,
+                             @PathVariable("notice_id") Long noticeId,
+                             @RequestBody NoticeUpdateRequest dto) {
+        farmNoticeService.updateNotice(farmId, noticeId, dto);
+    }
+
 }
