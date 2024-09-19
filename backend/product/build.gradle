@@ -32,6 +32,9 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.mindrot:jbcrypt:0.4'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.0.5'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.2.0'
 
 	// feignclient
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
