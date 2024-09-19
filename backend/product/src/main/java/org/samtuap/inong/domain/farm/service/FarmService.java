@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.farm.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
 import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
@@ -19,4 +20,9 @@ public class FarmService {
     public Page<FarmListGetResponse> getFarmList(Pageable pageable) {
         return farmRepository.findAll(pageable).map(FarmListGetResponse::fromEntity);
     }
+
+    public FarmDetailGetResponse getFarmDetail(Long farmId) {
+        return FarmDetailGetResponse.fromEntity(farmRepository.findByIdOrThrow(farmId));
+    }
+
 }

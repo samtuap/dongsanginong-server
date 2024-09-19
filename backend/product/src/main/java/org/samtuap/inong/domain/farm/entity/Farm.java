@@ -31,6 +31,7 @@ public class Farm extends BaseEntity {
     @Column(columnDefinition = "varchar(5000)")
     private String profileImageUrl;
 
+    @Column(columnDefinition = "varchar(5000)")
     private String farmIntro;
 
     @NotNull
