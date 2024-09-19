@@ -9,4 +9,6 @@ import java.util.List;
 public interface FarmNoticeImageRepository extends JpaRepository<FarmNoticeImage, Long> {
 
     List<FarmNoticeImage> findByFarmNotice(FarmNotice farmNotice);
+
+    void deleteByFarmNotice(FarmNotice farmNotice);
 }
