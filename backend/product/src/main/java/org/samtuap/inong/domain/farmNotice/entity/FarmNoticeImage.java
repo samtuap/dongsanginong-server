@@ -21,4 +21,16 @@ public class FarmNoticeImage extends BaseEntity {
 
     @Column(columnDefinition = "varchar(5000)")
     private String imageUrl;
+
+
+    // 기본 생성자
+    public FarmNoticeImage() {
+    }
+
+    // 생성자
+    public FarmNoticeImage(String imageUrl, FarmNotice farmNotice) {
+        this.imageUrl = imageUrl;
+        this.farmNotice = farmNotice;
+    }
+
 }

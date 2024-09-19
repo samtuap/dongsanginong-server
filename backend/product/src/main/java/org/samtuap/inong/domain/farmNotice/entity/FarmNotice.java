@@ -24,4 +24,21 @@ public class FarmNotice extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "farm_id")
     private Farm farm; // 농장 id 추가
+
+
+    // 기본 생성자
+    protected FarmNotice() {
+    }
+
+    public FarmNotice(String title, String contents, Farm farm) {
+        this.title = title;
+        this.contents = contents;
+        this.farm = farm;
+    }
+
+    // 공지 수정 메서드
+    public void update(String title, String contents) {
+        this.title = title;
+        this.contents = contents;
+    }
 }

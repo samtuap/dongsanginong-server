@@ -131,4 +131,55 @@ public class FarmNoticeService {
         return dtoList;
 
     }
+
+    /**
+     * 공지 생성 (판매자가 공지 등록)
+     */
+    @Transactional
+    public void createNotice(Long farmId, String title, String content, List<String> imageUrls) {
+
+        // 해당 id에 일치하는 농장 가져오기
+        Farm farm = farmRepository.findById(farmId).orElseThrow(
+                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+        );
+
+        FarmNotice farmNotice = new FarmNotice(title, content, farm);
+        farmNoticeRepository.save(farmNotice);
+
+        // 이미지 저장
+        saveNoticeImages(farmNotice, imageUrls);
+    }
+
+    /**
+     * 공지 수정 (판매자가 공지 수정)
+     */
+    @Transactional
+    public void updateNotice(Long farmId, Long noticeId, String title, String content, List<String> imageUrls) {
+
+        // 해당 id에 일치하는 농장 가져오기
+        Farm farm = farmRepository.findById(farmId).orElseThrow(
+                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+        );
+
+        FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
+        if (farmNotice == null) {
+            throw new EntityNotFoundException("해당 공지가 존재하지 않습니다.");
+        }
+
+        farmNotice.update(title, content);
+
+        // 기존 이미지 삭제 및 새로운 이미지 저장
+        farmNoticeImageRepository.deleteByFarmNotice(farmNotice);
+        saveNoticeImages(farmNotice, imageUrls);
+    }
+
+    /**
+     * 공지에 이미지 저장
+     */
+    private void saveNoticeImages(FarmNotice farmNotice, List<String> imageUrls) {
+        for (String imageUrl : imageUrls) {
+            FarmNoticeImage image = new FarmNoticeImage(imageUrl, farmNotice);
+            farmNoticeImageRepository.save(image);
+        }
+    }
 }
