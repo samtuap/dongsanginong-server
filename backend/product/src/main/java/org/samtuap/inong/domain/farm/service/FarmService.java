@@ -24,5 +24,4 @@ public class FarmService {
     public FarmDetailGetResponse getFarmDetail(Long farmId) {
         return FarmDetailGetResponse.fromEntity(farmRepository.findByIdOrThrow(farmId));
     }
-
 }
