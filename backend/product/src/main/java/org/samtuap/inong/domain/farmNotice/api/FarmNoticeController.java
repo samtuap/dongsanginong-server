@@ -1,10 +1,7 @@
 package org.samtuap.inong.domain.farmNotice.api;
 
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.farmNotice.dto.CommentCreateRequest;
-import org.samtuap.inong.domain.farmNotice.dto.CommentListResponse;
-import org.samtuap.inong.domain.farmNotice.dto.NoticeDetailResponse;
-import org.samtuap.inong.domain.farmNotice.dto.NoticeListResponse;
+import org.samtuap.inong.domain.farmNotice.dto.*;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,27 +60,21 @@ public class FarmNoticeController {
      * 공지 생성 (판매자가 공지 등록)
      */
     @PostMapping("/{farm_id}/notice/create")
-    public void createNotice(@PathVariable("farm_id") Long farmId,
-                             @RequestParam("title") String title,
-                             @RequestParam("content") String content,
-                             @RequestParam("imageUrls") List<String> imageUrls) {
-
-        farmNoticeService.createNotice(farmId, title, content, imageUrls);
+    public NoticeCreateRequest createNotice(@PathVariable("farm_id") Long farmId,
+                             @RequestBody NoticeCreateRequest dto) {
+        farmNoticeService.createNotice(farmId, dto.title(), dto.content(), dto.imageUrls());
+        return dto;
     }
 
     /**
      * 공지 수정 (판매자가 공지 수정)
      */
     @PutMapping("/{farm_id}/notice/{notice_id}/update")
-    public void updateNotice(@PathVariable("farm_id") Long farmId,
-                             @PathVariable("notice_id") Long noticeId,
-                             @RequestParam("title") String title,
-                             @RequestParam("content") String content,
-                             @RequestParam("imageUrls") List<String> imageUrls) {
-
-        farmNoticeService.updateNotice(farmId, noticeId, title, content, imageUrls);
+    public NoticeCreateRequest updateNotice(@PathVariable("farm_id") Long farmId,
+                                            @PathVariable("notice_id") Long noticeId,
+                                            @RequestBody NoticeCreateRequest dto) {
+        farmNoticeService.updateNotice(farmId, noticeId, dto.title(), dto.content(), dto.imageUrls());
+        return dto;
     }
-
-
 
 }
