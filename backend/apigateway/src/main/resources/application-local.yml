@@ -4,6 +4,7 @@ spring:
   config:
     activate:
       on-profile: local
+    import: application-secret.properties
   application:
     name: api-gateway
   cloud:
@@ -73,3 +74,8 @@ springdoc:
         name: live-service
 
 
+jwt:
+  secret_key: ${JWT_SECRET_KEY}
+  token:
+    access_expiration_time: ${JWT_TOKEN_ACCESS_EXPIRATION_TIME}
+    refresh_expiration_time: ${JWT_TOKEN_REFRESH_EXPIRATION_TIME}

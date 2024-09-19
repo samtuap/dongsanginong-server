@@ -43,7 +43,27 @@ logging:
     org.hibernate.sql: debug
     org.hibernate.type: info
 
-## swagger
+
+kakao:
+  login:
+    api_key: ${KAKAO_LOGIN_API_KEY}
+    redirect_uri: ${KAKAO_LOGIN_REDIRECT_URI}
+    uri:
+      base: ${KAKAO_LOGIN_URI_BASE}
+      code: ${KAKAO_LOGIN_URI_CODE}
+      token: ${KAKAO_LOGIN_URI_TOKEN}
+  api:
+    uri:
+      base: ${KAKAO_API_URI_BASE}
+      user: ${KAKAO_API_URI_USER}
+
+jwt:
+  secret_key: ${JWT_SECRET_KEY}
+  token:
+    access_expiration_time: ${JWT_TOKEN_ACCESS_EXPIRATION_TIME}
+    refresh_expiration_time: ${JWT_TOKEN_REFRESH_EXPIRATION_TIME}
+
+### swagger
 #springdoc:
 #  api-docs:
 #    path: /member-service/v3/api-docs
