@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.farmNotice.service;
+package org.samtuap.inong.common.client;
 
 import org.samtuap.inong.config.FeignConfig;
 import org.samtuap.inong.domain.farmNotice.dto.MemberDetailResponse;
@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "member-service", configuration = FeignConfig.class)
-public interface MemberFeign {
+@FeignClient(name = "order-service", configuration = FeignConfig.class)
+public interface OrderFeign {
 
-    @GetMapping(value = "/member/{id}")
-    MemberDetailResponse getMemberById(@PathVariable("id") Long id);
+//    @GetMapping(value = "/package/top")
+//    List<TopPackageGetResponse> getTopPackages();
 
 }
