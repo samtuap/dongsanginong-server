@@ -60,21 +60,19 @@ public class FarmNoticeController {
      * 공지 생성 (판매자가 공지 등록)
      */
     @PostMapping("/{farm_id}/notice/create")
-    public NoticeCreateRequest createNotice(@PathVariable("farm_id") Long farmId,
+    public void createNotice(@PathVariable("farm_id") Long farmId,
                              @RequestBody NoticeCreateRequest dto) {
-        farmNoticeService.createNotice(farmId, dto.title(), dto.content(), dto.imageUrls());
-        return dto;
+        farmNoticeService.createNotice(farmId, dto);
     }
 
     /**
      * 공지 수정 (판매자가 공지 수정)
      */
     @PutMapping("/{farm_id}/notice/{notice_id}/update")
-    public NoticeCreateRequest updateNotice(@PathVariable("farm_id") Long farmId,
-                                            @PathVariable("notice_id") Long noticeId,
-                                            @RequestBody NoticeCreateRequest dto) {
-        farmNoticeService.updateNotice(farmId, noticeId, dto.title(), dto.content(), dto.imageUrls());
-        return dto;
+    public void updateNotice(@PathVariable("farm_id") Long farmId,
+                             @PathVariable("notice_id") Long noticeId,
+                             @RequestBody NoticeUpdateRequest dto) {
+        farmNoticeService.updateNotice(farmId, noticeId, dto);
     }
 
 }
