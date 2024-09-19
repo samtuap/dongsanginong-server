@@ -75,4 +75,13 @@ public class FarmNoticeController {
         farmNoticeService.updateNotice(farmId, noticeId, dto);
     }
 
+    /**
+     * 공지 삭제 (판매자가 공지 삭제)
+     */
+    @DeleteMapping("/{farm_id}/notice/{notice_id}/delete")
+    public void deleteNotice(@PathVariable("farm_id") Long farmId,
+                             @PathVariable("notice_id") Long noticeId) {
+        farmNoticeService.deleteNotice(farmId, noticeId);
+    }
+
 }
