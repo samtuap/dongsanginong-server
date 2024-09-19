@@ -57,6 +57,21 @@ public class FarmNoticeController {
     }
 
     /**
+     * 유저 > 공지에 달린 '본인'의 댓글 수정
+     */
+    @PutMapping("/{farm_id}/notice/{notice_id}/comment/{comment_id}")
+    public void commentUpdate(@PathVariable("farm_id") Long farmId,
+                              @PathVariable("notice_id") Long noticeId,
+                              @PathVariable("comment_id") Long commentId,
+                              @RequestParam("memberId") Long memberId,
+                              @RequestBody CommentUpdateRequest dto) {
+
+        farmNoticeService.commentUpdate(farmId, noticeId, commentId, memberId, dto);
+    }
+
+
+
+    /**
      * 공지 생성 (판매자가 공지 등록)
      */
     @PostMapping("/{farm_id}/notice/create")

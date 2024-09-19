@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
@@ -135,6 +136,40 @@ public class FarmNoticeService {
         return dtoList;
 
     }
+
+    /**
+     * 유저 > 공지에 달린 본인의 댓글 수정
+     */
+    @Transactional
+    public void commentUpdate(Long farmId, Long noticeId, Long commentId, Long memberId, CommentUpdateRequest dto) {
+
+        // 해당 id에 일치하는 농장 가져오기
+        Farm farm = farmRepository.findById(farmId).orElseThrow(
+                () -> new BaseCustomException(FARM_NOT_FOUND)
+        );
+
+        FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
+        // 공지사항이 존재하지 않는 경우 예외 처리
+        if (farmNotice == null) {
+            throw new BaseCustomException(NOTICE_NOT_FOUND);
+        }
+
+        // 위에서 찾아온 공지글의 댓글 가져오기
+        NoticeComment comment = noticeCommentRepository.findByFarmNoticeAndId(farmNotice, commentId);
+        if (comment == null) {
+            throw new BaseCustomException(COMMENT_NOT_FOUND);
+        }
+
+        // 댓글 작성자 확인
+        if (!comment.getMemberId().equals(memberId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
+
+        // 댓글 업데이트
+        dto.updateEntity(comment);
+    }
+
+
 
     /**
      * 공지 생성 (판매자가 공지 등록)

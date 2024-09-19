@@ -13,4 +13,6 @@ public interface NoticeCommentRepository extends JpaRepository<NoticeComment, Lo
     List<NoticeComment> findByFarmNotice(FarmNotice farmNotice);
 
     void deleteByFarmNotice(FarmNotice farmNotice);
+
+    NoticeComment findByFarmNoticeAndId(FarmNotice farmNotice, Long id);
 }
