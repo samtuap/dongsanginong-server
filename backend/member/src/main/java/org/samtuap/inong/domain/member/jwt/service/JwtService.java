@@ -21,9 +21,9 @@ public class JwtService {
     private final JwtValidator jwtValidator;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public JwtToken issueToken(Long memberId) {
-        String accessToken = jwtProvider.createToken(memberId);
-        String refreshToken = jwtProvider.createRefreshToken(memberId);
+    public JwtToken issueToken(Long memberId, String role) {
+        String accessToken = jwtProvider.createToken(memberId, role);
+        String refreshToken = jwtProvider.createRefreshToken(memberId, role);
 
         saveRefreshTokenToRedis(memberId, refreshToken);
 
@@ -34,11 +34,11 @@ public class JwtService {
     }
 
     // Jwt 재발급
-    public JwtToken reissueToken(String requestRefreshToken, Long memberId) {
+    public JwtToken reissueToken(String requestRefreshToken, Long memberId, String role) {
         // 리프레시 토큰 검사
         String refreshToken = getRefreshTokenFromRedis(memberId);
 
-        // 1. requestRefreshToken이 null이거나 empty
+        // 1. requestRefreshToken 이 null 이거나 empty
         if(requestRefreshToken == null || requestRefreshToken.isEmpty()) {
             throw new TokenException(NO_REFRESH_TOKEN);
         }
@@ -54,7 +54,7 @@ public class JwtService {
         }
 
 
-        return issueToken(memberId);
+        return issueToken(memberId, role);
     }
 
     private void saveRefreshTokenToRedis(Long memberId, String refreshToken) {

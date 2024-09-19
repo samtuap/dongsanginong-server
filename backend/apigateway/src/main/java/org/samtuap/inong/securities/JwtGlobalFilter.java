@@ -50,13 +50,15 @@ public class JwtGlobalFilter implements GlobalFilter {
             try {
                 byte[] keyBytes = secretKey.getBytes();
                 Claims claims = Jwts.parser().verifyWith(Keys.hmacShaKeyFor(keyBytes)).build().parseSignedClaims(accessToken).getPayload();
-                String email = claims.getSubject();
+                String memberId = claims.getSubject();
+                String role = claims.get("role", String.class);
                 request = exchange.getRequest().mutate()
-                        .header("myEmail", email)
+                        .header("myId", memberId)
+                        .header("myRole", role)
                         .build();
                 exchange = exchange.mutate().request(request).build();
             } catch (ExpiredJwtException e) {
-//                return validateRefreshTokenAndGenerateNewAccessToken(exchange, e.getClaims().getSubject(), chain);
+//                return validateRefreshTokenAndGenerateNewAccessToken(exchange, e.getClaims().getSubject(), e.getClaims().get("role", String.class),chain);
                 return onError(exchange, "Invalid token", HttpStatus.BAD_REQUEST);
             } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
                 return onError(exchange, "Invalid token", HttpStatus.BAD_REQUEST);
@@ -79,12 +81,12 @@ public class JwtGlobalFilter implements GlobalFilter {
         return response.writeWith(Mono.just(buffer));
     }
 
-    private Mono<Void> validateRefreshTokenAndGenerateNewAccessToken(ServerWebExchange exchange, String email, GatewayFilterChain chain) {
+    private Mono<Void> validateRefreshTokenAndGenerateNewAccessToken(ServerWebExchange exchange, String memberId, String role, GatewayFilterChain chain) {
         String refreshToken = exchange.getRequest().getHeaders().getFirst("X-Refresh-Token");
-        String storedRefreshToken = redisTemplate.opsForValue().get("RT:" + email);
+        String storedRefreshToken = redisTemplate.opsForValue().get("RT:" + memberId);
 
         if (refreshToken != null && refreshToken.equals(storedRefreshToken)) {
-            String newAccessToken = generateNewAccessToken(email);
+            String newAccessToken = generateNewAccessToken(memberId, role);
             // 새로운 액세스 토큰을 요청 헤더에 추가
             ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                     .header("Authorization", "Bearer " + newAccessToken)
@@ -96,14 +98,17 @@ public class JwtGlobalFilter implements GlobalFilter {
         }
     }
 
-    private String generateNewAccessToken(String email) {
+    private String generateNewAccessToken(String memberId, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessExpirationTime);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         byte[] keyBytes = secretKey.getBytes();
 
         // 새 액세스 토큰 생성
         return Jwts.builder()
-                .subject(email)
+                .claims(claims)
+                .subject(memberId)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(keyBytes))
