@@ -3,8 +3,11 @@ package org.samtuap.inong.domain.member.jwt.domain;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import static org.samtuap.inong.common.exceptionType.TokenExceptionType.*;
 
 @RequiredArgsConstructor
 @Component
@@ -25,7 +28,7 @@ public class JwtValidator {
         try {
             claims = getClaims(token);
         } catch(Exception e) {
-            throw new RuntimeException("INVALID_TOKEN");
+            throw new BaseCustomException(INVALID_TOKEN);
         }
         return Long.parseLong(claims.get("memberId").toString());
     }
