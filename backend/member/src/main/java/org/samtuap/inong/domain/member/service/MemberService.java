@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.member.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.common.exceptionType.MemberExceptionType;
 import org.samtuap.inong.domain.member.dto.MemberInfoServiceResponse;
 import org.samtuap.inong.domain.member.dto.SignInResponse;
 import org.samtuap.inong.domain.member.dto.SignUpRequest;
@@ -36,7 +37,7 @@ public class MemberService {
         MemberInfoServiceResponse signedMember = getMemberInfo(socialType, socialAccessToken);
         // DB 에서 회원 찾기
         Optional<Member> optionalMember = memberRepository.findBySocialIdAndSocialType(signedMember.socialId(), socialType);
-        Member member = optionalMember.orElseThrow(()->new EntityNotFoundException("Member not found"));
+        Member member = optionalMember.orElseThrow(()->new BaseCustomException(MemberExceptionType.NEED_TO_REGISTER));
         JwtToken jwtToken = jwtService.issueToken(member.getId());
         return SignInResponse.fromEntity(member, jwtToken);
     }
@@ -49,7 +50,7 @@ public class MemberService {
         // 2. 이미 있는 회원인지 확인
         Optional<Member> existingMember = memberRepository.findBySocialIdAndSocialType(memberInfo.socialId(), memberInfo.socialType());
         if (existingMember.isPresent()) {
-            throw new IllegalArgumentException("Already registered member");
+            throw new BaseCustomException(MemberExceptionType.NOT_A_NEW_MEMBER);
         }
         // 3. DB에 회원 저장
         Member member = signUpRequest.toEntity(memberInfo.socialId(), memberInfo.email());
@@ -66,6 +67,7 @@ public class MemberService {
         return switch (socialType) {
             case KAKAO -> kakaoService.getMemberInfo(socialAccessToken);
             case GOOGLE -> googleService.getMemberInfo(socialAccessToken);
+            default -> throw new BaseCustomException(MemberExceptionType.INVALID_SOCIAL_TYPE);
         };
     }
 
