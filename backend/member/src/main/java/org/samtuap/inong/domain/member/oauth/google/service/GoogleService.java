@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.member.oauth.google.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.member.dto.MemberInfoServiceResponse;
 import org.samtuap.inong.domain.member.oauth.google.config.GoogleOAuthConfig;
 import org.samtuap.inong.domain.member.oauth.google.dto.GoogleGetMemberInfoServiceResponse;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import static org.samtuap.inong.common.exceptionType.MemberExceptionType.*;
 import static org.samtuap.inong.domain.member.entity.SocialType.*;
 import static org.samtuap.inong.domain.member.oauth.google.config.GoogleOAuthConfig.*;
 
@@ -29,11 +31,11 @@ public class GoogleService implements OAuthService {
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
                             (googleRequest, googleResponse) -> {
-                                throw new RuntimeException("FAIL_TO_AUTH");
+                                throw new BaseCustomException(FAIL_TO_AUTH);
                             })
                     .body(GoogleGetMemberInfoServiceResponse.class);
         } catch(Exception e) {
-            throw new RuntimeException("FAIL_TO_AUTH");
+            throw new BaseCustomException(FAIL_TO_AUTH);
         }
 
         assert response != null;
