@@ -37,8 +37,9 @@ public class JwtValidator {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(secretKeyFactory.createSecretKey()) // 서명 키 설정
-                .parseClaimsJws(token) // JWT 파싱
-                .getBody(); // Claims 반환
+                .verifyWith(secretKeyFactory.createSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

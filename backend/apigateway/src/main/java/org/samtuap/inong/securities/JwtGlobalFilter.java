@@ -1,6 +1,7 @@
 package org.samtuap.inong.securities;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -21,7 +22,7 @@ import java.util.*;
 @Component
 public class JwtGlobalFilter implements GlobalFilter {
 
-    @Value("${jwt.secretKey}")
+    @Value("${jwt.secret_key}")
     private String secretKey;
 
     @Value("${jwt.token.access_expiration_time}")
@@ -47,7 +48,8 @@ public class JwtGlobalFilter implements GlobalFilter {
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             String accessToken = bearerToken.substring(7);
             try {
-                Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken).getBody();
+                byte[] keyBytes = secretKey.getBytes();
+                Claims claims = Jwts.parser().verifyWith(Keys.hmacShaKeyFor(keyBytes)).build().parseSignedClaims(accessToken).getPayload();
                 String email = claims.getSubject();
                 request = exchange.getRequest().mutate()
                         .header("myEmail", email)
@@ -55,7 +57,7 @@ public class JwtGlobalFilter implements GlobalFilter {
                 exchange = exchange.mutate().request(request).build();
             } catch (ExpiredJwtException e) {
                 return validateRefreshTokenAndGenerateNewAccessToken(exchange, e.getClaims().getSubject(), chain);
-            } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
                 return onError(exchange, "Invalid token", HttpStatus.BAD_REQUEST);
             } catch (Exception e) {
                 return onError(exchange, "Authentication failed", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -96,13 +98,14 @@ public class JwtGlobalFilter implements GlobalFilter {
     private String generateNewAccessToken(String email) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessExpirationTime);
+        byte[] keyBytes = secretKey.getBytes();
 
         // 새 액세스 토큰 생성
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes(StandardCharsets.UTF_8))
+                .subject(email)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(Keys.hmacShaKeyFor(keyBytes))
                 .compact();
     }
 }
