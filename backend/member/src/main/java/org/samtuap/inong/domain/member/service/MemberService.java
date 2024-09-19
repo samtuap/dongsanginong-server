@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.member.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.member.dto.MemberInfoServiceResponse;
 import org.samtuap.inong.domain.member.dto.SignInResponse;
 import org.samtuap.inong.domain.member.dto.SignUpRequest;
@@ -12,14 +13,14 @@ import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.member.jwt.service.JwtService;
 import org.samtuap.inong.domain.member.oauth.kakao.service.KakaoService;
 import org.samtuap.inong.domain.member.dto.MemberDetailResponse;
-import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@RequiredArgsConstructor
+import static org.samtuap.inong.common.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -63,6 +64,7 @@ public class MemberService {
         return switch (socialType) {
             case KAKAO -> kakaoService.getMemberInfo(socialAccessToken);
         };
+    }
 
     /**
      * id로 회원 찾아오기
@@ -70,7 +72,7 @@ public class MemberService {
     public MemberDetailResponse findMember(Long id) {
 
         Member member = memberRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("해당 id의 회원이 존재하지 않습니다.")
+                () -> new BaseCustomException(MEMBER_NOT_FOUND)
         );
         return MemberDetailResponse.from(member);
     }

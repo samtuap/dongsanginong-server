@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.farmNotice.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.farmNotice.dto.*;
@@ -17,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.FARM_NOT_FOUND;
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.NOTICE_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +40,7 @@ public class FarmNoticeService {
 
         // 해당 id에 일치한 농장 가져오기
         Farm farm = farmRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+                () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         // 파라미터id와 일치한 농장의 notice 목록 가져와서 => dto로 변환
@@ -60,13 +64,13 @@ public class FarmNoticeService {
 
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
-                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+                () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         // 공지사항이 존재하지 않는 경우 예외 처리
         if (farmNotice == null) {
-            throw new EntityNotFoundException("해당 농장에 해당하는 공지사항이 존재하지 않습니다.");
+            throw new BaseCustomException(NOTICE_NOT_FOUND);
         }
 
         // 이미지repo에서 이미지 찾아오기
@@ -84,13 +88,13 @@ public class FarmNoticeService {
 
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
-                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+                () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         // 공지사항이 존재하지 않는 경우 예외 처리
         if (farmNotice == null) {
-            throw new EntityNotFoundException("해당 농장에 해당하는 공지사항이 존재하지 않습니다.");
+            throw new BaseCustomException(NOTICE_NOT_FOUND);
         }
 
         NoticeComment noticeComment = CommentCreateRequest.to(dto, farmNotice, memberId);
@@ -104,13 +108,13 @@ public class FarmNoticeService {
 
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
-                () -> new EntityNotFoundException("해당 id의 농장이 존재하지 않습니다.")
+                () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         // 공지사항이 존재하지 않는 경우 예외 처리
         if (farmNotice == null) {
-            throw new EntityNotFoundException("해당 농장에 해당하는 공지사항이 존재하지 않습니다.");
+            throw new BaseCustomException(NOTICE_NOT_FOUND);
         }
 
         // 해당 농장의 모든 댓글 가져오기
