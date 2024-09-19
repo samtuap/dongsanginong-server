@@ -163,7 +163,6 @@ public class FarmNoticeService {
             throw new EntityNotFoundException("해당 공지가 존재하지 않습니다.");
         }
 
-        // NoticeUpdateRequest에서 엔티티 업데이트 작업
         updateFarmNoticeFields(farmNotice, dto);
 
         // 기존 이미지 삭제 및 새로운 이미지 저장
@@ -186,19 +185,13 @@ public class FarmNoticeService {
         }
     }
 
-
-
     /**
      * 공지 이미지 저장
      */
     @Transactional
     public void saveNoticeImages(FarmNotice farmNotice, List<String> imageUrls) {
-        List<FarmNoticeImage> farmNoticeImages = NoticeImageCreateRequest.toEntityList(farmNotice, imageUrls);
-
-        // 변환된 이미지 엔티티 리스트를 저장
-        for (FarmNoticeImage farmNoticeImage : farmNoticeImages) {
-            farmNoticeImageRepository.save(farmNoticeImage);
-        }
+        List<FarmNoticeImage> farmNoticeImages = NoticeCreateRequest.toImageEntityList(farmNotice, imageUrls);
+        farmNoticeImageRepository.saveAll(farmNoticeImages);
     }
 
 
