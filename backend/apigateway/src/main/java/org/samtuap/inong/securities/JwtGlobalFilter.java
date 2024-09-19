@@ -56,7 +56,8 @@ public class JwtGlobalFilter implements GlobalFilter {
                         .build();
                 exchange = exchange.mutate().request(request).build();
             } catch (ExpiredJwtException e) {
-                return validateRefreshTokenAndGenerateNewAccessToken(exchange, e.getClaims().getSubject(), chain);
+//                return validateRefreshTokenAndGenerateNewAccessToken(exchange, e.getClaims().getSubject(), chain);
+                return onError(exchange, "Invalid token", HttpStatus.BAD_REQUEST);
             } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
                 return onError(exchange, "Invalid token", HttpStatus.BAD_REQUEST);
             } catch (Exception e) {
