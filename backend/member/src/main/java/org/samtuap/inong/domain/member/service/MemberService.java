@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.member.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.member.dto.MemberInfoServiceResponse;
 import org.samtuap.inong.domain.member.dto.SignInResponse;
 import org.samtuap.inong.domain.member.dto.SignUpRequest;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static org.samtuap.inong.common.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -69,7 +72,7 @@ public class MemberService {
     public MemberDetailResponse findMember(Long id) {
 
         Member member = memberRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("해당 id의 회원이 존재하지 않습니다.")
+                () -> new BaseCustomException(MEMBER_NOT_FOUND)
         );
         return MemberDetailResponse.from(member);
     }

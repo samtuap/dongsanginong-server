@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
-public enum ProductExceptionType implements ExceptionType {
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
-    FARM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 id의 농장이 존재하지 않습니다."),
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 농장에 해당하는 공지사항이 존재하지 않습니다.");
+public enum MemberExceptionType implements ExceptionType {
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 id의 회원이 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String message;
