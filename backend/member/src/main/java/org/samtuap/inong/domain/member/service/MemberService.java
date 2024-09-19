@@ -12,14 +12,12 @@ import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.member.jwt.service.JwtService;
 import org.samtuap.inong.domain.member.oauth.kakao.service.KakaoService;
 import org.samtuap.inong.domain.member.dto.MemberDetailResponse;
-import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -63,6 +61,7 @@ public class MemberService {
         return switch (socialType) {
             case KAKAO -> kakaoService.getMemberInfo(socialAccessToken);
         };
+    }
 
     /**
      * id로 회원 찾아오기
