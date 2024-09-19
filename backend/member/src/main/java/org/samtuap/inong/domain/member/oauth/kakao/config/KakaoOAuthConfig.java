@@ -20,7 +20,7 @@ public class KakaoOAuthConfig {
 
     // oauth/authorize
     @Value("${kakao.login.uri.code}")
-    private String codeReqeustUri;
+    private String codeRequestUri;
 
     // https://kapi.kakao.com
     @Value("${kakao.login.uri.base}")

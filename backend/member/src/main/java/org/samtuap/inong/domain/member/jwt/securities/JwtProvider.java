@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.member.securities;
+package org.samtuap.inong.domain.member.jwt.securities;
 
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;

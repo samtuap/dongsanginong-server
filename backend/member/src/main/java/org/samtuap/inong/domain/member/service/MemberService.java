@@ -11,6 +11,7 @@ import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.entity.SocialType;
 import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.member.jwt.service.JwtService;
+import org.samtuap.inong.domain.member.oauth.google.service.GoogleService;
 import org.samtuap.inong.domain.member.oauth.kakao.service.KakaoService;
 import org.samtuap.inong.domain.member.dto.MemberDetailResponse;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
@@ -27,6 +28,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final KakaoService kakaoService;
+    private final GoogleService googleService;
     private final JwtService jwtService;
 
     @Transactional
@@ -63,6 +65,7 @@ public class MemberService {
     private MemberInfoServiceResponse getMemberInfo(SocialType socialType, String socialAccessToken) {
         return switch (socialType) {
             case KAKAO -> kakaoService.getMemberInfo(socialAccessToken);
+            case GOOGLE -> googleService.getMemberInfo(socialAccessToken);
         };
     }
 

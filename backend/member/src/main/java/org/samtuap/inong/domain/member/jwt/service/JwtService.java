@@ -3,7 +3,7 @@ package org.samtuap.inong.domain.member.jwt.service;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.member.jwt.domain.JwtValidator;
-import org.samtuap.inong.domain.member.securities.JwtProvider;
+import org.samtuap.inong.domain.member.jwt.securities.JwtProvider;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
