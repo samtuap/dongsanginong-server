@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 public class JwtProvider {
 
     private final SecretKeyFactory secretKeyFactory;
-    private final RedisTemplate<String, String> redisTemplate;
 
     @Value("${JWT_SECRET_KEY}")
     private String secretKey;
