@@ -20,7 +20,6 @@ public class PackageProductService {
     private final OrderFeign orderFeign;
     public List<TopPackageGetResponse> getTopPackages() {
         List<Long> topPackages = orderFeign.getTopPackages();
-        log.info("line 19: {}", topPackages);
         List<PackageProduct> products = packageProductRepository.findAllByIds(topPackages);
 
         return products.stream()

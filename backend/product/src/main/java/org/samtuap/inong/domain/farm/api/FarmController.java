@@ -10,10 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/farm")
 @RequiredArgsConstructor
@@ -25,6 +22,13 @@ public class FarmController {
     public ResponseEntity<Page<FarmListGetResponse>> getFarmList(
             @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable);
+        return new ResponseEntity<>(farmList, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<FarmListGetResponse>> searchFarm(@RequestParam String farmName,
+                                                                @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<FarmListGetResponse> farmList = farmService.farmSearch(farmName, pageable);
         return new ResponseEntity<>(farmList, HttpStatus.OK);
     }
 
