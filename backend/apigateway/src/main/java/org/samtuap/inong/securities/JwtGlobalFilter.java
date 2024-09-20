@@ -31,7 +31,7 @@ public class JwtGlobalFilter implements GlobalFilter {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    private final List<String> allowUrl = Arrays.asList("/member/sign-in", "/member/sign-up", "/member/{id}", "/create-token",
+    private final List<String> allowUrl = Arrays.asList("/member/sign-in", "/member/sign-up", "/member/{id}", "/member/create-token",
                                                         "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**");
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 

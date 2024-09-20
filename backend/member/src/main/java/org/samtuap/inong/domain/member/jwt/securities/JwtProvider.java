@@ -29,7 +29,6 @@ public class JwtProvider {
 
     public String createToken(Long memberId, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("memberId", memberId);
         claims.put("role", role);
 
         Date now = new Date();
@@ -37,6 +36,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessExpirationTime))
+                .subject(Long.toString(memberId))
                 .claims(claims)
                 .signWith(secretKeyFactory.createSecretKey())
                 .compact();
