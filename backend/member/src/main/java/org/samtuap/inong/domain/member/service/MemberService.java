@@ -1,6 +1,5 @@
 package org.samtuap.inong.domain.member.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.MemberExceptionType;
