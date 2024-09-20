@@ -43,11 +43,17 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withDraw(@RequestBody Long memberId){
+        memberService.withdraw(memberId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     /**
      * id로 회원 찾아오기 => product 모듈에서 feignclient로 찾아올 수 있도록 추가
      */
     @GetMapping("/{id}")
-    public MemberDetailResponse findMember(@PathVariable("id") Long id) {
-        return memberService.findMember(id);
+    public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {
+        return memberService.findMember(memberId);
     }
 }
