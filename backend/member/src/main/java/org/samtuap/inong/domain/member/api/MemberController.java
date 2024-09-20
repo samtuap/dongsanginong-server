@@ -49,6 +49,12 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/member-info")
+    public ResponseEntity<MemberInfoResponse> getMemberInfo(@RequestBody Long memberId){
+        MemberInfoResponse memberInfo =  memberService.getMemberInfo(memberId);
+        return new ResponseEntity<>(memberInfo, HttpStatus.OK);
+    }
+
     /**
      * id로 회원 찾아오기 => product 모듈에서 feignclient로 찾아올 수 있도록 추가
      */

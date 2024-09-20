@@ -40,22 +40,15 @@ public class MemberService {
 
     @Transactional
     public SignUpResponse signUp(String socialAccessToken, SignUpRequest signUpRequest) {
-        // 1. 회원 정보 가져오기
         MemberInfoServiceResponse memberInfo = getMemberInfo(signUpRequest.socialType(), socialAccessToken);
-
-        // 2. 이미 있는 회원인지 확인
         Optional<Member> existingMember = memberRepository.findBySocialIdAndSocialType(memberInfo.socialId(), memberInfo.socialType());
         if (existingMember.isPresent()) {
             throw new BaseCustomException(MemberExceptionType.NOT_A_NEW_MEMBER);
         }
-        // 3. DB에 회원 저장
         Member member = signUpRequest.toEntity(memberInfo.socialId(), memberInfo.email());
         memberRepository.save(member);
-
-        // 4. 토큰 발급
         JwtToken jwtToken = jwtService.issueToken(member.getId(), MemberRole.MEMBER.toString());
 
-        // 5. 응답 반환
         return SignUpResponse.fromEntity(member, jwtToken);
     }
 
@@ -72,11 +65,17 @@ public class MemberService {
         jwtService.deleteRefreshToken(memberId);
     }
 
-
+    @Transactional
     public void withdraw(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(()->new BaseCustomException(MEMBER_NOT_FOUND));
+        Member member = memberRepository.findByIdOrThrow(memberId);
         memberRepository.deleteById(member.getId());
         jwtService.deleteRefreshToken(member.getId());
+    }
+
+    public MemberInfoResponse getMemberInfo(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+
+        return MemberInfoResponse.fromEntity(member);
     }
 
     /**
