@@ -13,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.EMAIL_NOT_FOUND;
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.INVALID_PASSWORD;
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
 @Service
 @Transactional
@@ -58,5 +57,12 @@ public class SellerService {
             throw new BaseCustomException(INVALID_PASSWORD);
         }
         return seller;
+    }
+
+    public void withDraw(Long sellerId) {
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new BaseCustomException(ID_NOT_FOUND));
+        sellerRepository.deleteById(seller.getId());
+        jwtService.deleteRefreshToken(seller.getId());
     }
 }
