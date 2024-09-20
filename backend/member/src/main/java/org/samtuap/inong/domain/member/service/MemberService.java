@@ -72,21 +72,27 @@ public class MemberService {
         jwtService.deleteRefreshToken(member.getId());
     }
 
+    @Transactional
     public MemberInfoResponse getMemberInfo(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
 
         return MemberInfoResponse.fromEntity(member);
     }
 
-    /**
-     * id로 회원 찾아오기
-     */
+    @Transactional
     public MemberDetailResponse findMember(Long id) {
-
         Member member = memberRepository.findById(id).orElseThrow(
                 () -> new BaseCustomException(MEMBER_NOT_FOUND)
         );
         return MemberDetailResponse.from(member);
     }
 
+    @Transactional
+    public MemberUpdateInfoRequest updateMemberInfo(MemberUpdateInfoRequest updateInfo, Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        member.updatePhone(updateInfo.phone());
+        member.updateAddress(updateInfo.address(), updateInfo.addressDetail(), updateInfo.zipcode());
+
+        return MemberUpdateInfoRequest.newInfo(member);
+    }
 }

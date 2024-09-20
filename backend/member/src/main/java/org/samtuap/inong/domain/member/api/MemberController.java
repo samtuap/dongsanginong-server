@@ -59,16 +59,20 @@ public class MemberController {
         return new ResponseEntity<>(memberInfo, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {
+        return memberService.findMember(memberId);
+    }
+
+    // 임시 코드 발급 > 추후 삭제 예정
     @GetMapping("/create-token")
     public JwtToken authTest(@RequestParam("id") Long memberId) {
         return jwtService.issueToken(memberId, MemberRole.MEMBER.toString());
     }
 
-    /**
-     * id로 회원 찾아오기 => product 모듈에서 feignclient로 찾아올 수 있도록 추가
-     */
-    @GetMapping("/{id}")
-    public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {
-        return memberService.findMember(memberId);
+    @PatchMapping("/update-info")
+    public ResponseEntity<MemberUpdateInfoRequest> updateMemberInfo(@RequestBody MemberUpdateInfoRequest updateInfo, @RequestParam("id") Long memberId){
+        memberService.updateMemberInfo(updateInfo, memberId);
+        return new ResponseEntity<>(updateInfo, HttpStatus.OK);
     }
 }
