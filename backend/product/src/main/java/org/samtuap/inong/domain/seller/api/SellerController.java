@@ -30,9 +30,16 @@ public class SellerController {
         SellerSignInResponse sellerSignInResponse = sellerService.signIn(dto);
         return new ResponseEntity<>(sellerSignInResponse, HttpStatus.OK);
     }
+
     @PostMapping("/sign-out")
     public ResponseEntity<SellerSignOutRequest> signOut(@RequestBody final SellerSignOutRequest sellerSignOutRequest){
         sellerService.signOut(sellerSignOutRequest.sellerId());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withDraw(@RequestBody Long sellerId) {
+        sellerService.withDraw(sellerId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
