@@ -58,7 +58,7 @@ public class JwtService {
     }
 
     private void saveRefreshTokenToRedis(Long memberId, String refreshToken) {
-        redisTemplate.opsForValue().set(memberId.toString(), refreshToken, Duration.ofDays(14));
+        redisTemplate.opsForValue().set("memberRT:"+ memberId.toString(), refreshToken, Duration.ofDays(14));
     }
 
     private String getRefreshTokenFromRedis(Long memberId) {
@@ -76,7 +76,7 @@ public class JwtService {
     }
 
     public void deleteRefreshToken(Long memberId) {
-        redisTemplate.delete(memberId.toString());
+        redisTemplate.delete("memberRT:" + memberId.toString());
     }
 
 

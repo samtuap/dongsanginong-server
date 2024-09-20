@@ -55,10 +55,6 @@ public class JwtProvider {
                 .claim("role", role)
                 .compact();
 
-        // Redis에 리프레시 토큰 저장 (memberId 를 key 로 사용)
-        String redisKey = "RT:" + memberId;
-        redisTemplate.opsForValue().set(redisKey, refreshToken, refreshExpirationTime, TimeUnit.MILLISECONDS);
-
         return refreshToken;
     }
 }

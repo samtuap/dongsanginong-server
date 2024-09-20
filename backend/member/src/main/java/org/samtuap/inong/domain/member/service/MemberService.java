@@ -4,10 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.MemberExceptionType;
-import org.samtuap.inong.domain.member.dto.MemberInfoServiceResponse;
-import org.samtuap.inong.domain.member.dto.SignInResponse;
-import org.samtuap.inong.domain.member.dto.SignUpRequest;
-import org.samtuap.inong.domain.member.dto.SignUpResponse;
+import org.samtuap.inong.domain.member.dto.*;
 import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.entity.MemberRole;
 import org.samtuap.inong.domain.member.entity.SocialType;
@@ -15,7 +12,6 @@ import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.member.jwt.service.JwtService;
 import org.samtuap.inong.domain.member.oauth.google.service.GoogleService;
 import org.samtuap.inong.domain.member.oauth.kakao.service.KakaoService;
-import org.samtuap.inong.domain.member.dto.MemberDetailResponse;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,8 +39,8 @@ public class MemberService {
         return SignInResponse.fromEntity(member, jwtToken);
     }
 
+    @Transactional
     public SignUpResponse signUp(String socialAccessToken, SignUpRequest signUpRequest) {
-
         // 1. 회원 정보 가져오기
         MemberInfoServiceResponse memberInfo = getMemberInfo(signUpRequest.socialType(), socialAccessToken);
 
@@ -72,6 +68,13 @@ public class MemberService {
         };
     }
 
+    @Transactional
+    public void signOut(final Long memberId) {
+        jwtService.deleteRefreshToken(memberId);
+    }
+
+
+
     /**
      * id로 회원 찾아오기
      */
@@ -82,4 +85,6 @@ public class MemberService {
         );
         return MemberDetailResponse.from(member);
     }
+
+
 }
