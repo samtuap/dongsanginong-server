@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.seller.dto.SellerSignInRequest;
 import org.samtuap.inong.domain.seller.dto.SellerSignInResponse;
+import org.samtuap.inong.domain.seller.dto.SellerSignOutRequest;
 import org.samtuap.inong.domain.seller.dto.SellerSignUpRequest;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.service.SellerService;
@@ -28,5 +29,10 @@ public class SellerController {
     public ResponseEntity<?> signIn(@RequestBody SellerSignInRequest dto){
         SellerSignInResponse sellerSignInResponse = sellerService.signIn(dto);
         return new ResponseEntity<>(sellerSignInResponse, HttpStatus.OK);
+    }
+    @PostMapping("/sign-out")
+    public ResponseEntity<SellerSignOutRequest> signOut(@RequestBody final SellerSignOutRequest sellerSignOutRequest){
+        sellerService.signOut(sellerSignOutRequest.sellerId());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

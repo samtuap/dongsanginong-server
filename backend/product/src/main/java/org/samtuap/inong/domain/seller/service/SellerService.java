@@ -29,6 +29,7 @@ public class SellerService {
         this.jwtService = jwtService;
     }
 
+    @Transactional
     public Seller signUp(SellerSignUpRequest dto) {
         if (sellerRepository.findByEmail(dto.email()).isPresent()) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
@@ -41,6 +42,11 @@ public class SellerService {
         Seller seller = validateSellerCredentials(dto);
         JwtToken jwtToken = jwtService.issueToken(seller.getId());
         return SellerSignInResponse.fromEntity(seller, jwtToken);
+    }
+
+    @Transactional
+    public void signOut(final Long sellerId) {
+        jwtService.deleteRefreshToken(sellerId);
     }
 
     private Seller validateSellerCredentials(SellerSignInRequest dto) {
