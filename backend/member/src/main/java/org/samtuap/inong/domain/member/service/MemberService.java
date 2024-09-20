@@ -74,6 +74,11 @@ public class MemberService {
     }
 
 
+    public void withdraw(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new BaseCustomException(MEMBER_NOT_FOUND));
+        memberRepository.deleteById(member.getId());
+        jwtService.deleteRefreshToken(member.getId());
+    }
 
     /**
      * id로 회원 찾아오기
@@ -85,6 +90,5 @@ public class MemberService {
         );
         return MemberDetailResponse.from(member);
     }
-
 
 }
