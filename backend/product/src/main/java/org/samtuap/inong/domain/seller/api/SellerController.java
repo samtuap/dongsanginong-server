@@ -2,7 +2,9 @@ package org.samtuap.inong.domain.seller.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.seller.dto.CommonResDto;
+import org.samtuap.inong.domain.seller.dto.SellerSignInRequest;
+import org.samtuap.inong.domain.seller.dto.SellerSignInResponse;
+import org.samtuap.inong.domain.seller.dto.SellerSignOutRequest;
 import org.samtuap.inong.domain.seller.dto.SellerSignUpRequest;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.service.SellerService;
@@ -17,10 +19,20 @@ public class SellerController {
 
     private final SellerService sellerService;
 
-    @PostMapping("/signup")
+    @PostMapping("/sign-up")
     public ResponseEntity<?> signup(@Valid @RequestBody SellerSignUpRequest dto) {
         Seller seller = sellerService.signUp(dto);
-        CommonResDto commonResDto = new CommonResDto(HttpStatus.CREATED, "회원가입이 완료되었습니다.", seller.getBusinessName());
-        return new ResponseEntity<>(commonResDto, HttpStatus.CREATED);
+        return new ResponseEntity<>("회원가입이 완료되었습니다: " + seller.getBusinessName(), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> signIn(@RequestBody SellerSignInRequest dto){
+        SellerSignInResponse sellerSignInResponse = sellerService.signIn(dto);
+        return new ResponseEntity<>(sellerSignInResponse, HttpStatus.OK);
+    }
+    @PostMapping("/sign-out")
+    public ResponseEntity<SellerSignOutRequest> signOut(@RequestBody final SellerSignOutRequest sellerSignOutRequest){
+        sellerService.signOut(sellerSignOutRequest.sellerId());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
