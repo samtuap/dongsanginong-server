@@ -14,5 +14,4 @@ public interface NoticeCommentRepository extends JpaRepository<NoticeComment, Lo
 
     void deleteByFarmNotice(FarmNotice farmNotice);
 
-    NoticeComment findByFarmNoticeAndId(FarmNotice farmNotice, Long id);
 }
