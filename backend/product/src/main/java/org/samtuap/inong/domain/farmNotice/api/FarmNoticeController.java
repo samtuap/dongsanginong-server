@@ -40,7 +40,7 @@ public class FarmNoticeController {
     @PostMapping("/{farm_id}/notice/{notice_id}/comment/create")
     public void commentCreate(@PathVariable("farm_id") Long farmId,
                               @PathVariable("notice_id") Long noticeId,
-                              @RequestParam("memberId") Long memberId,
+                              @RequestHeader("myId") Long memberId,
                               @RequestBody CommentCreateRequest dto) {
 
         farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
@@ -54,6 +54,27 @@ public class FarmNoticeController {
                                                  @PathVariable("notice_id") Long noticeId) {
 
         return farmNoticeService.commentList(farmId, noticeId);
+    }
+
+    /**
+     * 유저 > 공지에 달린 '본인'의 댓글 수정
+     */
+    @PutMapping("/notice/comment/{comment_id}")
+    public void commentUpdate(@PathVariable("comment_id") Long commentId,
+                              @RequestHeader("myId") Long memberId,
+                              @RequestBody CommentUpdateRequest dto) {
+
+        farmNoticeService.commentUpdate(commentId, memberId, dto);
+    }
+
+    /**
+     * 유저 > 공지에 달린 '본인'의 댓글 삭제
+     */
+    @DeleteMapping("/notice/comment/{comment_id}/delete")
+    public void commentDelete(@PathVariable("comment_id") Long commentId,
+                              @RequestHeader("myId") Long memberId) {
+
+        farmNoticeService.commentDelete(commentId, memberId);
     }
 
     /**

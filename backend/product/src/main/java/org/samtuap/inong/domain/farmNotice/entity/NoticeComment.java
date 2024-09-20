@@ -33,4 +33,8 @@ public class NoticeComment extends BaseEntity {
     @NotNull
     private Long memberId; // 회원 id 컬럼
 
+    // 댓글 내용 수정
+    public void updateContents(String newContents) {
+        this.contents = newContents;
+    }
 }

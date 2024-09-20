@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.farmNotice.service;
+package org.samtuap.inong.common.client;
 
 import org.samtuap.inong.config.FeignConfig;
 import org.samtuap.inong.domain.farmNotice.dto.MemberDetailResponse;

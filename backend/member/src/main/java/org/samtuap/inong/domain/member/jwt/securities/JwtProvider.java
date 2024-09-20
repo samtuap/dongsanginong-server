@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.member.securities;
+package org.samtuap.inong.domain.member.jwt.securities;
 
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +30,10 @@ public class JwtProvider {
     @Value("${jwt.token.refresh_expiration_time}")
     private Long refreshExpirationTime;
 
-    public String createToken(Long memberId) {
+    public String createToken(Long memberId, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("memberId", memberId);
+        claims.put("role", role);
 
         Date now = new Date();
 
@@ -44,18 +45,15 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String createRefreshToken(Long memberId) {
+    public String createRefreshToken(Long memberId, String role) {
         Date now = new Date();
         String refreshToken = Jwts.builder()
                 .subject(String.valueOf(memberId))
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + refreshExpirationTime))
                 .signWith(secretKeyFactory.createSecretKey())
+                .claim("role", role)
                 .compact();
-
-        // Redis에 리프레시 토큰 저장 (memberId 를 key 로 사용)
-        String redisKey = "RT:" + memberId;
-        redisTemplate.opsForValue().set(redisKey, refreshToken, refreshExpirationTime, TimeUnit.MILLISECONDS);
 
         return refreshToken;
     }

@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.member.oauth.kakao.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.member.dto.MemberInfoServiceResponse;
 import org.samtuap.inong.domain.member.entity.SocialType;
 import org.samtuap.inong.domain.member.oauth.kakao.config.KakaoOAuthConfig;
@@ -9,6 +10,8 @@ import org.samtuap.inong.domain.member.oauth.service.OAuthService;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+
+import static org.samtuap.inong.common.exceptionType.MemberExceptionType.FAIL_TO_AUTH;
 
 @RequiredArgsConstructor
 @Service
@@ -26,11 +29,11 @@ public class KakaoService implements OAuthService {
                 .header("Content-type","application/x-www-form-urlencoded;charset=utf-8")
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,(kakaoRequest, kakaoResponse) -> {
-                    throw new RuntimeException("Fail to Auth");
+                    throw new BaseCustomException(FAIL_TO_AUTH);
                 })
                 .body(KakaoGetMemberInfoServiceResponse.class);
         if (response == null) {
-            throw new RuntimeException("Failed to retrieve user information");
+            throw new BaseCustomException(FAIL_TO_AUTH);
         }
         return new MemberInfoServiceResponse(response.id(), SocialType.KAKAO, response.kakao_account().email());
     }
