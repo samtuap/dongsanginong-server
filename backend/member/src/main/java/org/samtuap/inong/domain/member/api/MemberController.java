@@ -2,6 +2,9 @@ package org.samtuap.inong.domain.member.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.member.dto.*;
+import org.samtuap.inong.domain.member.entity.MemberRole;
+import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
+import org.samtuap.inong.domain.member.jwt.service.JwtService;
 import org.samtuap.inong.domain.member.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
+    private final JwtService jwtService;
 
     // 소셜 로그인
     @PostMapping("/sign-in")
@@ -47,6 +51,17 @@ public class MemberController {
     public ResponseEntity<?> withDraw(@RequestBody Long memberId){
         memberService.withdraw(memberId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/member-info")
+    public ResponseEntity<MemberInfoResponse> getMemberInfo(@RequestBody Long memberId){
+        MemberInfoResponse memberInfo =  memberService.getMemberInfo(memberId);
+        return new ResponseEntity<>(memberInfo, HttpStatus.OK);
+    }
+
+    @GetMapping("/create-token")
+    public JwtToken authTest(@RequestParam("id") Long memberId) {
+        return jwtService.issueToken(memberId, MemberRole.MEMBER.toString());
     }
 
     /**
