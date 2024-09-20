@@ -11,7 +11,8 @@ public enum ProductExceptionType implements ExceptionType {
     FIELD_NOT_FOUND(HttpStatus.NOT_FOUND, "필드를 업데이트 할 수 없습니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하는 이메일이 없습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
-
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 Id의 댓글이 존재하지 않습니다."),
+    UNAUTHORIZED_ACTION(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다.");
 
     private final HttpStatus status;
     private final String message;
