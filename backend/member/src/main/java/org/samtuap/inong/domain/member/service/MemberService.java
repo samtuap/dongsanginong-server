@@ -9,6 +9,7 @@ import org.samtuap.inong.domain.member.dto.SignInResponse;
 import org.samtuap.inong.domain.member.dto.SignUpRequest;
 import org.samtuap.inong.domain.member.dto.SignUpResponse;
 import org.samtuap.inong.domain.member.entity.Member;
+import org.samtuap.inong.domain.member.entity.MemberRole;
 import org.samtuap.inong.domain.member.entity.SocialType;
 import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.member.jwt.service.JwtService;
@@ -38,7 +39,7 @@ public class MemberService {
         // DB 에서 회원 찾기
         Optional<Member> optionalMember = memberRepository.findBySocialIdAndSocialType(signedMember.socialId(), socialType);
         Member member = optionalMember.orElseThrow(()->new BaseCustomException(MemberExceptionType.NEED_TO_REGISTER));
-        JwtToken jwtToken = jwtService.issueToken(member.getId());
+        JwtToken jwtToken = jwtService.issueToken(member.getId(), MemberRole.MEMBER.toString());
         return SignInResponse.fromEntity(member, jwtToken);
     }
 
@@ -57,7 +58,7 @@ public class MemberService {
         memberRepository.save(member);
 
         // 4. 토큰 발급
-        JwtToken jwtToken = jwtService.issueToken(member.getId());
+        JwtToken jwtToken = jwtService.issueToken(member.getId(), MemberRole.MEMBER.toString());
 
         // 5. 응답 반환
         return SignUpResponse.fromEntity(member, jwtToken);
