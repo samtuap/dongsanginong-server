@@ -143,7 +143,7 @@ public class FarmNoticeService {
     public void commentUpdate(Long commentId, Long memberId, CommentUpdateRequest dto) {
 
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
-                () -> new BaseCustomException(NOTICE_NOT_FOUND)
+                () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
         if (!comment.getMemberId().equals(memberId)) {
@@ -160,7 +160,7 @@ public class FarmNoticeService {
     public void commentDelete(Long commentId, Long memberId) {
 
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
-                () -> new BaseCustomException(NOTICE_NOT_FOUND)
+                () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
         if (!comment.getMemberId().equals(memberId)) {
