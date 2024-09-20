@@ -6,8 +6,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 
-import java.time.LocalDateTime;
-
 
 @Entity
 @SQLDelete(sql = "UPDATE ordering SET deleted_at = now() WHERE id = ?")
@@ -28,4 +26,7 @@ public class Ordering extends BaseEntity {
 
     @NotNull
     private Long discountPrice;
+
+    @NotNull
+    private Long farmId; // farm_id 추가
 }

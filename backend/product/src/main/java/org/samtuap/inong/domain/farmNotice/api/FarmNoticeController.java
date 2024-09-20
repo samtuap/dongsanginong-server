@@ -40,7 +40,7 @@ public class FarmNoticeController {
     @PostMapping("/{farm_id}/notice/{notice_id}/comment/create")
     public void commentCreate(@PathVariable("farm_id") Long farmId,
                               @PathVariable("notice_id") Long noticeId,
-                              @RequestHeader("myId") Long memberId,
+                              @RequestHeader("myId") String memberId,
                               @RequestBody CommentCreateRequest dto) {
 
         farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
@@ -61,7 +61,7 @@ public class FarmNoticeController {
      */
     @PutMapping("/notice/comment/{comment_id}")
     public void commentUpdate(@PathVariable("comment_id") Long commentId,
-                              @RequestHeader("myId") Long memberId,
+                              @RequestHeader("myId") String memberId,
                               @RequestBody CommentUpdateRequest dto) {
 
         farmNoticeService.commentUpdate(commentId, memberId, dto);
@@ -72,7 +72,7 @@ public class FarmNoticeController {
      */
     @DeleteMapping("/notice/comment/{comment_id}/delete")
     public void commentDelete(@PathVariable("comment_id") Long commentId,
-                              @RequestHeader("myId") Long memberId) {
+                              @RequestHeader("myId") String memberId) {
 
         farmNoticeService.commentDelete(commentId, memberId);
     }
