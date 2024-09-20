@@ -57,6 +57,27 @@ public class FarmNoticeController {
     }
 
     /**
+     * 유저 > 공지에 달린 '본인'의 댓글 수정
+     */
+    @PutMapping("/notice/comment/{comment_id}")
+    public void commentUpdate(@PathVariable("comment_id") Long commentId,
+                              @RequestParam("memberId") Long memberId,
+                              @RequestBody CommentUpdateRequest dto) {
+
+        farmNoticeService.commentUpdate(commentId, memberId, dto);
+    }
+
+    /**
+     * 유저 > 공지에 달린 '본인'의 댓글 삭제
+     */
+    @DeleteMapping("/notice/comment/{comment_id}/delete")
+    public void commentDelete(@PathVariable("comment_id") Long commentId,
+                              @RequestParam("memberId") Long memberId) {
+
+        farmNoticeService.commentDelete(commentId, memberId);
+    }
+
+    /**
      * 공지 생성 (판매자가 공지 등록)
      */
     @PostMapping("/{farm_id}/notice/create")

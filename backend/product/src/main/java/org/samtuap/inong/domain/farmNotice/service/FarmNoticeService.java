@@ -137,6 +137,41 @@ public class FarmNoticeService {
     }
 
     /**
+     * 유저 > 공지에 달린 본인의 댓글 수정
+     */
+    @Transactional
+    public void commentUpdate(Long commentId, Long memberId, CommentUpdateRequest dto) {
+
+        NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
+                () -> new BaseCustomException(NOTICE_NOT_FOUND)
+        );
+        // 댓글 작성자 확인
+        if (!comment.getMemberId().equals(memberId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
+
+        // 댓글 업데이트
+        dto.updateEntity(comment);
+    }
+
+    /**
+     * 유저 > 공지에 달린 본인의 댓글 삭제
+     */
+    public void commentDelete(Long commentId, Long memberId) {
+
+        NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
+                () -> new BaseCustomException(NOTICE_NOT_FOUND)
+        );
+        // 댓글 작성자 확인
+        if (!comment.getMemberId().equals(memberId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
+
+        noticeCommentRepository.deleteById(comment.getId());
+    }
+
+
+    /**
      * 공지 생성 (판매자가 공지 등록)
      */
     @Transactional
