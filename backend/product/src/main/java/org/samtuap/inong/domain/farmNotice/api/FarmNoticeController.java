@@ -35,7 +35,6 @@ public class FarmNoticeController {
 
     /**
      * 유저가 공지글에 댓글 작성
-     * 나중에 수정할 예정이기 때문에 memberId만 requestParam으로 받았음
      */
     @PostMapping("/{farm_id}/notice/{notice_id}/comment/create")
     public void commentCreate(@PathVariable("farm_id") Long farmId,

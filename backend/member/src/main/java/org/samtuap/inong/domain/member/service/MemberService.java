@@ -79,7 +79,7 @@ public class MemberService {
     }
 
     /**
-     * id로 회원 찾아오기
+     * feignClient 요청용
      */
     public MemberDetailResponse findMember(Long id) {
 

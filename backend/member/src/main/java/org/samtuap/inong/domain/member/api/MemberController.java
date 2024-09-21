@@ -65,7 +65,7 @@ public class MemberController {
     }
 
     /**
-     * id로 회원 찾아오기 => product 모듈에서 feignclient로 찾아올 수 있도록 추가
+     * feignClient 요청용
      */
     @GetMapping("/{id}")
     public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {

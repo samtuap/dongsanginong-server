@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.member.dto;
 import lombok.Builder;
 import org.samtuap.inong.domain.member.entity.Member;
 
+// feignClient 요청용
 @Builder
 public record MemberDetailResponse(
         Long id,
