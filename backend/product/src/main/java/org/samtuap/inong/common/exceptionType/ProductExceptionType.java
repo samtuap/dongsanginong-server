@@ -13,7 +13,8 @@ public enum ProductExceptionType implements ExceptionType {
     ID_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하는 아이디가 없습니다."), // seller
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."), // seller
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 Id의 댓글이 존재하지 않습니다."),
-    UNAUTHORIZED_ACTION(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다.");
+    UNAUTHORIZED_ACTION(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다."),
+    PRODUCT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "상품의 이미지가 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String message;
