@@ -62,4 +62,9 @@ public class Member extends BaseEntity {
         this.addressDetail = addressDetail;
         this.zipcode = zipcode;
     }
+
+
+    public void updateFcmToken(String fcmToken){
+        this.fcmToken = fcmToken;
+    }
 }
