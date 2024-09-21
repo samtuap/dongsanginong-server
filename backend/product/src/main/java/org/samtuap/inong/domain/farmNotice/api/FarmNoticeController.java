@@ -35,12 +35,11 @@ public class FarmNoticeController {
 
     /**
      * 유저가 공지글에 댓글 작성
-     * 나중에 수정할 예정이기 때문에 memberId만 requestParam으로 받았음
      */
     @PostMapping("/{farm_id}/notice/{notice_id}/comment/create")
     public void commentCreate(@PathVariable("farm_id") Long farmId,
                               @PathVariable("notice_id") Long noticeId,
-                              @RequestHeader("myId") Long memberId,
+                              @RequestHeader("myId") String memberId,
                               @RequestBody CommentCreateRequest dto) {
 
         farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
@@ -61,7 +60,7 @@ public class FarmNoticeController {
      */
     @PutMapping("/notice/comment/{comment_id}")
     public void commentUpdate(@PathVariable("comment_id") Long commentId,
-                              @RequestHeader("myId") Long memberId,
+                              @RequestHeader("myId") String memberId,
                               @RequestBody CommentUpdateRequest dto) {
 
         farmNoticeService.commentUpdate(commentId, memberId, dto);
@@ -72,7 +71,7 @@ public class FarmNoticeController {
      */
     @DeleteMapping("/notice/comment/{comment_id}/delete")
     public void commentDelete(@PathVariable("comment_id") Long commentId,
-                              @RequestHeader("myId") Long memberId) {
+                              @RequestHeader("myId") String memberId) {
 
         farmNoticeService.commentDelete(commentId, memberId);
     }

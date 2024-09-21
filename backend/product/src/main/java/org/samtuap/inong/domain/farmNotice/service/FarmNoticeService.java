@@ -84,7 +84,7 @@ public class FarmNoticeService {
      * 유저가 공지글에 댓글 작성
      */
     @Transactional
-    public void commentCreate(Long farmId, Long noticeId, Long memberId, CommentCreateRequest dto) {
+    public void commentCreate(Long farmId, Long noticeId, String memberId, CommentCreateRequest dto) {
 
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
@@ -97,7 +97,7 @@ public class FarmNoticeService {
             throw new BaseCustomException(NOTICE_NOT_FOUND);
         }
 
-        NoticeComment noticeComment = CommentCreateRequest.to(dto, farmNotice, memberId);
+        NoticeComment noticeComment = CommentCreateRequest.to(dto, farmNotice, Long.parseLong(memberId));
         noticeCommentRepository.save(noticeComment);
     }
 
@@ -140,13 +140,13 @@ public class FarmNoticeService {
      * 유저 > 공지에 달린 본인의 댓글 수정
      */
     @Transactional
-    public void commentUpdate(Long commentId, Long memberId, CommentUpdateRequest dto) {
+    public void commentUpdate(Long commentId, String memberId, CommentUpdateRequest dto) {
 
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
                 () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
-        if (!comment.getMemberId().equals(memberId)) {
+        if (!comment.getMemberId().equals(Long.parseLong(memberId))) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
 
@@ -157,13 +157,13 @@ public class FarmNoticeService {
     /**
      * 유저 > 공지에 달린 본인의 댓글 삭제
      */
-    public void commentDelete(Long commentId, Long memberId) {
+    public void commentDelete(Long commentId, String memberId) {
 
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
                 () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
-        if (!comment.getMemberId().equals(memberId)) {
+        if (!comment.getMemberId().equals(Long.parseLong(memberId))) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
 

@@ -9,10 +9,6 @@ import org.samtuap.inong.domain.member.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 
 @RequestMapping("/member")
@@ -59,20 +55,30 @@ public class MemberController {
         return new ResponseEntity<>(memberInfo, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {
-        return memberService.findMember(memberId);
-    }
-
     // 임시 코드 발급 > 추후 삭제 예정
     @GetMapping("/create-token")
     public JwtToken authTest(@RequestParam("id") Long memberId) {
         return jwtService.issueToken(memberId, MemberRole.MEMBER.toString());
     }
 
+    /**
+     * feignClient 요청용
+     */
+    @GetMapping("/{id}")
+    public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {
+        return memberService.findMember(memberId);
+    }
+
     @PatchMapping("/update-info")
     public ResponseEntity<MemberUpdateInfoRequest> updateMemberInfo(@RequestBody MemberUpdateInfoRequest updateInfo, @RequestParam("id") Long memberId){
         memberService.updateMemberInfo(updateInfo, memberId);
         return new ResponseEntity<>(updateInfo, HttpStatus.OK);
+    }
+
+    @GetMapping("/subscription")
+    public ResponseEntity<MemberSubscriptionResponse> getSubscription(@RequestParam("id") Long memberId){
+        MemberSubscriptionResponse memberSubscriptionResponse = memberService.getSubscription(memberId);
+        return new ResponseEntity<>(memberSubscriptionResponse, HttpStatus.OK);
+
     }
 }
