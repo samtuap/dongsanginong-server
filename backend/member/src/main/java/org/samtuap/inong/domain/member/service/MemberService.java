@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.MemberExceptionType;
 import org.samtuap.inong.domain.member.dto.*;
@@ -12,6 +13,8 @@ import org.samtuap.inong.domain.member.jwt.service.JwtService;
 import org.samtuap.inong.domain.member.oauth.google.service.GoogleService;
 import org.samtuap.inong.domain.member.oauth.kakao.service.KakaoService;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
+import org.samtuap.inong.domain.subscription.entity.Subscription;
+import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +25,9 @@ import static org.samtuap.inong.common.exceptionType.MemberExceptionType.MEMBER_
 @Service
 @RequiredArgsConstructor
 public class MemberService {
-
     private final MemberRepository memberRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final ProductFeign productFeign;
     private final KakaoService kakaoService;
     private final GoogleService googleService;
     private final JwtService jwtService;
@@ -72,6 +76,7 @@ public class MemberService {
         jwtService.deleteRefreshToken(member.getId());
     }
 
+    @Transactional
     public MemberInfoResponse getMemberInfo(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
 
@@ -81,12 +86,29 @@ public class MemberService {
     /**
      * feignClient 요청용
      */
+    @Transactional
     public MemberDetailResponse findMember(Long id) {
-
         Member member = memberRepository.findById(id).orElseThrow(
                 () -> new BaseCustomException(MEMBER_NOT_FOUND)
         );
         return MemberDetailResponse.from(member);
     }
 
+    @Transactional
+    public MemberUpdateInfoRequest updateMemberInfo(MemberUpdateInfoRequest updateInfo, Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        member.updatePhone(updateInfo.phone());
+        member.updateAddress(updateInfo.address(), updateInfo.addressDetail(), updateInfo.zipcode());
+
+        return MemberUpdateInfoRequest.newInfo(member);
+    }
+
+    public MemberSubscriptionResponse getSubscription(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        Subscription subscription = subscriptionRepository.findByMemberOrThrow(member);
+        Long packageProductId = subscription.getPackageId();
+        PackageProductResponse packageProduct = productFeign.getPackageProduct(packageProductId);
+
+        return MemberSubscriptionResponse.fromEntity(packageProduct);
+    }
 }

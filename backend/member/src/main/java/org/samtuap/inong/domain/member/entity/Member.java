@@ -51,4 +51,13 @@ public class Member extends BaseEntity {
     @NotNull
     private String socialId;
 
+    public void updatePhone(String phone){
+        this.phone = phone;
+    }
+
+    public void updateAddress(String address, String addressDetail, String zipcode){
+        this.address = address;
+        this.addressDetail = addressDetail;
+        this.zipcode = zipcode;
+    }
 }

@@ -1,7 +1,15 @@
 package org.samtuap.inong.domain.seller.service;
 
+import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.domain.farm.entity.Farm;
+import org.samtuap.inong.domain.farm.entity.FarmCategory;
+import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
+import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
+import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
+import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.seller.dto.SellerInfoResponse;
 import org.samtuap.inong.domain.seller.dto.SellerSignInRequest;
 import org.samtuap.inong.domain.seller.dto.SellerSignInResponse;
 import org.samtuap.inong.domain.seller.dto.SellerSignUpRequest;
@@ -9,24 +17,22 @@ import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
 import org.samtuap.inong.domain.seller.repository.SellerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.EMAIL_NOT_FOUND;
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.INVALID_PASSWORD;
 
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class SellerService {
 
     private final SellerRepository sellerRepository;
+    private final FarmRepository farmRepository;
+    private final FarmCategoryRepository farmCategoryRepository;
+    private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
-
-    @Autowired
-    public SellerService(SellerRepository sellerRepository, JwtService jwtService) {
-        this.sellerRepository = sellerRepository;
-        this.jwtService = jwtService;
-    }
 
     @Transactional
     public Seller signUp(SellerSignUpRequest dto) {
@@ -60,9 +66,18 @@ public class SellerService {
     }
 
     public void withDraw(Long sellerId) {
-        Seller seller = sellerRepository.findById(sellerId)
-                .orElseThrow(() -> new BaseCustomException(ID_NOT_FOUND));
+        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
         sellerRepository.deleteById(seller.getId());
         jwtService.deleteRefreshToken(seller.getId());
     }
+
+    public SellerInfoResponse getSellerInfo(Long sellerId) {
+        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+        Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
+        FarmCategoryRelation categoryRelation = farmCategoryRelationRepository.findByFarmId(farm.getId());
+        FarmCategory farmCategory = farmCategoryRepository.findByIdOrThrow(categoryRelation.getCategory().getId());
+
+        return SellerInfoResponse.fromEntity(seller, farm, farmCategory);
+    }
+
 }

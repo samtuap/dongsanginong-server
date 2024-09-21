@@ -2,10 +2,7 @@ package org.samtuap.inong.domain.seller.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.seller.dto.SellerSignInRequest;
-import org.samtuap.inong.domain.seller.dto.SellerSignInResponse;
-import org.samtuap.inong.domain.seller.dto.SellerSignOutRequest;
-import org.samtuap.inong.domain.seller.dto.SellerSignUpRequest;
+import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.service.SellerService;
 import org.springframework.http.HttpStatus;
@@ -41,5 +38,11 @@ public class SellerController {
     public ResponseEntity<?> withDraw(@RequestBody Long sellerId) {
         sellerService.withDraw(sellerId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/seller-info")
+    public ResponseEntity<SellerInfoResponse> getSellerInfo(@RequestParam("id") Long sellerId){
+        SellerInfoResponse sellerInfo =  sellerService.getSellerInfo(sellerId);
+        return new ResponseEntity<>(sellerInfo, HttpStatus.OK);
     }
 }
