@@ -8,9 +8,13 @@ import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.product.dto.PackageProductCreateRequest;
 import org.samtuap.inong.domain.product.dto.PackageProductCreateResponse;
+import org.samtuap.inong.domain.product.dto.SellerPackageListGetResponse;
 import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,5 +59,12 @@ public class PackageProductService {
 
         // 저장된 엔티티를 DTO로 반환
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
+    }
+
+    @Transactional
+    public Page<SellerPackageListGetResponse> getSellerPackages(Long sellerId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PackageProduct> packageProductPage = packageProductRepository.findBySellerId(sellerId, pageable);
+        return SellerPackageListGetResponse.fromEntities(packageProductPage);
     }
 }
