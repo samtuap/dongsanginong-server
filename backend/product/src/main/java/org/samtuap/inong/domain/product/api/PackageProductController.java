@@ -2,9 +2,11 @@ package org.samtuap.inong.domain.product.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.exception.BaseCustomException;
-import org.samtuap.inong.domain.product.dto.PackageProductResponse;
+import org.samtuap.inong.domain.product.dto.PackageProductCreateRequest;
+import org.samtuap.inong.domain.product.dto.PackageProductCreateResponse;
 import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
 import org.samtuap.inong.domain.product.service.PackageProductService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,5 +38,10 @@ public class PackageProductController {
     @GetMapping("/info/{id}")
     public PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId) {
         return packageProductService.getProductInfo(packageProductId);
+  
+    @PostMapping("/create")
+    public ResponseEntity<PackageProductCreateResponse> createProduct(@RequestBody PackageProductCreateRequest request) {
+        PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(request);
+        return ResponseEntity.ok(packageProductCreateResponse);
     }
 }
