@@ -51,6 +51,8 @@ public class Member extends BaseEntity {
     @NotNull
     private String socialId;
 
+    private String fcmToken;
+
     public void updatePhone(String phone){
         this.phone = phone;
     }
