@@ -55,15 +55,18 @@ public class MemberController {
         return new ResponseEntity<>(memberInfo, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {
-        return memberService.findMember(memberId);
-    }
-
     // 임시 코드 발급 > 추후 삭제 예정
     @GetMapping("/create-token")
     public JwtToken authTest(@RequestParam("id") Long memberId) {
         return jwtService.issueToken(memberId, MemberRole.MEMBER.toString());
+    }
+
+    /**
+     * feignClient 요청용
+     */
+    @GetMapping("/{id}")
+    public MemberDetailResponse findMember(@PathVariable("id") Long memberId) {
+        return memberService.findMember(memberId);
     }
 
     @PatchMapping("/update-info")
@@ -76,5 +79,6 @@ public class MemberController {
     public ResponseEntity<MemberSubscriptionResponse> getSubscription(@RequestParam("id") Long memberId){
         MemberSubscriptionResponse memberSubscriptionResponse = memberService.getSubscription(memberId);
         return new ResponseEntity<>(memberSubscriptionResponse, HttpStatus.OK);
+
     }
 }

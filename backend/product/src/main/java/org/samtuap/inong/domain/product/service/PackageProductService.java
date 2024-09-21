@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.product.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.OrderFeign;
+import org.samtuap.inong.domain.product.dto.PackageProductResponse;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
@@ -41,11 +42,11 @@ public class PackageProductService {
                 .collect(Collectors.toList());
     }
 
-
     public PackageProductResponse getProductInfo(Long packageProductId) {
         PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
         List<PackageProductImage> packageProductImage = packageProductImageRepository.findAllByPackageProduct(packageProduct);
         return PackageProductResponse.fromEntity(packageProduct, packageProductImage);
+    }
 
     @Transactional
     public PackageProductCreateResponse createPackageProduct(PackageProductCreateRequest request) {
@@ -64,6 +65,5 @@ public class PackageProductService {
 
         // 저장된 엔티티를 DTO로 반환
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
-
     }
 }

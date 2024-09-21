@@ -83,6 +83,9 @@ public class MemberService {
         return MemberInfoResponse.fromEntity(member);
     }
 
+    /**
+     * feignClient 요청용
+     */
     @Transactional
     public MemberDetailResponse findMember(Long id) {
         Member member = memberRepository.findById(id).orElseThrow(
