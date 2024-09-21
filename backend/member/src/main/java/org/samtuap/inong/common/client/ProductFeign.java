@@ -5,10 +5,10 @@ import org.samtuap.inong.config.FeignConfig;
 import org.samtuap.inong.domain.member.dto.PackageProductResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "product-service", configuration = FeignConfig.class)
 public interface ProductFeign {
-    @GetMapping("/product/info")
-    PackageProductResponse getPackageProduct(@RequestParam("id") Long packageProductId);
+    @GetMapping("/product/info/{id}")
+    PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId);
 }

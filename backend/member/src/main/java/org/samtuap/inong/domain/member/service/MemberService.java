@@ -102,8 +102,9 @@ public class MemberService {
 
     public MemberSubscriptionResponse getSubscription(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
-        Subscription subscription = subscriptionRepository.findByMemberIdOrThrow(memberId);
-        PackageProductResponse packageProduct = productFeign.getPackageProduct(subscription.getPackageId());
+        Subscription subscription = subscriptionRepository.findByMemberIdOrThrow(member.getId());
+        Long packageProductId = subscription.getPackageId();
+        PackageProductResponse packageProduct = productFeign.getPackageProduct(packageProductId);
 
         return MemberSubscriptionResponse.fromEntity(packageProduct);
     }

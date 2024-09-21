@@ -5,10 +5,7 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.product.dto.PackageProductResponse;
 import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
 import org.samtuap.inong.domain.product.service.PackageProductService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,9 +32,9 @@ public class PackageProductController {
         return packageProductService.getTopPackages();
     }
 
-    // Member 의 MyPage 에서 Product 를 조회하기 위한 메서드
-    @GetMapping("/info")
-    public PackageProductResponse getPackageProduct(@RequestParam("id") Long packageProductId) {
+    //  Feign 요청용 메서드
+    @GetMapping("/info/{id}")
+    public PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId) {
         return packageProductService.getProductInfo(packageProductId);
     }
 }
