@@ -62,6 +62,10 @@ logging:
     org.hibernate.sql: debug
     org.hibernate.type: info
 
+
+fcm:
+  secret-file: ${FCM_SECRET_FILE}
+
 cloud:
   aws:
     credentials:
@@ -74,3 +78,4 @@ cloud:
       auto: false
     stack:
       auto: false
+
