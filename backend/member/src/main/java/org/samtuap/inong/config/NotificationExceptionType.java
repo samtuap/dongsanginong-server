@@ -1,10 +1,11 @@
-package org.samtuap.inong.common.exceptionType;
+package org.samtuap.inong.config;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.exceptionType.ExceptionType;
 import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
-public enum AlertExceptionType implements ExceptionType {
+public enum NotificationExceptionType implements ExceptionType {
     SECRET_FILE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 시크릿 파일이 없습니다."),
     INVALID_SECRET_FILE(HttpStatus.INTERNAL_SERVER_ERROR, "잘못된 FCM 시크릿 파일입니다.");
 

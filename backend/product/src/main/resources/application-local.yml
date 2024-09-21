@@ -63,4 +63,4 @@ logging:
     org.hibernate.type: info
 
 fcm:
-  secret-file:
+  secret-file: ${FCM_SECRET_FILE}

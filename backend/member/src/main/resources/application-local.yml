@@ -86,3 +86,6 @@ jwt:
 #  service:
 #    # API Gateway port
 #    url: http://localhost:8080
+
+fcm:
+  secret-file: ${FCM_SECRET_FILE}
