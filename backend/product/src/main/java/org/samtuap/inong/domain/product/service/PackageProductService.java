@@ -10,6 +10,8 @@ import org.samtuap.inong.domain.product.dto.PackageProductCreateRequest;
 import org.samtuap.inong.domain.product.dto.PackageProductCreateResponse;
 import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
+import org.samtuap.inong.domain.product.entity.PackageProductImage;
+import org.samtuap.inong.domain.product.repository.PackageProductImageRepository;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import static org.samtuap.inong.common.exceptionType.ProductExceptionType.FARM_N
 @Service
 public class PackageProductService {
     private final PackageProductRepository packageProductRepository;
+    private final PackageProductImageRepository packageProductImageRepository;
     private final OrderFeign orderFeign;
     private final FarmRepository farmRepository;
     private final PackageProductImageService packageProductImageService;
@@ -37,6 +40,12 @@ public class PackageProductService {
                 .sorted(Comparator.comparingInt(product -> topPackages.indexOf(product.id())))
                 .collect(Collectors.toList());
     }
+
+
+    public PackageProductResponse getProductInfo(Long packageProductId) {
+        PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
+        List<PackageProductImage> packageProductImage = packageProductImageRepository.findAllByPackageProduct(packageProduct);
+        return PackageProductResponse.fromEntity(packageProduct, packageProductImage);
 
     @Transactional
     public PackageProductCreateResponse createPackageProduct(PackageProductCreateRequest request) {
@@ -55,5 +64,6 @@ public class PackageProductService {
 
         // 저장된 엔티티를 DTO로 반환
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
+
     }
 }

@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.product.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 
+@Getter
 @Entity
 @Builder
 @NoArgsConstructor

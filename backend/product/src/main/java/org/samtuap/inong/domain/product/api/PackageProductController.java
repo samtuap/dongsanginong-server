@@ -34,6 +34,11 @@ public class PackageProductController {
         return packageProductService.getTopPackages();
     }
 
+    //  Feign 요청용 메서드
+    @GetMapping("/info/{id}")
+    public PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId) {
+        return packageProductService.getProductInfo(packageProductId);
+  
     @PostMapping("/create")
     public ResponseEntity<PackageProductCreateResponse> createProduct(@RequestBody PackageProductCreateRequest request) {
         PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(request);
