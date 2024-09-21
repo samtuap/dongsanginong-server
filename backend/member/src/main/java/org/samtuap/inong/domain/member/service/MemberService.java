@@ -102,7 +102,7 @@ public class MemberService {
 
     public MemberSubscriptionResponse getSubscription(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
-        Subscription subscription = subscriptionRepository.findByMemberIdOrThrow(member.getId());
+        Subscription subscription = subscriptionRepository.findByMemberOrThrow(member);
         Long packageProductId = subscription.getPackageId();
         PackageProductResponse packageProduct = productFeign.getPackageProduct(packageProductId);
 

@@ -5,7 +5,6 @@ import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
-import org.samtuap.inong.domain.farm.entity.Farm;
 
 @Getter
 @Entity

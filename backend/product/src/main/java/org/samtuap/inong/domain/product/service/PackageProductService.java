@@ -34,7 +34,7 @@ public class PackageProductService {
 
     public PackageProductResponse getProductInfo(Long packageProductId) {
         PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
-        PackageProductImage packageProductImage = packageProductImageRepository.findByPackageProductIdOrThrow(packageProductId);
+        List<PackageProductImage> packageProductImage = packageProductImageRepository.findAllByPackageProduct(packageProduct);
         return PackageProductResponse.fromEntity(packageProduct, packageProductImage);
     }
 }
