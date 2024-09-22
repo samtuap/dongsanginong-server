@@ -5,22 +5,28 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.samtuap.inong.common.client.LiveFeign;
 import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
 import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
+import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class FarmService {
     private final FarmRepository farmRepository;
+    private final LiveFeign liveFeign;
 
     // 최신순, 스크랩순, 판매량 순
     public Page<FarmListGetResponse> getFarmList(Pageable pageable) {
@@ -54,5 +60,13 @@ public class FarmService {
 
         Page<Farm> farms = farmRepository.findAll(specification, pageable);
         return farms.map(FarmListGetResponse::fromEntity);
+    }
+
+    /**
+     * feign 요청용
+     */
+    @Transactional
+    public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(List<Long> favoriteFarmList) {
+        return liveFeign.getFavoritesFarmLiveList(favoriteFarmList);
     }
 }
