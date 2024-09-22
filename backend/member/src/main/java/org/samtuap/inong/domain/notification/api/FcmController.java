@@ -6,6 +6,7 @@ import com.google.firebase.messaging.WebpushNotification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.notification.dto.FcmTokenSaveRequest;
+import org.samtuap.inong.domain.notification.dto.NotificationIssueRequest;
 import org.samtuap.inong.domain.notification.service.FcmService;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,10 @@ public class FcmController {
         return ResponseEntity.ok(null);
     }
 
-    @PostMapping("/test/notice")
-    public ResponseEntity<Void> testNotification(@RequestHeader Long myId) {
-        fcmService.sendTestMessage(myId);
+
+    @PostMapping("/notice/issue")
+    public ResponseEntity<Void> issueNotice(@RequestBody @Valid NotificationIssueRequest notiRequest) {
+        fcmService.issueNotice(notiRequest);
         return ResponseEntity.ok(null);
     }
 }
