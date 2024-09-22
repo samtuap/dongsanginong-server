@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PackageProductImageRepository extends JpaRepository<PackageProductImage, Long> {
     List<PackageProductImage> findAllByPackageProduct(PackageProduct packageProduct);
+
+    void deleteByPackageProductAndImageUrl(PackageProduct packageProduct, String imageUrl);
 }

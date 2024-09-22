@@ -35,4 +35,16 @@ public class PackageProduct extends BaseEntity {
 
     @NotNull
     private Long price;
+
+    public void updatePackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public void updateDeliveryCycle(Integer deliveryCycle) {
+        this.delivery_cycle = deliveryCycle;
+    }
+
+    public void updatePrice(Long price) {
+        this.price = price;
+    }
 }

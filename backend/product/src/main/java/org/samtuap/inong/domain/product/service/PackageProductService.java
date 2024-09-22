@@ -3,14 +3,10 @@ package org.samtuap.inong.domain.product.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.OrderFeign;
-import org.samtuap.inong.domain.product.dto.PackageProductResponse;
+import org.samtuap.inong.domain.product.dto.*;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
-import org.samtuap.inong.domain.product.dto.PackageProductCreateRequest;
-import org.samtuap.inong.domain.product.dto.PackageProductCreateResponse;
-import org.samtuap.inong.domain.product.dto.SellerPackageListGetResponse;
-import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.samtuap.inong.domain.product.repository.PackageProductImageRepository;
@@ -25,8 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.FARM_NOT_FOUND;
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.UNAUTHORIZED_ACTION;
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -86,5 +81,22 @@ public class PackageProductService {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
         packageProductRepository.delete(packageProduct);
+    }
+
+    @Transactional
+    public void updatePackageProduct(Long sellerId, Long packageId, PackageProductUpdateRequest request) {
+        // 상품 조회 및 검증
+        PackageProduct packageProduct = packageProductRepository.findById(packageId)
+                .orElseThrow(() -> new BaseCustomException(PRODUCT_NOT_FOUND));
+
+        if (!packageProduct.getFarm().getSellerId().equals(sellerId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
+
+        // 상품 정보 및 이미지 수정
+        request.updatePackageProduct(packageProduct, packageProductImageService);
+
+        // 수정된 상품 정보 저장
+        packageProductRepository.save(packageProduct);
     }
 }

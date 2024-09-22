@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.seller.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.domain.product.dto.PackageProductUpdateRequest;
 import org.samtuap.inong.domain.product.dto.SellerPackageListGetResponse;
 import org.samtuap.inong.domain.product.service.PackageProductService;
 import org.samtuap.inong.domain.seller.dto.*;
@@ -64,5 +65,13 @@ public class SellerController {
             @PathVariable Long sellerId,
             @PathVariable Long packageId) {
         packageProductService.deletePackage(sellerId, packageId);
+    }
+
+    @PutMapping("/{sellerId}/packages/{packageId}/update")
+    public void updatePackageProduct(
+            @PathVariable Long sellerId,
+            @PathVariable Long packageId,
+            @RequestBody PackageProductUpdateRequest request) {
+        packageProductService.updatePackageProduct(sellerId, packageId, request);
     }
 }
