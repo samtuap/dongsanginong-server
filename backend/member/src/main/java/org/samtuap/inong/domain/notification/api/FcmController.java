@@ -25,7 +25,6 @@ public class FcmController {
     }
 
 
-    // [feign 요청 용] 원하는 내용으로 알림을 보낼 수 있는 API입니다.
     @PostMapping("/notice/issue")
     public ResponseEntity<Void> issueNotice(@RequestBody @Valid NotificationIssueRequest notiRequest) {
         fcmService.issueNotice(notiRequest);

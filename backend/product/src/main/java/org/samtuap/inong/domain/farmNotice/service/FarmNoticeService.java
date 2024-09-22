@@ -194,7 +194,7 @@ public class FarmNoticeService {
 
     private void issueNotificationToFollowers(Farm farm, NoticeCreateRequest dto) {
         FollowersGetResponse followers = memberFeign.getFollowers(farm.getId());
-        for(Long memberId : followers.getFollowers()) {
+        for(Long memberId : followers.followers()) {
             KafkaNotificationRequest notification = KafkaNotificationRequest.builder()
                     .memberId(memberId)
                     .title(farm.getFarmName() + " 농장에 공지 글이 등록 되었어요!")
