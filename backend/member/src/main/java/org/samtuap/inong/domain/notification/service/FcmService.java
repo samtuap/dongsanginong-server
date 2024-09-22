@@ -30,33 +30,6 @@ public class FcmService {
         member.updateFcmToken(fcmTokenSaveRequest.fcmToken());
 
     }
-    public void sendTestMessage(Long myId) {
-        Member member = memberRepository.findByIdOrThrow(myId);
-        String token = member.getFcmToken();
-
-        if(token == null || token.isEmpty()) {
-            throw new BaseCustomException(FCM_TOKEN_NOT_FOUND);
-        }
-
-        Message message = Message.builder()
-                .setWebpushConfig(WebpushConfig.builder()
-                        .setNotification(WebpushNotification.builder()
-                                .setTitle("알림 제목")
-                                .setBody("알림 내용")
-                                .build())
-                        .build())
-                .setToken(token)
-                .build();
-
-        try {
-            FirebaseMessaging.getInstance().sendAsync(message);
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw new BaseCustomException(FCM_SEND_FAIL);
-        }
-
-    }
 
     public void issueNotice(NotificationIssueRequest notiRequest) {
         List<Long> targets = notiRequest.targets();
