@@ -43,7 +43,7 @@ public class FcmService {
         String token = member.getFcmToken();
 
         if(token == null || token.isEmpty()) {
-            throw new BaseCustomException(FCM_TOKEN_NOT_FOUND);
+            return;
         }
 
         Message message = Message.builder()
