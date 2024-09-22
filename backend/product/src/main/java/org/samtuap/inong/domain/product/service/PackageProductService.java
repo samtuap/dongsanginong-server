@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.FARM_NOT_FOUND;
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.UNAUTHORIZED_ACTION;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -76,5 +77,14 @@ public class PackageProductService {
         Pageable pageable = PageRequest.of(page, size);
         Page<PackageProduct> packageProductPage = packageProductRepository.findBySellerId(sellerId, pageable);
         return SellerPackageListGetResponse.fromEntities(packageProductPage);
+    }
+
+    @Transactional
+    public void deletePackage(Long sellerId, Long packageId) {
+        PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageId);
+        if (!packageProduct.getFarm().getSellerId().equals(sellerId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
+        packageProductRepository.delete(packageProduct);
     }
 }

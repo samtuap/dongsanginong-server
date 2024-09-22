@@ -58,4 +58,11 @@ public class SellerController {
         Page<SellerPackageListGetResponse> response = packageProductService.getSellerPackages(sellerId, page, size);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{sellerId}/packages/{packageId}/delete")
+    public void deletePackage(
+            @PathVariable Long sellerId,
+            @PathVariable Long packageId) {
+        packageProductService.deletePackage(sellerId, packageId);
+    }
 }
