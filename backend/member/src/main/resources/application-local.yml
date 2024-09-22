@@ -15,7 +15,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
     generate-ddl: true
@@ -86,3 +86,6 @@ jwt:
 #  service:
 #    # API Gateway port
 #    url: http://localhost:8080
+
+fcm:
+  secret-file: ${FCM_SECRET_FILE}

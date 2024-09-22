@@ -21,6 +21,8 @@ ext {
 	set('springCloudVersion', "2023.0.3")
 }
 
+//apply plugin: 'com.google.gms.google-services'
+
 dependencies {
 //	implementation 'org.springframework.boot:spring-boot-starter' // 이게 없어도 되나?
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -42,6 +44,8 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
+	// fcm
+	implementation 'com.google.firebase:firebase-admin:9.3.0'
 }
 
 dependencyManagement {
