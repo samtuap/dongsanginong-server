@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.samtuap.inong.common.exceptionType.DeliveryExceptionType.DELIVERY_NOT_FOUND;
 
@@ -22,4 +23,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     default Delivery findByIdOrThrow(Long id) {
         return findById(id).orElseThrow(()->new BaseCustomException(DELIVERY_NOT_FOUND));
     }
+
+    Page<Delivery> findByDeliveryStatusIn(List<DeliveryStatus> statuses, Pageable pageable);
 }
