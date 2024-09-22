@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
+import org.samtuap.inong.domain.delivery.dto.BillingNumberCreateRequest;
 import org.samtuap.inong.domain.delivery.dto.DeliveryUpComingListResponse;
 import org.samtuap.inong.domain.delivery.dto.MemberDetailResponse;
 import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
@@ -13,6 +14,7 @@ import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -42,5 +44,20 @@ public class DeliveryService {
             // DeliveryUpComingListResponse 생성
             return DeliveryUpComingListResponse.from(delivery, member.name(), packageProduct.packageName());
         });
+    }
+
+    /**
+     * 사장님 페이지 > 운송장 번호를 등록하면 delivery 엔티티의 status가 IN_DELIVERY로 변경
+     */
+    @Transactional
+    public void createBillingNumber(Long id, BillingNumberCreateRequest dto) {
+
+        Delivery delivery = deliveryRepository.findByIdOrThrow(id);
+
+        // delivery의 운송장 번호 추가 및 상태 변경
+        if (dto.billingNumber() != null) {
+            delivery.updateDelivery(dto.billingNumber(), DeliveryStatus.IN_DELIVERY);
+        }
+        deliveryRepository.save(delivery);
     }
 }
