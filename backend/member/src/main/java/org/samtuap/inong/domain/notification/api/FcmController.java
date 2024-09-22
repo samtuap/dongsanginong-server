@@ -6,6 +6,7 @@ import com.google.firebase.messaging.WebpushNotification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.notification.dto.FcmTokenSaveRequest;
+import org.samtuap.inong.domain.notification.dto.NotificationIssueRequest;
 import org.samtuap.inong.domain.notification.service.FcmService;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,18 @@ public class FcmController {
         return ResponseEntity.ok(null);
     }
 
+    // TODO: 추후 삭제 예정 (테스트용)
     @PostMapping("/test/notice")
     public ResponseEntity<Void> testNotification(@RequestHeader Long myId) {
         fcmService.sendTestMessage(myId);
+        return ResponseEntity.ok(null);
+    }
+
+    // [feign 요청 용] 원하는 내용으로 알림을 보낼 수 있는 API입니다.
+    @PostMapping("/notice/issue")
+    public ResponseEntity<Void> issueNotice(@RequestHeader Long myId,
+                                            @RequestBody @Valid NotificationIssueRequest notiRequest) {
+        fcmService.issueNotice(notiRequest);
         return ResponseEntity.ok(null);
     }
 }
