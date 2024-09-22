@@ -32,4 +32,15 @@ public class PackageProductImageService {
             packageProductImageRepository.save(productImage);
         }
     }
+
+    @Transactional
+    public void deleteImages(PackageProduct packageProduct, List<String> imageUrls) {
+        for (String imageUrl : imageUrls) {
+            // DB에서 이미지 삭제
+            packageProductImageRepository.deleteByPackageProductAndImageUrl(packageProduct, imageUrl);
+
+            // S3에서 이미지 삭제 (이미지 URL을 기반으로 S3 객체 삭제)
+            s3Service.deleteFileFromS3(imageUrl);
+        }
+    }
 }
