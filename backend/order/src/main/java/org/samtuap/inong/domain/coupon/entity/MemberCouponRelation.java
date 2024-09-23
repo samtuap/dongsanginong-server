@@ -30,4 +30,8 @@ public class MemberCouponRelation extends BaseEntity {
     public void updateUsedAt(LocalDateTime usedAt) {
         this.usedAt = usedAt;
     }
+
+    public void updateOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
 }

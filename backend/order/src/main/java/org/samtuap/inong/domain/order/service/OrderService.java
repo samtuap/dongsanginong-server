@@ -90,7 +90,7 @@ public class OrderService {
         }
 
         // 4. 최초 결제하기
-        firstPayment(memberInfo, packageProduct, finalAmount);
+        firstPayment(memberInfo, packageProduct, finalAmount, order.getId());
 
         // TODO: 5. 다음 결제 예약하기
         scheduleNextPayment();
@@ -103,7 +103,8 @@ public class OrderService {
 
     private String firstPayment(MemberAllInfoResponse memberInfo,
                               PackageProductResponse packageInfo,
-                              Long paidAmount) {
+                              Long paidAmount,
+                              Long orderId) {
         // 포트원 빌링키 결제 API URL
         String paymentId = PAYMENT_PREFIX + String.valueOf(UUID.randomUUID());
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
@@ -171,6 +172,7 @@ public class OrderService {
         // 쿠폰 사용
         memberCoupon.updateIsUsed("Y");
         memberCoupon.updateUsedAt(LocalDateTime.now());
+        memberCoupon.updateOrderId(orderId);
 
         return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
     }
