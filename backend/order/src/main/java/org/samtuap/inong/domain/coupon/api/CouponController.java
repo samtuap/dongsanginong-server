@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/coupons")
@@ -20,4 +22,11 @@ public class CouponController {
         couponService.createCoupon(farmId, request);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
+    @GetMapping("/{id}/list")
+    public ResponseEntity<List<Coupon>> getCouponsByFarmId(@PathVariable("id") Long farmId) {
+        List<Coupon> coupons = couponService.getCouponsByFarmId(farmId);
+        return ResponseEntity.ok(coupons);
+    }
+
 }

@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum CouponExceptionType implements ExceptionType {
-    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 조회할 수 없습니다.");
-
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 조회할 수 없습니다."),
+    FARM_NOT_FOUND(HttpStatus.NOT_FOUND, "id에 맞는 농장이 없습니다.");
 
     private final HttpStatus status;
     private final String message;
