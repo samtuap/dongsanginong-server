@@ -67,6 +67,21 @@ public class FarmService {
      */
     @Transactional
     public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(List<Long> favoriteFarmList) {
-        return liveFeign.getFavoritesFarmLiveList(favoriteFarmList);
+        List<Farm> list = farmRepository.findByIdIn(favoriteFarmList);
+        List<Long> farmIdList = list.stream()
+                .map(Farm::getId)
+                .toList();
+        return liveFeign.getFavoritesFarmLiveList(farmIdList).stream()
+                .map(response -> {
+                    String farmName = farmRepository.getFarmNameById(response.farmId());
+                    return new FavoritesLiveListResponse(
+                            response.id(),
+                            response.farmId(),
+                            farmName,
+                            response.title(),
+                            response.liveImage()
+                    );
+                })
+                .toList();
     }
 }
