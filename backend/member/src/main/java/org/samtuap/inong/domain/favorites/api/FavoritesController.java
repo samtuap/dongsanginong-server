@@ -27,7 +27,7 @@ public class FavoritesController {
      * 즐겨찾기 한 농장 중 라이브 중인 목록 출력
      */
     @GetMapping("/farm/live/list")
-    public List<FavoritesLiveListResponse> favoritesFarmLiveList(@RequestHeader("myId") Long memberId) {
-        return favoritesService.favoritesFarmLiveList(memberId);
+    public ResponseEntity<List<FavoritesLiveListResponse>> favoritesFarmLiveList(@RequestHeader("myId") Long memberId) {
+        return new ResponseEntity<>(favoritesService.favoritesFarmLiveList(memberId), HttpStatus.OK);
     }
 }
