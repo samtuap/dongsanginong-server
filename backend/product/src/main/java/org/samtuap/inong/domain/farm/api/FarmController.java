@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.farm.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
+import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
 import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
 import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.farm.service.FarmService;
@@ -42,6 +43,12 @@ public class FarmController {
     }
 
 
+    // Member -> Feign 요청용 메서드
+    @PostMapping("/favorite/list")
+    public List<FarmFavoriteResponse> getFarmFavoriteList(@RequestBody List<Long> farmFavoriteIds){
+        return farmService.getFarmFavoriteList(farmFavoriteIds);
+
+
     @GetMapping("/{id}")
     public FarmDetailGetResponse findMember(@PathVariable("id") Long farmId) {
         return farmService.getFarmDetail(farmId);
@@ -53,6 +60,7 @@ public class FarmController {
     @PostMapping("/favorites/list")
     public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList) {
         return farmService.getFavoritesFarmLiveList(favoriteFarmList);
+
 
     }
 }

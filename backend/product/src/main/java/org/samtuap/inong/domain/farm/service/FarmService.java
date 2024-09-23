@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
 import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
+import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
 import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
 import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.farm.entity.Farm;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -62,6 +64,16 @@ public class FarmService {
         return farms.map(FarmListGetResponse::fromEntity);
     }
 
+
+    public List<FarmFavoriteResponse> getFarmFavoriteList(List<Long> farmFavoriteIds) {
+        List<Farm> farmFavoriteList = farmRepository.findByIdIn(farmFavoriteIds);
+        List<FarmFavoriteResponse> tmp = farmFavoriteList.stream()
+                .map(FarmFavoriteResponse::fromEntity)
+                .collect(Collectors.toList());
+        return tmp;
+    }
+
+
     /**
      * feign 요청용
      */
@@ -84,4 +96,5 @@ public class FarmService {
                 })
                 .toList();
     }
+  
 }

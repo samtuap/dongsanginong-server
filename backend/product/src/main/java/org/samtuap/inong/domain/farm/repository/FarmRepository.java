@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+import java.util.List;
+
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.FARM_NOT_FOUND;
 
 public interface FarmRepository extends JpaRepository<Farm, Long> {
@@ -24,8 +26,12 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
 
     Page<Farm> findAll(Specification<Farm> specification, Pageable pageable);
 
+    // Feign 요청용
+    List<Farm> findByIdIn(List<Long> farmFavoriteIds);
+
     List<Farm> findByIdIn(List<Long> favoriteFarmList);
 
     @Query("SELECT f.farmName FROM Farm f WHERE f.id = :farmId")
     String getFarmNameById(@Param("farmId") Long farmId);
+
 }
