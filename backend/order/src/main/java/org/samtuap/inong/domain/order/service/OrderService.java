@@ -48,14 +48,17 @@ public class OrderService {
         // 1. 멤버 정보, 패키지 상품 정보 가져오기
         MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
         PackageProductResponse packageProduct = productFeign.getPackageProduct(reqDto.packageId());
-         = couponRepository.findByIdOrThrow(reqDto.couponId());
+        Coupon coupon = couponRepository.findByIdOrThrow(reqDto.couponId());
 
         // 2. 최초 결제하기
+//        firstPayment(memberInfo, )
 
         // 2.
     }
 
-    private void firstPayment(MemberAllInfoResponse memberInfo, PaymentRequest reqDto) {
+    private void firstPayment(MemberAllInfoResponse memberInfo,
+                              PackageProductResponse packageInfo,
+                              Coupon coupon) {
         // 포트원 빌링키 결제 API URL
         String paymentId = String.valueOf(UUID.randomUUID());
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
@@ -68,7 +71,7 @@ public class OrderService {
         // 요청 바디 설정
         Map<String, Object> body = new HashMap<>();
         body.put("billingKey", memberInfo.billingKey());
-        body.put("orderName", "당근 패키지 정기결제");
+        body.put("orderName", packageInfo.packageName());
         body.put("storeId", STORE_ID);
         body.put("channelKey", CHANNEL_KEY);
 
