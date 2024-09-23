@@ -6,7 +6,9 @@ import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
+import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
+import org.samtuap.inong.domain.coupon.repository.MemberCouponRelationRepository;
 import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
@@ -22,9 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.samtuap.inong.common.exceptionType.CouponExceptionType.CANNOT_APPLY_COUPON;
+import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
 
@@ -37,6 +40,7 @@ public class OrderService {
     private final ProductFeign productFeign;
     private final CouponRepository couponRepository;
     private final DeliveryRepository deliveryRepository;
+    private final MemberCouponRelationRepository memberCouponRelationRepository;
 
     @Value("${portone.api-secret}")
     private String API_SECRET;
@@ -66,7 +70,7 @@ public class OrderService {
         Long finalAmount = totalAmount;
         Long discountAmount = 0L;
         if(coupon != null) {
-            discountAmount = calculateDiscountAmount(totalAmount, coupon, packageProduct);
+            discountAmount = calculateDiscountAmount(coupon, memberId, totalAmount, packageProduct);
             finalAmount = totalAmount - discountAmount;
         }
 
@@ -145,12 +149,28 @@ public class OrderService {
         }
     }
 
-    protected Long calculateDiscountAmount(Long originalPrice, Coupon coupon, PackageProductResponse packageInfo) {
+    protected Long calculateDiscountAmount(Coupon coupon, Long memberId, Long originalPrice, PackageProductResponse packageInfo) {
         // 구매하려는 상품에 적용할 수 있는 쿠폰인지 검증
-        // 검증: 1. 적용할 수 있는 쿠폰인가? 2. 멤버가 이미 발급 받았는가? 3. 이미 사용하지는 않았는가?
+        // [검증 1] 적용할 수 있는 쿠폰인가?
         if(!coupon.getFarmId().equals(packageInfo.farmId())) {
             throw new BaseCustomException(CANNOT_APPLY_COUPON);
         }
+
+        // [검증 2] 발급 받았는가
+        Optional<MemberCouponRelation> memberCouponOpt = memberCouponRelationRepository.findByCouponIdAndMemberId(coupon.getId(), memberId);
+        if(memberCouponOpt.isEmpty()) {
+            throw new BaseCustomException(COUPON_NOT_ISSUED);
+        }
+
+        // [검증 3] 시용되지 않았는가
+        MemberCouponRelation memberCoupon = memberCouponOpt.get();
+        if(memberCoupon.getUseYn().equals("Y")) {
+            throw new BaseCustomException(COUPON_ALREADY_USED);
+        }
+
+        // 쿠폰 사용
+        memberCoupon.updateIsUsed("Y");
+        memberCoupon.updateUsedAt(LocalDateTime.now());
 
         return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
     }

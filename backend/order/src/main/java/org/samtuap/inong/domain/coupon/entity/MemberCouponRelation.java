@@ -1,10 +1,12 @@
 package org.samtuap.inong.domain.coupon.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.samtuap.inong.domain.common.BaseEntity;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 public class MemberCouponRelation extends BaseEntity {
     @Id
@@ -20,4 +22,12 @@ public class MemberCouponRelation extends BaseEntity {
     private String useYn;
     private LocalDateTime usedAt;
     private LocalDateTime issuedAt;
+
+    public void updateIsUsed(String yn) {
+        this.useYn = yn;
+    }
+
+    public void updateUsedAt(LocalDateTime usedAt) {
+        this.usedAt = usedAt;
+    }
 }
