@@ -10,4 +10,6 @@ public interface LiveRepository extends JpaRepository<Live, Long> {
 
     @Query("SELECT live FROM Live live WHERE live.endAt IS NULL")
     List<Live> findActiveLives();
+
+    List<Live> findByFarmIdInAndEndAtIsNull(List<Long> farmIdList);
 }
