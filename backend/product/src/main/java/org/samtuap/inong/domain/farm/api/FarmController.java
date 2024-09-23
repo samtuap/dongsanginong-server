@@ -45,9 +45,9 @@ public class FarmController {
 
     // Member -> Feign 요청용 메서드
     @PostMapping("/favorite/list")
-    public List<FarmFavoriteResponse> getFarmFavoriteList(@RequestBody List<Long> farmFavoriteIds){
+    public List<FarmFavoriteResponse> getFarmFavoriteList(@RequestBody List<Long> farmFavoriteIds) {
         return farmService.getFarmFavoriteList(farmFavoriteIds);
-
+    }
 
     @GetMapping("/{id}")
     public FarmDetailGetResponse findMember(@PathVariable("id") Long farmId) {
