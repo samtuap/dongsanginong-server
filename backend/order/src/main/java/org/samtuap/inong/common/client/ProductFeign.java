@@ -11,4 +11,5 @@ public interface ProductFeign {
 
     @GetMapping(value = "/product/info/{id}")
     PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId);
+
 }

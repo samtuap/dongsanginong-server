@@ -5,6 +5,9 @@ import lombok.Builder;
 @Builder
 public record PackageProductResponse(
         Long id,
-        String packageName) {
+        String packageName,
+        Long farmId,
+        Long price,
+        Integer deliveryCycle) {
 
 }

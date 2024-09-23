@@ -9,5 +9,6 @@ public record PackageProductResponse(Long id,
                                      String packageName,
                                      Integer delivery_cycle,
                                      Long price,
+                                     Long farmId,
                                      List<String> imageUrls) {
 }

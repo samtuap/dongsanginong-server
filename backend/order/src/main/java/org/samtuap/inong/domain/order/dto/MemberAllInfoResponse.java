@@ -10,6 +10,7 @@ public record MemberAllInfoResponse(
         String addressDetail,
         String zipcode,
         String socialType,
+        String socialId,
         String fcmToken,
         String billingKey) {
 }

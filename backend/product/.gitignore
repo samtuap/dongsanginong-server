@@ -39,3 +39,6 @@ out/
 ## secret
 src/main/resources/application-secret.properties
 src/main/resources/dongsanginong**.json
+
+## data
+src/main/resources/data.sql

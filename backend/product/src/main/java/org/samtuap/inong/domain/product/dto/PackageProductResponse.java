@@ -1,17 +1,20 @@
 package org.samtuap.inong.domain.product.dto;
 
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Builder
 public record PackageProductResponse(Long id,
                                      String packageName,
                                      Integer delivery_cycle,
                                      Long price,
+                                     Long farmId,
                                      List<String> imageUrls) {
     public static PackageProductResponse fromEntity(PackageProduct packageProduct, List<PackageProductImage> packageProductImage){
         List<String> imageUrls = packageProductImage.stream()
@@ -23,6 +26,7 @@ public record PackageProductResponse(Long id,
                 .packageName(packageProduct.getPackageName())
                 .delivery_cycle(packageProduct.getDelivery_cycle())
                 .price(packageProduct.getPrice())
+                .farmId(packageProduct.getFarm().getId())
                 .imageUrls(imageUrls)
                 .build();
     }
