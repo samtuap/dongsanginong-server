@@ -8,7 +8,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 @Configuration
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
-    @Value("${spring.elasticsearch.uris}")
+    @Value("${SPRING.ELASTICSEARCH.URIS}")
     private String[] esHost;
 
     @Override
@@ -18,4 +18,3 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
                 .build();
     }
 }
-
