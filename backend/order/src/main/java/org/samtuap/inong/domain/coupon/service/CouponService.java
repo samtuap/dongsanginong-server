@@ -7,6 +7,8 @@ import org.samtuap.inong.domain.coupon.repository.CouponRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class CouponService {
     private final CouponRepository couponRepository;
@@ -22,4 +24,10 @@ public class CouponService {
         Coupon coupon = request.toEntity(farmId);
         couponRepository.save(coupon);
     }
+
+    @Transactional
+    public List<Coupon> getCouponsByFarmId(Long farmId) {
+        return couponRepository.findAllByFarmId(farmId);
+    }
+
 }
