@@ -22,5 +22,5 @@ public interface ProductFeign {
     List<FarmFavoriteResponse> getFarmFavoriteList(@RequestBody List<Long> farmFavoriteIds);
 
     @PostMapping("/farm/favorites/list")
-    List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList);
+    List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> farmFavoriteIds);
 }

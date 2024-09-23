@@ -84,7 +84,7 @@ public class MemberController {
     }
 
     @GetMapping("/favorite/farm")
-    public ResponseEntity<List<MemberFavoriteFarmResponse>> getFavoriteFarm(@RequestParam("id") Long memberId){
+    public ResponseEntity<List<MemberFavoriteFarmResponse>> getFavoriteFarm(@RequestHeader("myId") Long memberId){
         List<MemberFavoriteFarmResponse> favoriteFarmResponse = memberService.getFavoriteFarm(memberId);
         return new ResponseEntity<>(favoriteFarmResponse, HttpStatus.OK);
     }

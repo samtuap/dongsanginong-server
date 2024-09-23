@@ -29,8 +29,6 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
     // Feign 요청용
     List<Farm> findByIdIn(List<Long> farmFavoriteIds);
 
-    List<Farm> findByIdIn(List<Long> favoriteFarmList);
-
     @Query("SELECT f.farmName FROM Farm f WHERE f.id = :farmId")
     String getFarmNameById(@Param("farmId") Long farmId);
 
