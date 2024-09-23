@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
+import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
 import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -55,4 +57,13 @@ public class FarmService {
         Page<Farm> farms = farmRepository.findAll(specification, pageable);
         return farms.map(FarmListGetResponse::fromEntity);
     }
+
+    public List<FarmFavoriteResponse> getFarmFavoriteList(List<Long> farmFavoriteIds) {
+        List<Farm> farmFavoriteList = farmRepository.findByIdIn(farmFavoriteIds);
+        List<FarmFavoriteResponse> tmp = farmFavoriteList.stream()
+                .map(FarmFavoriteResponse::fromEntity)
+                .collect(Collectors.toList());
+        return tmp;
+    }
+
 }
