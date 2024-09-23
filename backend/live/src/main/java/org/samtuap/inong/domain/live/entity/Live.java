@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 
 @Entity
+@Getter
 @SQLDelete(sql = "UPDATE live SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 @Getter

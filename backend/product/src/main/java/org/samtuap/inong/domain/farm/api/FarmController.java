@@ -41,11 +41,17 @@ public class FarmController {
         return new ResponseEntity<>(farmDetail, HttpStatus.OK);
     }
 
+
+    @GetMapping("/{id}")
+    public FarmDetailGetResponse findMember(@PathVariable("id") Long farmId) {
+        return farmService.getFarmDetail(farmId);
+  
     /**
      * feign 요청용
      */
     @PostMapping("/favorites/list")
     public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList) {
         return farmService.getFavoritesFarmLiveList(favoriteFarmList);
+
     }
 }
