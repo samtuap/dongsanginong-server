@@ -8,6 +8,6 @@ public record PackageProductResponse(
         String packageName,
         Long farmId,
         Long price,
-        Integer deliveryCycle) {
+        Integer delivery_cycle) {
 
 }

@@ -8,6 +8,8 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
 import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
+import org.samtuap.inong.domain.delivery.entity.Delivery;
+import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.MemberAllInfoResponse;
 import org.samtuap.inong.domain.order.dto.PaymentRequest;
 import org.samtuap.inong.domain.order.dto.PaymentResponse;
@@ -19,9 +21,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.CANNOT_APPLY_COUPON;
+import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
+import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ public class OrderService {
     private final MemberFeign memberFeign;
     private final ProductFeign productFeign;
     private final CouponRepository couponRepository;
+    private final DeliveryRepository deliveryRepository;
 
     @Value("${portone.api-secret}")
     private String API_SECRET;
@@ -55,7 +61,7 @@ public class OrderService {
         PackageProductResponse packageProduct = productFeign.getPackageProduct(reqDto.packageId());
         Coupon coupon = couponRepository.findByIdOrThrow(reqDto.couponId());
 
-        // 2. 최초 결제하기
+        // 2. 최초 결제 정보 저장하기
         Long totalAmount = packageProduct.price();
         Long finalAmount = totalAmount;
         Long discountAmount = 0L;
@@ -63,9 +69,7 @@ public class OrderService {
             discountAmount = calculateDiscountAmount(totalAmount, coupon, packageProduct);
             finalAmount = totalAmount - discountAmount;
         }
-        firstPayment(memberInfo, packageProduct, finalAmount);
 
-        // TODO: 3. 결제 정보 저장하기
         Ordering order = Ordering.builder()
                 .memberId(memberId)
                 .packageId(reqDto.packageId())
@@ -75,9 +79,17 @@ public class OrderService {
                 .build();
         Ordering savedOrder = orderRepository.save(order);
 
-        // TODO: 4. 배송 정보 저장하기
+        // 3. 배송 정보 저장하기
+        switch (packageProduct.delivery_cycle()) {
+            case 1, 4, 7, 14, 28 -> saveDeliveries(order, packageProduct);
+            default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
+        }
+
+        // 4. 최초 결제하기
+        firstPayment(memberInfo, packageProduct, finalAmount);
 
         // TODO: 5. 다음 결제 예약하기
+        scheduleNextPayment();
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -127,16 +139,13 @@ public class OrderService {
             RestTemplate restTemplate = new RestTemplate();
             response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
             // 응답 처리
-            log.info("[Debug. OrderService. line 101] {}", response.getBody());
             return response.getBody();
         } catch(Exception e) {
-            e.printStackTrace();
+            throw new BaseCustomException(FAIL_TO_PAY);
         }
-
-        return "failed";
     }
 
-    private Long calculateDiscountAmount(Long originalPrice, Coupon coupon, PackageProductResponse packageInfo) {
+    protected Long calculateDiscountAmount(Long originalPrice, Coupon coupon, PackageProductResponse packageInfo) {
         // 구매하려는 상품에 적용할 수 있는 쿠폰인지 검증
         // 검증: 1. 적용할 수 있는 쿠폰인가? 2. 멤버가 이미 발급 받았는가? 3. 이미 사용하지는 않았는가?
         if(!coupon.getFarmId().equals(packageInfo.farmId())) {
@@ -144,6 +153,22 @@ public class OrderService {
         }
 
         return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
+    }
+
+    protected void saveDeliveries(Ordering ordering, PackageProductResponse packageProduct) {
+        int times = 28 / packageProduct.delivery_cycle();
+        for(int time = 0; time < times; time++) {
+            Delivery delivery = Delivery.builder()
+                    .ordering(ordering)
+                    .deliveryStatus(BEFORE_DELIVERY)
+                    .deliveryDueDate(LocalDate.now().plusDays(time))
+                    .courier("CJ") // FIXME: 논의 필요
+                    .build();
+            deliveryRepository.save(delivery);
+        }
+    }
+
+    private void scheduleNextPayment() {
 
     }
 }
