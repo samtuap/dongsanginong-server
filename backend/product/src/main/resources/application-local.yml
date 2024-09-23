@@ -34,6 +34,12 @@ spring:
     redis:
       port: 6379
       host: 127.0.0.1
+    elasticsearch:
+      client:
+        # Elasticsearch 서버의 URL
+        endpoints: http://localhost:9200
+      connection-timeout: 1000 # 연결 시간 제한 (밀리초)
+      socket-timeout: 30000    # 소켓 시간 제한 (밀리초)
 
   mail:
     host: smtp.gmail.com
