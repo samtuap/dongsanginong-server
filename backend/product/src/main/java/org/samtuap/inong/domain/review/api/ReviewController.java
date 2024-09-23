@@ -15,10 +15,10 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @PostMapping("/{packageProductId}/create/{memberId}")
+    @PostMapping("/{packageProductId}/create")
     public ResponseEntity<ReviewResponse> createReview(
             @PathVariable Long packageProductId,
-            @PathVariable Long memberId,
+            @RequestHeader("memberId") Long memberId, // memberId를 헤더에서 받기 이렇게 하라는거지??
             @RequestBody ReviewCreateRequest request) {
 
         ReviewResponse response = reviewService.createReview(packageProductId, memberId, request);

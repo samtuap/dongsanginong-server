@@ -18,21 +18,18 @@ public record ReviewCreateRequest(
     public Review toEntity(PackageProduct packageProduct, Long memberId) {
         return Review.builder()
                 .packageProduct(packageProduct)
-                .memberId(memberId) // memberId를 여기서 설정
+                .memberId(memberId)
                 .title(this.title)
                 .rating(this.rating)
                 .contents(this.contents)
                 .build();
     }
 
-
-
     public List<ReviewImage> toReviewImages(Review review) {
-        // ReviewImage 리스트 생성
         return this.imageUrls.stream()
-                .map(url -> ReviewImage.builder() // Builder를 사용하여 생성
-                        .review(review) // Review와의 관계 설정
-                        .imageUrl(url)  // 이미지 URL 설정
+                .map(url -> ReviewImage.builder()
+                        .review(review)
+                        .imageUrl(url)
                         .build())
                 .collect(Collectors.toList());
     }

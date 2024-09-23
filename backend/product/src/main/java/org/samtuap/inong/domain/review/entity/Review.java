@@ -27,20 +27,19 @@ public class Review extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id")
-    public PackageProduct packageProduct;
+    private PackageProduct packageProduct;
 
     @NotNull
-    public Long memberId;
+    private Long memberId;
 
     @NotNull
-    public String title;
+    private String title;
 
     @Min(1)
     @Max(5)
     @NotNull
-    public Integer rating;
+    private Integer rating;
 
     @NotNull
-    public String contents;
-
+    private String contents;
 }

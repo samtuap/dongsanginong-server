@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum ReviewExceptionType implements ExceptionType {
-    REIEW_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "이 상품에 대한 리뷰는 이미 존재합니다.");
+    REVIEW_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "이 상품에 대한 리뷰는 이미 존재합니다.");
 
 
     private final HttpStatus status;
