@@ -26,4 +26,14 @@ public record PackageProductResponse(Long id,
                 .imageUrls(imageUrls)
                 .build();
     }
+
+    // 리뷰 작성 받아올 메서드
+    public PackageProduct from() {
+        return PackageProduct.builder()
+                .id(this.id)
+                .packageName(this.packageName)
+                .delivery_cycle(this.delivery_cycle)
+                .price(this.price)
+                .build();
+    }
 }
