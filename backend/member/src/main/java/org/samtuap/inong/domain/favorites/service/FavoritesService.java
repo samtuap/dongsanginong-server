@@ -35,11 +35,10 @@ public class FavoritesService {
         Member member = memberRepository.findByIdOrThrow(memberId);
         // 회원이 즐겨찾기 한 농장 목록
         List<Favorites> favoritesList = favoritesRepository.findByMember(member);
-
         // 즐겨찾기 목록 중 farmId만 추출해서 list 생성 => feign 보내기 위해
-        List<Long> favoriteFarmList = favoritesList.stream()
+        List<Long> farmFavoriteIds = favoritesList.stream()
                 .map(Favorites::getFarmId)
                 .toList();
-        return productFeign.getFavoritesFarmLiveList(favoriteFarmList);
+        return productFeign.getFavoritesFarmLiveList(farmFavoriteIds);
     }
 }

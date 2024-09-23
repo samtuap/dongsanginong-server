@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RequestMapping("/member")
 @RestController
@@ -79,6 +81,11 @@ public class MemberController {
     public ResponseEntity<MemberSubscriptionResponse> getSubscription(@RequestParam("id") Long memberId){
         MemberSubscriptionResponse memberSubscriptionResponse = memberService.getSubscription(memberId);
         return new ResponseEntity<>(memberSubscriptionResponse, HttpStatus.OK);
+    }
 
+    @GetMapping("/favorite/farm")
+    public ResponseEntity<List<MemberFavoriteFarmResponse>> getFavoriteFarm(@RequestHeader("myId") Long memberId){
+        List<MemberFavoriteFarmResponse> favoriteFarmResponse = memberService.getFavoriteFarm(memberId);
+        return new ResponseEntity<>(favoriteFarmResponse, HttpStatus.OK);
     }
 }
