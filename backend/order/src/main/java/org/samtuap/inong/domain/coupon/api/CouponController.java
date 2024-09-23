@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.coupon.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.coupon.dto.CouponCreateRequest;
+import org.samtuap.inong.domain.coupon.dto.MemberCouponRelationResponse;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.service.CouponService;
 import org.springframework.http.HttpStatus;
@@ -29,4 +30,10 @@ public class CouponController {
         return ResponseEntity.ok(coupons);
     }
 
+    @PostMapping("/{id}/download")
+    public ResponseEntity<MemberCouponRelationResponse> downloadCoupon(@PathVariable("id") Long couponId,
+                                                                       @RequestHeader("myId") String memberId) {
+        MemberCouponRelationResponse response = couponService.downloadCoupon(couponId, memberId);
+        return new ResponseEntity<>(response ,HttpStatus.OK);
+    }
 }
