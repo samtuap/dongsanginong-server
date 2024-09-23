@@ -45,7 +45,8 @@ public class FarmController {
     @GetMapping("/{id}")
     public FarmDetailGetResponse findMember(@PathVariable("id") Long farmId) {
         return farmService.getFarmDetail(farmId);
-  
+    }
+
     /**
      * feign 요청용
      */

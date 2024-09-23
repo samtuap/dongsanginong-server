@@ -28,6 +28,7 @@ public class LiveController {
     public ResponseEntity<List<ActiveLiveListGetResponse>> getActiveLiveList() {
         List<ActiveLiveListGetResponse> response = liveService.getActiveLiveList();
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     /**
      * feign 요청용
