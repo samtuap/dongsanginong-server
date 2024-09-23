@@ -6,6 +6,7 @@ import org.samtuap.inong.common.exceptionType.ExceptionType;
 import org.samtuap.inong.common.response.CustomErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,6 +19,18 @@ public class GlobalExceptionHandler {
         e.printStackTrace();
         return ResponseEntity.status(exceptionType.httpStatus())
                 .body(CustomErrorResponse.of(exceptionType));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<CustomErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        log.error("[Validation Error] {}", e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CustomErrorResponse.builder()
+                        .name(HttpStatus.BAD_REQUEST.name())
+                        .httpStatusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("요청 데이터가 유효하지 않습니다.")
+                        .build());
     }
 
 

@@ -1,8 +1,12 @@
 package org.samtuap.inong.domain.delivery.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
@@ -15,6 +19,9 @@ import java.time.LocalDateTime;
 @SQLDelete(sql = "UPDATE coupon SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Delivery extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,5 +42,10 @@ public class Delivery extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ordering_id")
     private Ordering ordering;
+
+    public void updateDelivery(String billingNumber, DeliveryStatus deliveryStatus) {
+        this.billingNumber = billingNumber;
+        this.deliveryStatus = deliveryStatus;
+    }
 
 }

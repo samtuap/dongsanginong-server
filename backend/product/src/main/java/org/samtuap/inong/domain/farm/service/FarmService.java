@@ -5,15 +5,19 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.samtuap.inong.common.client.LiveFeign;
 import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
 import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
 import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
+import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +25,10 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class FarmService {
     private final FarmRepository farmRepository;
+    private final LiveFeign liveFeign;
 
     // 최신순, 스크랩순, 판매량 순
     public Page<FarmListGetResponse> getFarmList(Pageable pageable) {
@@ -58,6 +64,7 @@ public class FarmService {
         return farms.map(FarmListGetResponse::fromEntity);
     }
 
+
     public List<FarmFavoriteResponse> getFarmFavoriteList(List<Long> farmFavoriteIds) {
         List<Farm> farmFavoriteList = farmRepository.findByIdIn(farmFavoriteIds);
         List<FarmFavoriteResponse> tmp = farmFavoriteList.stream()
@@ -66,4 +73,28 @@ public class FarmService {
         return tmp;
     }
 
+
+    /**
+     * feign 요청용
+     */
+    @Transactional
+    public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(List<Long> favoriteFarmList) {
+        List<Farm> list = farmRepository.findByIdIn(favoriteFarmList);
+        List<Long> farmIdList = list.stream()
+                .map(Farm::getId)
+                .toList();
+        return liveFeign.getFavoritesFarmLiveList(farmIdList).stream()
+                .map(response -> {
+                    String farmName = farmRepository.getFarmNameById(response.farmId());
+                    return new FavoritesLiveListResponse(
+                            response.id(),
+                            response.farmId(),
+                            farmName,
+                            response.title(),
+                            response.liveImage()
+                    );
+                })
+                .toList();
+    }
+  
 }

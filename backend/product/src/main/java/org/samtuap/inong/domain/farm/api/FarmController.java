@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
 import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
 import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
+import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.farm.service.FarmService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,9 +42,25 @@ public class FarmController {
         return new ResponseEntity<>(farmDetail, HttpStatus.OK);
     }
 
+
     // Member -> Feign 요청용 메서드
     @PostMapping("/favorite/list")
     public List<FarmFavoriteResponse> getFarmFavoriteList(@RequestBody List<Long> farmFavoriteIds){
         return farmService.getFarmFavoriteList(farmFavoriteIds);
+
+
+    @GetMapping("/{id}")
+    public FarmDetailGetResponse findMember(@PathVariable("id") Long farmId) {
+        return farmService.getFarmDetail(farmId);
+    }
+
+    /**
+     * feign 요청용
+     */
+    @PostMapping("/favorites/list")
+    public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList) {
+        return farmService.getFavoritesFarmLiveList(favoriteFarmList);
+
+
     }
 }

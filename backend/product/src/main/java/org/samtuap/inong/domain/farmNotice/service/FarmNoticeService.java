@@ -13,6 +13,7 @@ import org.samtuap.inong.domain.farmNotice.entity.NoticeComment;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeImageRepository;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeRepository;
 import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class FarmNoticeService {
     private final FarmRepository farmRepository; // 농장 id 가져오기 위해 참조
     private final NoticeCommentRepository noticeCommentRepository;
     private final MemberFeign memberFeign;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     /**
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
@@ -185,6 +187,21 @@ public class FarmNoticeService {
 
         // 이미지 저장
         saveNoticeImages(farmNotice, dto.imageUrls());
+
+        //== Kafka를 통한 알림 전송 ==//
+        issueNotificationToFollowers(farm, dto);
+    }
+
+    private void issueNotificationToFollowers(Farm farm, NoticeCreateRequest dto) {
+        FollowersGetResponse followers = memberFeign.getFollowers(farm.getId());
+        for(Long memberId : followers.followers()) {
+            KafkaNotificationRequest notification = KafkaNotificationRequest.builder()
+                    .memberId(memberId)
+                    .title(farm.getFarmName() + " 농장에 공지 글이 등록 되었어요!")
+                    .content(dto.title())
+                    .build();
+        kafkaTemplate.send("send-notification-topic", notification);
+        };
     }
 
     /**
