@@ -53,6 +53,8 @@ public class Member extends BaseEntity {
 
     private String fcmToken;
 
+    private String billingKey;
+
     public void updatePhone(String phone){
         this.phone = phone;
     }
@@ -64,7 +66,11 @@ public class Member extends BaseEntity {
     }
 
 
-    public void updateFcmToken(String fcmToken){
+    public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public void updateBillingKey(String billingKey) {
+        this.billingKey = billingKey;
     }
 }

@@ -1,6 +1,8 @@
 package org.samtuap.inong.domain.order.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.domain.order.dto.PaymentRequest;
+import org.samtuap.inong.domain.order.dto.PaymentResponse;
 import org.samtuap.inong.domain.order.dto.TopPackageResponse;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -14,4 +16,8 @@ public class OrderService {
     public List<Long> getTopPackages() {
         return orderRepository.findTop10PackageIdWithMostOrders();
     }
+
+//    public PaymentResponse makeOrder(Long memberId, PaymentRequest reqDto) {
+//
+//    }
 }
