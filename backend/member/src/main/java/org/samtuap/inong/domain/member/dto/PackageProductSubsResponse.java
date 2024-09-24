@@ -1,5 +1,8 @@
 package org.samtuap.inong.domain.member.dto;
 
-public record PackageProductSubsResponse(String packageName,
-                                         String imageUrl) {
+public record PackageProductSubsResponse(Long packageId,
+                                         String packageName,
+                                         String imageUrl,
+                                         String farmId,
+                                         String farmName) {
 }

@@ -108,7 +108,8 @@ public class PackageProductService {
         return subsPackageProductList.stream()
                 .map(packageProduct -> {
                     String imageUrl = packageProductImageRepository.findFirstByPackageProduct(packageProduct).getImageUrl();
-                    return PackageProductSubsResponse.fromEntity(packageProduct, imageUrl);
+                    Farm farm = farmRepository.findByIdOrThrow(packageProduct.getFarm().getId());
+                    return PackageProductSubsResponse.fromEntity(packageProduct, imageUrl, farm);
                 })
                 .collect(Collectors.toList());
     }

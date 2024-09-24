@@ -125,8 +125,11 @@ public class MemberService {
         List<PackageProductSubsResponse> subscriptionList = productFeign.getProductSubsList(subscriptionIds);
         return subscriptionList.stream()
                 .map(subscriptionProductList -> MemberSubscriptionListResponse.builder()
+                        .packageId(subscriptionProductList.packageId())
                         .packageName(subscriptionProductList.packageName())
                         .imageUrl(subscriptionProductList.imageUrl())
+                        .farmId(subscriptionProductList.farmId())
+                        .farmName(subscriptionProductList.farmName())
                         .build())
                 .toList();
     }

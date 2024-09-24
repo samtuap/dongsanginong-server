@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.farm.repository;
 import feign.Param;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
+import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,5 +32,6 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
 
     @Query("SELECT f.farmName FROM Farm f WHERE f.id = :farmId")
     String getFarmNameById(@Param("farmId") Long farmId);
+
 
 }
