@@ -89,6 +89,19 @@ public class MemberController {
         return new ResponseEntity<>(memberSubscriptionResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/subscription/list")
+    public ResponseEntity<List<MemberSubscriptionListResponse>> getSubscriptionList(@RequestHeader("myId") Long memberId){
+        List<MemberSubscriptionListResponse> subscriptionList = memberService.getSubscriptionList(memberId);
+        return new ResponseEntity<>(subscriptionList, HttpStatus.OK);
+    }
+
+    @PostMapping("subscription/cancel")
+    public ResponseEntity<MemberSubsCancelRequest> cancelSubscription(@RequestHeader("myId") Long memberId, @RequestParam("id") Long subsId){
+        MemberSubsCancelRequest cancelSubscription = memberService.cancelSubscription(memberId, subsId);
+        return new ResponseEntity<>(cancelSubscription, HttpStatus.OK);
+    }
+
+
     @GetMapping("/favorite/farm")
     public ResponseEntity<List<MemberFavoriteFarmResponse>> getFavoriteFarm(@RequestHeader("myId") Long memberId){
         List<MemberFavoriteFarmResponse> favoriteFarmResponse = memberService.getFavoriteFarm(memberId);

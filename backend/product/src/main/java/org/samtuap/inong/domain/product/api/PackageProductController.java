@@ -2,11 +2,8 @@ package org.samtuap.inong.domain.product.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.exception.BaseCustomException;
-import org.samtuap.inong.domain.product.dto.PackageProductResponse;
-import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
+import org.samtuap.inong.domain.product.dto.*;
 import org.samtuap.inong.domain.product.service.PackageProductService;
-import org.samtuap.inong.domain.product.dto.PackageProductCreateRequest;
-import org.samtuap.inong.domain.product.dto.PackageProductCreateResponse;
 import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
 import org.springframework.http.ResponseEntity;
 
@@ -54,4 +51,9 @@ public class PackageProductController {
         return packageProductService.getProductInfoList(ids);
     }
 
+    //  Feign 요청용 메서드
+    @PostMapping("/subscription/list")
+    public List<PackageProductSubsResponse> getProductSubsList(@RequestBody List<Long> subscriptionIds){
+        return packageProductService.getProductSubsList(subscriptionIds);
+    }
 }

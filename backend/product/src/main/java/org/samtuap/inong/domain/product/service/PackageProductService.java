@@ -14,6 +14,7 @@ import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,5 +106,16 @@ public class PackageProductService {
         List<PackageProduct> packageProducts = packageProductRepository.findAllById(ids);
         return packageProducts.stream()
                 .map(p -> PackageProductResponse.fromEntity(p, new ArrayList<>())).toList();
+  
+    @Transactional
+    public List<PackageProductSubsResponse> getProductSubsList(List<Long> subscriptionIds) {
+        List<PackageProduct> subsPackageProductList = packageProductRepository.findAllByIds(subscriptionIds);
+        return subsPackageProductList.stream()
+                .map(packageProduct -> {
+                    String imageUrl = packageProductImageRepository.findFirstByPackageProduct(packageProduct).getImageUrl();
+                    Farm farm = farmRepository.findByIdOrThrow(packageProduct.getFarm().getId());
+                    return PackageProductSubsResponse.fromEntity(packageProduct, imageUrl, farm);
+                })
+                .collect(Collectors.toList());
     }
 }

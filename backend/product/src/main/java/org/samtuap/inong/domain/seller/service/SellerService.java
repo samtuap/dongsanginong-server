@@ -7,21 +7,19 @@ import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.entity.FarmCategory;
 import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
-import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
-import org.samtuap.inong.domain.seller.dto.SellerInfoResponse;
-import org.samtuap.inong.domain.seller.dto.SellerSignInRequest;
-import org.samtuap.inong.domain.seller.dto.SellerSignInResponse;
-import org.samtuap.inong.domain.seller.dto.SellerSignUpRequest;
+import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
+import org.samtuap.inong.domain.seller.entity.SellerRole;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
 import org.samtuap.inong.domain.seller.repository.SellerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.EMAIL_NOT_FOUND;
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.INVALID_PASSWORD;
+import java.util.List;
+
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
 @RequiredArgsConstructor
 @Service
@@ -30,22 +28,25 @@ public class SellerService {
 
     private final SellerRepository sellerRepository;
     private final FarmRepository farmRepository;
-    private final FarmCategoryRepository farmCategoryRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
 
     @Transactional
-    public Seller signUp(SellerSignUpRequest dto) {
+    public SellerSignUpResponse signUp(SellerSignUpRequest dto) {
         if (sellerRepository.findByEmail(dto.email()).isPresent()) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
         String encodedPassword = BCrypt.hashpw(dto.password(), BCrypt.gensalt());
-        return sellerRepository.save(SellerSignUpRequest.toEntity(dto, encodedPassword));
+        Seller seller = SellerSignUpRequest.toEntity(dto, encodedPassword);
+        sellerRepository.save(seller);
+        JwtToken jwtToken = jwtService.issueToken(seller.getId(), SellerRole.SELLER.toString());
+        return SellerSignUpResponse.fromEntity(seller, jwtToken);
     }
 
+    @Transactional
     public SellerSignInResponse signIn(SellerSignInRequest dto) {
         Seller seller = validateSellerCredentials(dto);
-        JwtToken jwtToken = jwtService.issueToken(seller.getId());
+        JwtToken jwtToken = jwtService.issueToken(seller.getId(), SellerRole.SELLER.toString());
         return SellerSignInResponse.fromEntity(seller, jwtToken);
     }
 
@@ -73,11 +74,27 @@ public class SellerService {
 
     public SellerInfoResponse getSellerInfo(Long sellerId) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-        Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
-        FarmCategoryRelation categoryRelation = farmCategoryRelationRepository.findByFarmId(farm.getId());
-        FarmCategory farmCategory = farmCategoryRepository.findByIdOrThrow(categoryRelation.getCategory().getId());
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+        List<FarmCategoryRelation> categoryRelation = farmCategoryRelationRepository.findAllByFarmId(farm.getId());
+        List<String> farmCategory = categoryRelation.stream()
+                .map(farmCategoryRelation -> farmCategoryRelation.getCategory().getTitle())
+                .toList();
 
         return SellerInfoResponse.fromEntity(seller, farm, farmCategory);
     }
 
+
+    public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
+        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+        farm.updateInfo(infoUpdateRequest);
+        farmCategoryRelationRepository.deleteAllByFarm(farm);
+        for (FarmCategory category : infoUpdateRequest.category()) {
+            FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
+                    .farm(farm)
+                    .category(category)
+                    .build();
+            farmCategoryRelationRepository.save(newRelation);
+        }
+    }
 }

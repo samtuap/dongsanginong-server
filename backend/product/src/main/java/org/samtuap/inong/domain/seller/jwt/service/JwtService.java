@@ -17,9 +17,9 @@ public class JwtService {
     private final JwtValidator jwtValidator;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public JwtToken issueToken(Long sellerId) {
-        String accessToken = jwtProvider.createToken(sellerId);
-        String refreshToken = jwtProvider.createRefreshToken(sellerId);
+    public JwtToken issueToken(Long sellerId, String role) {
+        String accessToken = jwtProvider.createToken(sellerId, role);
+        String refreshToken = jwtProvider.createRefreshToken(sellerId, role);
 
         saveRefreshTokenToRedis(sellerId, refreshToken);
 
@@ -30,7 +30,7 @@ public class JwtService {
     }
 
     // Jwt 재발급
-    public JwtToken reissueToken(String requestRefreshToken, Long sellerId) {
+    public JwtToken reissueToken(String requestRefreshToken, Long sellerId, String role) {
         // 리프레시 토큰 검사
         String refreshToken = getRefreshTokenFromRedis(sellerId);
 
@@ -50,7 +50,7 @@ public class JwtService {
         }
 
 
-        return issueToken(sellerId);
+        return issueToken(sellerId, role);
     }
 
     private void saveRefreshTokenToRedis(Long sellerId, String refreshToken) {

@@ -31,7 +31,7 @@ public class JwtGlobalFilter implements GlobalFilter {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    private final List<String> allowUrl = Arrays.asList("/member/sign-in", "/member/sign-up", "/member/{id}", "/member/create-token",
+    private final List<String> allowUrl = Arrays.asList("/member/sign-in", "/member/sign-up", "/seller/sign-in", "/seller/sign-up", "/member/{id}", "/member/create-token",
                                                         "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**");
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
@@ -53,8 +53,16 @@ public class JwtGlobalFilter implements GlobalFilter {
                 Claims claims = Jwts.parser().verifyWith(Keys.hmacShaKeyFor(keyBytes)).build().parseSignedClaims(accessToken).getPayload();
                 String memberId = claims.getSubject();
                 String role = claims.get("role", String.class);
+                String idName;
+                if(role.equals("SELLER")){
+                    idName = "sellerId";
+                }
+                else{
+                    idName = "myId";
+                }
+                System.out.println(idName+"@@@@@@@@@@@@@@@@@@@@@");
                 request = exchange.getRequest().mutate()
-                        .header("myId", memberId)
+                        .header(idName, memberId)
                         .header("myRole", role)
                         .build();
                 exchange = exchange.mutate().request(request).build();

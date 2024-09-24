@@ -17,6 +17,8 @@ import org.samtuap.inong.domain.common.BaseEntity;
 @SQLDelete(sql = "UPDATE ordering SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ordering extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

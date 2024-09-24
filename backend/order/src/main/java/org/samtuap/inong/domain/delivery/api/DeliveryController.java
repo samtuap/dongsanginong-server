@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.delivery.api;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.delivery.dto.BillingNumberCreateRequest;
 import org.samtuap.inong.domain.delivery.dto.DeliveryCompletedListResponse;
 import org.samtuap.inong.domain.delivery.dto.DeliveryUpComingListResponse;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/delivery")
 @RequiredArgsConstructor
+@Slf4j
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
@@ -26,8 +28,9 @@ public class DeliveryController {
      */
     @GetMapping("/upcoming/list")
     public ResponseEntity<Page<DeliveryUpComingListResponse>> upcomingDelivery(
-            @PageableDefault(size = 10, sort = "deliveryAt", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<DeliveryUpComingListResponse> list = deliveryService.upcomingDelivery(pageable);
+            @RequestHeader("sellerId") Long sellerId,
+            @PageableDefault(size = 10, sort = "deliveryDueDate", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<DeliveryUpComingListResponse> list = deliveryService.upcomingDelivery(sellerId, pageable);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
@@ -47,8 +50,9 @@ public class DeliveryController {
      */
     @GetMapping("/completed/list")
     public ResponseEntity<Page<DeliveryCompletedListResponse>> completedDelivery(
+            @RequestHeader("sellerId") Long sellerId,
             @PageableDefault(size = 10, sort = {"deliveryStatus", "deliveryAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<DeliveryCompletedListResponse> list = deliveryService.completedDelivery(pageable);
+        Page<DeliveryCompletedListResponse> list = deliveryService.completedDelivery(sellerId, pageable);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 }

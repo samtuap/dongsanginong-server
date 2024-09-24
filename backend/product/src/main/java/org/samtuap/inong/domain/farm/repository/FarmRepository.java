@@ -10,8 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-
-import java.util.List;
+import java.util.Optional;
 
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.FARM_NOT_FOUND;
 
@@ -20,8 +19,10 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
         return findById(farmId).orElseThrow(() -> new BaseCustomException(FARM_NOT_FOUND));
     }
 
+    Optional<Farm> findBySellerId(Long sellerId);
+
     default Farm findBySellerIdOrThrow(Long sellerId) {
-        return findById(sellerId).orElseThrow(() -> new BaseCustomException(FARM_NOT_FOUND));
+        return findBySellerId(sellerId).orElseThrow(() -> new BaseCustomException(FARM_NOT_FOUND));
     }
 
     Page<Farm> findAll(Specification<Farm> specification, Pageable pageable);
@@ -31,5 +32,6 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
 
     @Query("SELECT f.farmName FROM Farm f WHERE f.id = :farmId")
     String getFarmNameById(@Param("farmId") Long farmId);
+
 
 }

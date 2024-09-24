@@ -15,4 +15,6 @@ public interface OrderRepository extends JpaRepository<Ordering, Long> {
             "ORDER BY COUNT(o.packageId) DESC")
     List<Long> findTop10PackageIdWithMostOrders();
 
+    List<Ordering> findByFarmId(Long farm);
+
 }

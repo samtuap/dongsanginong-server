@@ -15,7 +15,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
     generate-ddl: true
