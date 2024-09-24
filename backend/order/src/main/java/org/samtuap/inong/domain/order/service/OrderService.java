@@ -83,6 +83,7 @@ public class OrderService {
                 .build();
         Ordering savedOrder = orderRepository.save(order);
 
+
         // 3. 배송 정보 저장하기
         switch (packageProduct.delivery_cycle()) {
             case 1, 4, 7, 14, 28 -> saveDeliveries(order, packageProduct);
@@ -189,7 +190,11 @@ public class OrderService {
         }
     }
 
-    private void scheduleNextPayment() {
+    protected void useCoupon() {
+
+    }
+
+    protected void scheduleNextPayment() {
 
     }
 }
