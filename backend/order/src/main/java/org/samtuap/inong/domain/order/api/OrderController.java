@@ -23,8 +23,6 @@ public class OrderController {
         return orderService.getTopPackages();
     }
 
-
-    // feign 요청 용 (member > subscribe 할 때 요청)
     @PostMapping("/first")
     public ResponseEntity<PaymentResponse> kakaoPay(@RequestHeader("myId") Long memberId,
                                                     @RequestBody PaymentRequest reqDto) {
@@ -32,5 +30,6 @@ public class OrderController {
 
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }
+
 
 }

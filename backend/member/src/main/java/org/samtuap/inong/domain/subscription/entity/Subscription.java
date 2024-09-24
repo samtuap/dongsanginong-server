@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 @Getter
 @Entity
-@SQLDelete(sql = "UPDATE subscription SET deleted_at = now() WHERE id = ?")
+@SQLDelete(sql = "UPDATE subscription SET deleted_at = CONVERT_TZ(now(), '+00:00', '+09:00') WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 public class Subscription extends BaseEntity {
     @Id

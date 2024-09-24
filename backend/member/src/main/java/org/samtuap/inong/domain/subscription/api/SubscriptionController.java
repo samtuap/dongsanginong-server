@@ -21,10 +21,18 @@ public class SubscriptionController {
         return ResponseEntity.ok(null);
     }
 
+    // feign 요청 용 API
     @GetMapping("/payment")
     public SubscriptionListGetResponse getSubscriptionToPay() {
         return subscriptionService.getSubscriptionToPay();
 
+    }
+
+    @DeleteMapping("/{subscriptionId}")
+    public ResponseEntity<Void> cancelSubscription(@RequestHeader("myId") Long memberId,
+                                                   @PathVariable("subscriptionId") Long subscriptionId) {
+        subscriptionService.cancelSubscription(memberId, subscriptionId);
+        return ResponseEntity.ok(null);
     }
 
 }
