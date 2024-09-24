@@ -66,22 +66,28 @@ public class OrderService {
         Coupon coupon = couponRepository.findByIdOrThrow(reqDto.couponId());
 
         // 2. 최초 결제 정보 저장하기
-        Long totalAmount = packageProduct.price();
-        Long finalAmount = totalAmount;
+        Long originalAmount = packageProduct.price();
+        Long paidAmount = originalAmount;
         Long discountAmount = 0L;
         if(coupon != null) {
-            discountAmount = calculateDiscountAmount(coupon, memberId, totalAmount, packageProduct);
-            finalAmount = totalAmount - discountAmount;
+            discountAmount = calculateDiscountAmount(coupon, originalAmount);
+            paidAmount = originalAmount - discountAmount;
         }
+
 
         Ordering order = Ordering.builder()
                 .memberId(memberId)
                 .packageId(reqDto.packageId())
                 .farmId(packageProduct.farmId())
-                .totalPrice(totalAmount)
+                .totalPrice(paidAmount)
                 .discountPrice(discountAmount)
                 .build();
         Ordering savedOrder = orderRepository.save(order);
+
+        if(coupon != null) {
+            useCoupon(coupon, order, packageProduct, memberId);
+        }
+
 
         // 3. 배송 정보 저장하기
         switch (packageProduct.delivery_cycle()) {
@@ -90,7 +96,7 @@ public class OrderService {
         }
 
         // 4. 최초 결제하기
-        firstPayment(memberInfo, packageProduct, finalAmount, order.getId());
+        firstPayment(memberInfo, packageProduct, paidAmount, order.getId());
 
         // TODO: 5. 다음 결제 예약하기
         scheduleNextPayment();
@@ -101,12 +107,13 @@ public class OrderService {
                 .build();
     }
 
-    private String firstPayment(MemberAllInfoResponse memberInfo,
-                              PackageProductResponse packageInfo,
-                              Long paidAmount,
-                              Long orderId) {
+
+    protected void firstPayment(MemberAllInfoResponse memberInfo,
+                                PackageProductResponse packageInfo,
+                                Long paidAmount,
+                                Long orderId) {
         // 포트원 빌링키 결제 API URL
-        String paymentId = PAYMENT_PREFIX + String.valueOf(UUID.randomUUID());
+        String paymentId = PAYMENT_PREFIX + orderId + "_" + UUID.randomUUID();
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
 
         // 요청 헤더 설정
@@ -144,13 +151,36 @@ public class OrderService {
             RestTemplate restTemplate = new RestTemplate();
             response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
             // 응답 처리
-            return response.getBody();
+            response.getBody();
+            log.info("line 156: {}", response.getBody());
         } catch(Exception e) {
+            e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
         }
     }
 
-    protected Long calculateDiscountAmount(Coupon coupon, Long memberId, Long originalPrice, PackageProductResponse packageInfo) {
+    protected Long calculateDiscountAmount(Coupon coupon, Long originalPrice) {
+        return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
+    }
+
+    protected void saveDeliveries(Ordering ordering, PackageProductResponse packageProduct) {
+        int times = 28 / packageProduct.delivery_cycle();
+        for(int time = 0; time < times; time++) {
+            Delivery delivery = Delivery.builder()
+                    .ordering(ordering)
+                    .deliveryStatus(BEFORE_DELIVERY)
+                    .deliveryDueDate(LocalDate.now().plusDays(time))
+                    .courier("CJ") // FIXME: 논의 필요
+                    .build();
+            deliveryRepository.save(delivery);
+        }
+    }
+
+    private void scheduleNextPayment() {
+
+    }
+
+    protected void useCoupon(Coupon coupon, Ordering order, PackageProductResponse packageInfo, Long memberId) {
         // 구매하려는 상품에 적용할 수 있는 쿠폰인지 검증
         // [검증 1] 적용할 수 있는 쿠폰인가?
         if(!coupon.getFarmId().equals(packageInfo.farmId())) {
@@ -172,24 +202,6 @@ public class OrderService {
         // 쿠폰 사용
         memberCoupon.updateIsUsed("Y");
         memberCoupon.updateUsedAt(LocalDateTime.now());
-
-        return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
-    }
-
-    protected void saveDeliveries(Ordering ordering, PackageProductResponse packageProduct) {
-        int times = 28 / packageProduct.delivery_cycle();
-        for(int time = 0; time < times; time++) {
-            Delivery delivery = Delivery.builder()
-                    .ordering(ordering)
-                    .deliveryStatus(BEFORE_DELIVERY)
-                    .deliveryDueDate(LocalDate.now().plusDays(time))
-                    .courier("CJ") // FIXME: 논의 필요
-                    .build();
-            deliveryRepository.save(delivery);
-        }
-    }
-
-    private void scheduleNextPayment() {
-
+        memberCoupon.updateOrderId(order.getId());
     }
 }
