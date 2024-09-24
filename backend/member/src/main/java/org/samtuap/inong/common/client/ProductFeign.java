@@ -5,7 +5,9 @@ import org.samtuap.inong.config.FeignConfig;
 import org.samtuap.inong.domain.member.dto.FarmFavoriteResponse;
 import org.samtuap.inong.domain.favorites.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.member.dto.PackageProductResponse;
+import org.samtuap.inong.domain.member.dto.PackageProductSubsResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,9 @@ import java.util.List;
 public interface ProductFeign {
     @GetMapping("/product/info/{id}")
     PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId);
+
+    @PostMapping("/product/subscription/list")
+    List<PackageProductSubsResponse> getProductSubsList(@RequestBody List<Long> subscriptionIds);
 
     @PostMapping("/farm/favorite/list")
     List<FarmFavoriteResponse> getFarmFavoriteList(@RequestBody List<Long> farmFavoriteIds);

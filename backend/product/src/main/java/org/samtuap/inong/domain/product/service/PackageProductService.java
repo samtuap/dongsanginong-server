@@ -14,9 +14,11 @@ import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,5 +100,16 @@ public class PackageProductService {
 
         // 수정된 상품 정보 저장
         packageProductRepository.save(packageProduct);
+    }
+
+    @Transactional
+    public List<PackageProductSubsResponse> getProductSubsList(List<Long> subscriptionIds) {
+        List<PackageProduct> subsPackageProductList = packageProductRepository.findAllByIds(subscriptionIds);
+        return subsPackageProductList.stream()
+                .map(packageProduct -> {
+                    String imageUrl = packageProductImageRepository.findFirstByPackageProduct(packageProduct).getImageUrl();
+                    return PackageProductSubsResponse.fromEntity(packageProduct, imageUrl);
+                })
+                .collect(Collectors.toList());
     }
 }
