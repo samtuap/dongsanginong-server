@@ -7,7 +7,6 @@ import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.entity.FarmCategory;
 import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
-import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
@@ -20,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.EMAIL_NOT_FOUND;
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.INVALID_PASSWORD;
+import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
 @RequiredArgsConstructor
 @Service
@@ -30,7 +28,6 @@ public class SellerService {
 
     private final SellerRepository sellerRepository;
     private final FarmRepository farmRepository;
-    private final FarmCategoryRepository farmCategoryRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
 
@@ -87,5 +84,17 @@ public class SellerService {
     }
 
 
-
+    public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
+        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+        farm.updateInfo(infoUpdateRequest);
+        farmCategoryRelationRepository.deleteAllByFarm(farm);
+        for (FarmCategory category : infoUpdateRequest.category()) {
+            FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
+                    .farm(farm)
+                    .category(category)
+                    .build();
+            farmCategoryRelationRepository.save(newRelation);
+        }
+    }
 }

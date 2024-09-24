@@ -7,6 +7,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
+import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
 
 @Getter
 @Entity
@@ -39,4 +40,11 @@ public class Farm extends BaseEntity {
 
     @NotNull
     private Long orderCount;
+
+    public void updateInfo(SellerFarmInfoUpdateRequest infoRequest) {
+        this.bannerImageUrl = infoRequest.bannerImageUrl();
+        this.profileImageUrl = infoRequest.profileImageUrl();
+        this.farmName = infoRequest.farmName();
+        this.farmIntro = infoRequest.farmIntro();
+    }
 }
