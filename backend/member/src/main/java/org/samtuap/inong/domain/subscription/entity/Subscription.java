@@ -2,6 +2,8 @@ package org.samtuap.inong.domain.subscription.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -10,6 +12,9 @@ import org.samtuap.inong.domain.member.entity.Member;
 
 import java.time.LocalDate;
 
+@Builder
+@AllArgsConstructor
+@NotNull
 @Getter
 @Entity
 @SQLDelete(sql = "UPDATE subscription SET deleted_at = CONVERT_TZ(now(), '+00:00', '+09:00') WHERE id = ?")

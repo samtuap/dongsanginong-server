@@ -26,7 +26,7 @@ public class OrderController {
     @PostMapping("/first")
     public ResponseEntity<PaymentResponse> kakaoPay(@RequestHeader("myId") Long memberId,
                                                     @RequestBody PaymentRequest reqDto) {
-        PaymentResponse paymentResponse = orderService.makeOrder(memberId, reqDto);
+        PaymentResponse paymentResponse = orderService.makeFirstOrder(memberId, reqDto);
 
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }

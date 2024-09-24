@@ -14,16 +14,14 @@ import org.samtuap.inong.domain.coupon.repository.MemberCouponRelationRepository
 import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
-import org.samtuap.inong.domain.order.dto.MemberAllInfoResponse;
-import org.samtuap.inong.domain.order.dto.PaymentRequest;
-import org.samtuap.inong.domain.order.dto.PaymentResponse;
-import org.samtuap.inong.domain.order.dto.SubscriptionListGetResponse;
+import org.samtuap.inong.domain.order.dto.*;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -47,6 +45,7 @@ public class OrderService {
     private final DeliveryRepository deliveryRepository;
     private final MemberCouponRelationRepository memberCouponRelationRepository;
     private final ReceiptRepository receiptRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${portone.api-secret}")
     private String API_SECRET;
@@ -62,6 +61,14 @@ public class OrderService {
 
     public List<Long> getTopPackages() {
         return orderRepository.findTop10PackageIdWithMostOrders();
+    }
+
+    @Transactional
+    public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
+        PaymentResponse paymentResponse = makeOrder(memberId, reqDto);
+        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId);
+        kafkaTemplate.send("subscription-topic", request);
+        return paymentResponse;
     }
 
     @Transactional
