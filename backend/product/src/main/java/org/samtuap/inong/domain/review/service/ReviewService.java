@@ -6,6 +6,7 @@ import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
 import org.samtuap.inong.domain.review.dto.ReviewResponse;
+import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
 import org.samtuap.inong.domain.review.entity.Review;
 import org.samtuap.inong.domain.review.entity.ReviewImage;
 import org.samtuap.inong.domain.review.repository.ReviewImageRepository;
@@ -14,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.REVIEW_FOUND;
+import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.REVIEW_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
@@ -44,5 +47,35 @@ public class ReviewService {
         reviewImageRepository.saveAll(images); // 이미지 리스트 저장
 
         return ReviewResponse.fromEntity(review, images); // 생성된 리뷰 응답 반환
+    }
+
+    @Transactional
+    public ReviewResponse updateReview(Long reviewId, Long memberId, ReviewUpdateRequest request) {
+        Review existingReview = reviewRepository.findByIdAndMemberId(reviewId, memberId)
+                .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
+
+        // 새로운 리뷰 엔티티 생성
+        Review updatedReview = request.toUpdatedEntity(existingReview);
+        reviewRepository.save(updatedReview);
+
+        // 기존 이미지 삭제 후 새로운 이미지 저장
+        reviewImageRepository.deleteAllByReviewId(reviewId);
+        List<ReviewImage> newImages = request.toReviewImages(updatedReview);
+        reviewImageRepository.saveAll(newImages);
+
+        return ReviewResponse.fromEntity(updatedReview, newImages);
+    }
+
+
+    @Transactional
+    public void deleteReview(Long reviewId, Long memberId) {
+        Review review = reviewRepository.findByIdAndMemberId(reviewId, memberId)
+                .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
+
+        // 리뷰에 속한 이미지를 먼저 삭제
+        reviewImageRepository.deleteAllByReviewId(reviewId);
+
+        // 리뷰 삭제
+        reviewRepository.delete(review);
     }
 }

@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.review.api;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
 import org.samtuap.inong.domain.review.dto.ReviewResponse;
+import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
 import org.samtuap.inong.domain.review.service.ReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,28 @@ public class ReviewController {
     @PostMapping("/{packageProductId}/create")
     public ResponseEntity<ReviewResponse> createReview(
             @PathVariable Long packageProductId,
-            @RequestHeader("memberId") Long memberId, // memberId를 헤더에서 받기 이렇게 하라는거지??
+            @RequestHeader("memberId") Long memberId,
             @RequestBody ReviewCreateRequest request) {
 
         ReviewResponse response = reviewService.createReview(packageProductId, memberId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/{reviewId}/update")
+    public ResponseEntity<ReviewResponse> updateReview(
+            @PathVariable Long reviewId,
+            @RequestHeader("memberId") Long memberId,
+            @RequestBody ReviewUpdateRequest request) {
+
+        ReviewResponse response = reviewService.updateReview(reviewId, memberId, request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/{reviewId}/delete")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable Long reviewId,
+            @RequestHeader("memberId") Long memberId) {
+        reviewService.deleteReview(reviewId, memberId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
