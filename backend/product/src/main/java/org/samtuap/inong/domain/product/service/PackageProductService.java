@@ -102,6 +102,11 @@ public class PackageProductService {
         packageProductRepository.save(packageProduct);
     }
 
+    public List<PackageProductResponse> getProductInfoList(List<Long> ids) {
+        List<PackageProduct> packageProducts = packageProductRepository.findAllById(ids);
+        return packageProducts.stream()
+                .map(p -> PackageProductResponse.fromEntity(p, new ArrayList<>())).toList();
+  
     @Transactional
     public List<PackageProductSubsResponse> getProductSubsList(List<Long> subscriptionIds) {
         List<PackageProduct> subsPackageProductList = packageProductRepository.findAllByIds(subscriptionIds);

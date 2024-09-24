@@ -3,12 +3,16 @@ package org.samtuap.inong.domain.common;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PreRemove;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Getter
 @MappedSuperclass
@@ -22,4 +26,9 @@ public abstract class BaseEntity {
     private LocalDateTime updatedAt;
 
     private LocalDateTime deletedAt;
+
+    @PreRemove
+    public void setDeletedAt() {
+        this.deletedAt = LocalDateTime.from(Instant.now().atZone(ZoneId.of("Asia/Seoul")).toInstant());
+    }
 }
