@@ -18,6 +18,7 @@ import org.samtuap.inong.domain.order.dto.PaymentResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,10 +97,10 @@ public class OrderService {
         }
 
         // 4. 최초 결제하기
-        firstPayment(memberInfo, packageProduct, paidAmount, order.getId());
+        firstPayment(memberInfo, packageProduct, paidAmount, order);
 
         // TODO: 5. 다음 결제 예약하기
-        scheduleNextPayment();
+        scheduleNextPayment(memberInfo, packageProduct);
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -111,10 +112,11 @@ public class OrderService {
     protected void firstPayment(MemberAllInfoResponse memberInfo,
                                 PackageProductResponse packageInfo,
                                 Long paidAmount,
-                                Long orderId) {
+                                Ordering order) {
         // 포트원 빌링키 결제 API URL
-        String paymentId = PAYMENT_PREFIX + orderId + "_" + UUID.randomUUID();
+        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
+        order.updatePaymentId(paymentId);
 
         // 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();
@@ -176,8 +178,111 @@ public class OrderService {
         }
     }
 
-    private void scheduleNextPayment() {
+    public void scheduleNextPayment(MemberAllInfoResponse memberInfo, PackageProductResponse packageProduct) {
+        int term = 28;
+        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
+        String url = "https://api.portone.io/payments/" + paymentId + "/schedule";
+        RestTemplate restTemplate = new RestTemplate();
+        String billingKey = memberInfo.billingKey();
 
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "PortOne " + API_SECRET);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Set body
+        Map<String, Object> payment = new HashMap<>();
+        payment.put("billingKey", billingKey);
+        payment.put("storeId", STORE_ID);
+        payment.put("channelKey", CHANNEL_KEY);
+        payment.put("orderName", packageProduct.packageName());
+
+        Map<String, String> customer = new HashMap<>();
+        customer.put("customerId", Long.toString(memberInfo.id()));
+        customer.put("customerEmail", memberInfo.email());
+        customer.put("customerName", memberInfo.name());
+        payment.put("customer", customer);
+
+        Map<String, Integer> amount = new HashMap<>();
+        amount.put("total", Math.toIntExact(packageProduct.price()));
+        payment.put("amount", amount);
+
+        payment.put("currency", "KRW");
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("payment", payment);
+        body.put("timeToPay", LocalDateTime.now().plusDays(term));
+        // Create request
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                System.out.println("Payment scheduled successfully: " + response.getBody());
+            } else {
+                throw new RuntimeException("Failed to schedule payment: " + response.getBody());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // TODO: 삭제
+    public void scheduleNextPaymentTest(Long term, Long memberId) {
+        // 1. 멤버 정보, 패키지 상품 정보 가져오기
+        MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
+        PackageProductResponse packageProduct = productFeign.getPackageProduct(1L);
+//        Coupon coupon = couponRepository.findByIdOrThrow(1L);
+
+        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
+        String url = "https://api.portone.io/payments/" + paymentId + "/schedule";
+        RestTemplate restTemplate = new RestTemplate();
+        String billingKey = "billing-key-0191ff60-d67e-b307-b6cd-8afc0e61c816";
+
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "PortOne " + API_SECRET);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Set body
+        Map<String, Object> payment = new HashMap<>();
+        log.info("line 249: {}", billingKey);
+        payment.put("billingKey", billingKey);
+        payment.put("storeId", STORE_ID);
+        payment.put("channelKey", CHANNEL_KEY);
+        payment.put("orderName", "[Test] 월간 이용권 정기결제");
+
+        Map<String, String> customer = new HashMap<>();
+        customer.put("customerId", Long.toString(memberInfo.id()));
+        customer.put("customerEmail", memberInfo.email());
+        customer.put("customerName", memberInfo.name());
+        payment.put("customer", customer);
+
+        Map<String, Integer> amount = new HashMap<>();
+        amount.put("total", 8900000);
+        payment.put("amount", amount);
+        payment.put("currency", "KRW");
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("payment", payment);
+        String time = LocalDateTime.now().plusMinutes(term).toString() + "Z";
+        body.put("timeToPay", time); // FIXME: 테스트 용도
+        // Create request
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                System.out.println("Payment scheduled successfully: " + response.getBody());
+            } else {
+                throw new RuntimeException("Failed to schedule payment: " + response.getBody());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected void useCoupon(Coupon coupon, Ordering order, PackageProductResponse packageInfo, Long memberId) {

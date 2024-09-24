@@ -32,4 +32,9 @@ public class OrderController {
 
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }
+
+    @PostMapping("/schedule/test")
+    public void testApi(@RequestParam Long term, @RequestParam Long memberId) {
+        orderService.scheduleNextPaymentTest(term, memberId);
+    }
 }
