@@ -172,7 +172,6 @@ public class OrderService {
         // 쿠폰 사용
         memberCoupon.updateIsUsed("Y");
         memberCoupon.updateUsedAt(LocalDateTime.now());
-        memberCoupon.updateOrderId(orderId);
 
         return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
     }
