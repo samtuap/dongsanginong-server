@@ -95,6 +95,12 @@ public class MemberController {
         return new ResponseEntity<>(subscriptionList, HttpStatus.OK);
     }
 
+    @PostMapping("subscription/cancel")
+    public ResponseEntity<MemberSubsCancelRequest> cancelSubscription(@RequestHeader("myId") Long memberId, @RequestParam("id") Long subsId){
+        MemberSubsCancelRequest cancelSubscription = memberService.cancelSubscription(memberId, subsId);
+        return new ResponseEntity<>(cancelSubscription, HttpStatus.OK);
+    }
+
 
     @GetMapping("/favorite/farm")
     public ResponseEntity<List<MemberFavoriteFarmResponse>> getFavoriteFarm(@RequestHeader("myId") Long memberId){
