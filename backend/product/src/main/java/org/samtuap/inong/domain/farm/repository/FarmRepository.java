@@ -3,14 +3,11 @@ package org.samtuap.inong.domain.farm.repository;
 import feign.Param;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
-import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
 
 import java.util.List;
 import java.util.Optional;
