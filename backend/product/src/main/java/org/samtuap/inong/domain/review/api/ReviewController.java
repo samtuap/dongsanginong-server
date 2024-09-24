@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
@@ -17,23 +19,23 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/{packageProductId}/create")
-    public ResponseEntity<ReviewResponse> createReview(
+    public ResponseEntity<Void> createReview(
             @PathVariable Long packageProductId,
             @RequestHeader("myId") Long memberId,
             @RequestBody ReviewCreateRequest request) {
 
-        ReviewResponse response = reviewService.createReview(packageProductId, memberId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        reviewService.createReview(packageProductId, memberId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{reviewId}/update")
-    public ResponseEntity<ReviewResponse> updateReview(
+    public ResponseEntity<Void> updateReview(
             @PathVariable Long reviewId,
             @RequestHeader("myId") Long memberId,
             @RequestBody ReviewUpdateRequest request) {
 
-        ReviewResponse response = reviewService.updateReview(reviewId, memberId, request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        reviewService.updateReview(reviewId, memberId, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("/{reviewId}/delete")
@@ -42,5 +44,11 @@ public class ReviewController {
             @RequestHeader("myId") Long memberId) {
         reviewService.deleteReview(reviewId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/{packageProductId}/list")
+    public ResponseEntity<List<ReviewResponse>> ReviewList(@PathVariable Long packageProductId) {
+        List<ReviewResponse> reviews = reviewService.getReviewsByPackageProductId(packageProductId);
+        return ResponseEntity.status(HttpStatus.OK).body(reviews);
     }
 }
