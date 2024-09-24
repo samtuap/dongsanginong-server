@@ -127,6 +127,23 @@ public class MemberService {
         return MemberSubscriptionResponse.fromEntity(packageProduct);
     }
 
+    public List<MemberSubscriptionListResponse> getSubscriptionList(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        List<Long> subscriptionIds = subscriptionRepository.findAllByMember(member).stream()
+                .map(Subscription::getPackageId)
+                .toList();
+        List<PackageProductSubsResponse> subscriptionList = productFeign.getProductSubsList(subscriptionIds);
+        return subscriptionList.stream()
+                .map(subscriptionProductList -> MemberSubscriptionListResponse.builder()
+                        .packageId(subscriptionProductList.packageId())
+                        .packageName(subscriptionProductList.packageName())
+                        .imageUrl(subscriptionProductList.imageUrl())
+                        .farmId(subscriptionProductList.farmId())
+                        .farmName(subscriptionProductList.farmName())
+                        .build())
+                .toList();
+    }
+
     public List<MemberFavoriteFarmResponse> getFavoriteFarm(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         List<Long> farmFavoriteIds = favoritesRepository.findAllByMember(member).stream()
@@ -140,5 +157,6 @@ public class MemberService {
                         .build())
                 .toList();
     }
+
 
 }
