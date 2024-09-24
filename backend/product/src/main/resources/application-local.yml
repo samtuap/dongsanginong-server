@@ -57,6 +57,8 @@ spring:
           timeout: 5000
           writetimeout: 5000
       auth-code-expiration-millis: 1800000  # 30 * 60 * 1000 == 30분
+  elasticsearch:
+    uris: ${SPRING.ELASTICSEARCH.URIS}
 
 eureka:
   client:
