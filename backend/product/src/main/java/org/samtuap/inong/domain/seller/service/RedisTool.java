@@ -1,36 +1,32 @@
 package org.samtuap.inong.domain.seller.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 
-@Slf4j
-@Component
-@Transactional
+@Service
 @RequiredArgsConstructor
 public class RedisTool {
+
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void setValues(String key, String data, Duration duration) {
-        ValueOperations<String, Object> values = redisTemplate.opsForValue();
-        values.set(key, data, duration);
+    public void setExpire(String key, Object value, Long duration) {
+
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Duration expireDuratoin = Duration.ofSeconds(duration);
+        valueOperations.set(key, value, expireDuratoin);
     }
 
-    @Transactional(readOnly = true)
-    public String getValues(String key) {
-        ValueOperations<String, Object> values = redisTemplate.opsForValue();
-        if (values.get(key) == null) {
-            return "false";
+
+    public <T> T getValue(String key, Class<T> clazz) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Object value = valueOperations.get(key);
+        if (value != null) {
+            return clazz.cast(value);
         }
-        return (String) values.get(key);
-    }
-
-    public boolean checkExistsValue(String value) {
-        return !value.equals("false");
+        return null;
     }
 }

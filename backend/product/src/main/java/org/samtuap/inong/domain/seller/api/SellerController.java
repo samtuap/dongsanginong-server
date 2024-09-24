@@ -2,29 +2,45 @@ package org.samtuap.inong.domain.seller.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.product.dto.PackageProductUpdateRequest;
 import org.samtuap.inong.domain.product.dto.SellerPackageListGetResponse;
 import org.samtuap.inong.domain.product.service.PackageProductService;
 import org.samtuap.inong.domain.seller.dto.*;
+import org.samtuap.inong.domain.seller.service.MailService;
 import org.samtuap.inong.domain.seller.service.SellerService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/seller")
 @RequiredArgsConstructor
+@Slf4j
 public class SellerController {
 
     private final SellerService sellerService;
+    private final MailService mailService;
     private final PackageProductService packageProductService;
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signup(@Valid @RequestBody SellerSignUpRequest dto) {
-        SellerSignUpResponse response = sellerService.signUp(dto);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        try{
+            mailService.authEmail(dto.email(), dto);
+            return new ResponseEntity<>("이메일로 인증코드를 발송 했습니다.", HttpStatus.OK);
+        } catch (MailSendException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
+
+    @PostMapping("/sign-up/verified")
+    public ResponseEntity<SellerSignUpResponse> verifyAuthCode(@RequestBody EmailRequestDto requestDto) {
+        SellerSignUpResponse response = sellerService.verifyAndSignUp(requestDto);
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> signIn(@RequestBody SellerSignInRequest dto){
