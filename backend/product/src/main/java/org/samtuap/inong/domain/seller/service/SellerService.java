@@ -18,6 +18,8 @@ import org.samtuap.inong.domain.seller.repository.SellerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.EMAIL_NOT_FOUND;
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.INVALID_PASSWORD;
 
@@ -75,11 +77,15 @@ public class SellerService {
 
     public SellerInfoResponse getSellerInfo(Long sellerId) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-        Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
-        FarmCategoryRelation categoryRelation = farmCategoryRelationRepository.findByFarmId(farm.getId());
-        FarmCategory farmCategory = farmCategoryRepository.findByIdOrThrow(categoryRelation.getCategory().getId());
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+        List<FarmCategoryRelation> categoryRelation = farmCategoryRelationRepository.findAllByFarmId(farm.getId());
+        List<String> farmCategory = categoryRelation.stream()
+                .map(farmCategoryRelation -> farmCategoryRelation.getCategory().getTitle())
+                .toList();
 
         return SellerInfoResponse.fromEntity(seller, farm, farmCategory);
     }
+
+
 
 }
