@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @NotNull
 @Getter
 @Entity
