@@ -44,8 +44,8 @@ public class SellerController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/seller-info")
-    public ResponseEntity<SellerInfoResponse> getSellerInfo(@RequestParam("id") Long sellerId){
+    @GetMapping("/info")
+    public ResponseEntity<SellerInfoResponse> getSellerInfo(@RequestHeader("sellerId") Long sellerId){
         SellerInfoResponse sellerInfo =  sellerService.getSellerInfo(sellerId);
         return new ResponseEntity<>(sellerInfo, HttpStatus.OK);
     }
@@ -72,5 +72,11 @@ public class SellerController {
             @PathVariable Long packageId,
             @RequestBody PackageProductUpdateRequest request) {
         packageProductService.updatePackageProduct(sellerId, packageId, request);
+    }
+
+    @PostMapping("/myfarm/info/update")
+    public ResponseEntity<?> updateFarmInfo(@RequestHeader("sellerId") Long sellerId, @RequestBody SellerFarmInfoUpdateRequest infoUpdateRequest){
+        sellerService.updateFarmInfo(sellerId, infoUpdateRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
