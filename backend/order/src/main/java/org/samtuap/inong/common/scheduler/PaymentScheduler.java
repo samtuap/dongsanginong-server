@@ -15,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentScheduler {
     private final OrderService orderService;
     @SchedulerLock(name = "shedLock_launch_view", lockAtLeastFor = "1m", lockAtMostFor = "59m")
-//    @Scheduled(cron = "0 0 4 * * *")
-    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(cron = "0 0 4 * * *")
     public void regularPayment() {
         // 오늘 결제해야하는 내용 가져오기
         log.info("line 22 Scheduler: 결제결제");

@@ -106,7 +106,10 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 4. 최초 결제하기
+        // 4. 영수증 만들기
+        makeReceipt(savedOrder, packageProduct, paidAmount);
+
+        // 5. 최초 결제하기
         kakaoPay(memberInfo, packageProduct, paidAmount, order);
 
         return PaymentResponse.builder()
@@ -225,11 +228,13 @@ public class OrderService {
     }
 
     public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
-        Receipt.builder().order(order)
+        Receipt receipt = Receipt.builder().order(order)
                 .payedAt(order.getCreatedAt())
                 .beforePrice(packageProduct.price())
                 .discountPrice(packageProduct.price() - paidAmount)
                 .totalPrice(packageProduct.price())
                 .build();
+
+        receiptRepository.save(receipt);
     }
 }
