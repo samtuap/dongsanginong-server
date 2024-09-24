@@ -1,10 +1,12 @@
 package org.samtuap.inong.domain.order.service;
 
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.common.exceptionType.OrderExceptionType;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
@@ -15,8 +17,11 @@ import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.MemberAllInfoResponse;
 import org.samtuap.inong.domain.order.dto.PaymentRequest;
 import org.samtuap.inong.domain.order.dto.PaymentResponse;
+import org.samtuap.inong.domain.order.dto.SubscriptionListGetResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
+import org.samtuap.inong.domain.receipt.entity.Receipt;
+import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -41,6 +46,7 @@ public class OrderService {
     private final CouponRepository couponRepository;
     private final DeliveryRepository deliveryRepository;
     private final MemberCouponRelationRepository memberCouponRelationRepository;
+    private final ReceiptRepository receiptRepository;
 
     @Value("${portone.api-secret}")
     private String API_SECRET;
@@ -59,29 +65,38 @@ public class OrderService {
     }
 
     @Transactional
-    public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
+    public PaymentResponse makeOrder(Long memberId, PaymentRequest reqDto) {
         // 1. 멤버 정보, 패키지 상품 정보 가져오기
         MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
         PackageProductResponse packageProduct = productFeign.getPackageProduct(reqDto.packageId());
-        Coupon coupon = couponRepository.findByIdOrThrow(reqDto.couponId());
+
+        Coupon coupon = null;
+        if(reqDto.couponId() != null) {
+            coupon = couponRepository.findByIdOrThrow(reqDto.couponId());
+        }
 
         // 2. 최초 결제 정보 저장하기
-        Long totalAmount = packageProduct.price();
-        Long finalAmount = totalAmount;
+        Long originalAmount = packageProduct.price();
+        Long paidAmount = originalAmount;
         Long discountAmount = 0L;
         if(coupon != null) {
-            discountAmount = calculateDiscountAmount(coupon, memberId, totalAmount, packageProduct);
-            finalAmount = totalAmount - discountAmount;
+            discountAmount = calculateDiscountAmount(coupon, originalAmount);
+            paidAmount = originalAmount - discountAmount;
         }
+
 
         Ordering order = Ordering.builder()
                 .memberId(memberId)
                 .packageId(reqDto.packageId())
                 .farmId(packageProduct.farmId())
-                .totalPrice(totalAmount)
+                .totalPrice(paidAmount)
                 .discountPrice(discountAmount)
                 .build();
         Ordering savedOrder = orderRepository.save(order);
+
+        if(coupon != null) {
+            useCoupon(coupon, order, packageProduct, memberId);
+        }
 
 
         // 3. 배송 정보 저장하기
@@ -90,11 +105,11 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 4. 최초 결제하기
-        firstPayment(memberInfo, packageProduct, finalAmount, order.getId());
+        // 4. 영수증 만들기
+        makeReceipt(savedOrder, packageProduct, paidAmount);
 
-        // TODO: 5. 다음 결제 예약하기
-        scheduleNextPayment();
+        // 5. 최초 결제하기
+        kakaoPay(memberInfo, packageProduct, paidAmount, order);
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -102,13 +117,20 @@ public class OrderService {
                 .build();
     }
 
-    private String firstPayment(MemberAllInfoResponse memberInfo,
-                              PackageProductResponse packageInfo,
-                              Long paidAmount,
-                              Long orderId) {
+
+    protected void kakaoPay(MemberAllInfoResponse memberInfo,
+                                PackageProductResponse packageInfo,
+                                Long paidAmount,
+                                Ordering order) {
         // 포트원 빌링키 결제 API URL
-        String paymentId = PAYMENT_PREFIX + String.valueOf(UUID.randomUUID());
+        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
+        order.updatePaymentId(paymentId);
+
+        if(memberInfo.billingKey() == null || memberInfo.billingKey().isEmpty()) {
+            throw new BaseCustomException(BILLING_KEY_NOT_FOUND);
+        }
+
 
         // 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();
@@ -144,14 +166,31 @@ public class OrderService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-            // 응답 처리
-            return response.getBody();
         } catch(Exception e) {
+            e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
         }
     }
 
-    protected Long calculateDiscountAmount(Coupon coupon, Long memberId, Long originalPrice, PackageProductResponse packageInfo) {
+    protected Long calculateDiscountAmount(Coupon coupon, Long originalPrice) {
+        return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
+    }
+
+    protected void saveDeliveries(Ordering ordering, PackageProductResponse packageProduct) {
+        int times = 28 / packageProduct.delivery_cycle();
+        for(int time = 0; time < times; time++) {
+            Delivery delivery = Delivery.builder()
+                    .ordering(ordering)
+                    .deliveryStatus(BEFORE_DELIVERY)
+                    .deliveryDueDate(LocalDate.now().plusDays(time))
+                    .courier("CJ") // FIXME: 논의 필요
+                    .build();
+            deliveryRepository.save(delivery);
+        }
+    }
+
+
+    protected void useCoupon(Coupon coupon, Ordering order, PackageProductResponse packageInfo, Long memberId) {
         // 구매하려는 상품에 적용할 수 있는 쿠폰인지 검증
         // [검증 1] 적용할 수 있는 쿠폰인가?
         if(!coupon.getFarmId().equals(packageInfo.farmId())) {
@@ -173,28 +212,26 @@ public class OrderService {
         // 쿠폰 사용
         memberCoupon.updateIsUsed("Y");
         memberCoupon.updateUsedAt(LocalDateTime.now());
-
-        return (long)((double)originalPrice * ((double)coupon.getDiscountPercentage() / 100.0));
+        memberCoupon.updateOrderId(order.getId());
     }
 
-    protected void saveDeliveries(Ordering ordering, PackageProductResponse packageProduct) {
-        int times = 28 / packageProduct.delivery_cycle();
-        for(int time = 0; time < times; time++) {
-            Delivery delivery = Delivery.builder()
-                    .ordering(ordering)
-                    .deliveryStatus(BEFORE_DELIVERY)
-                    .deliveryDueDate(LocalDate.now().plusDays(time))
-                    .courier("CJ") // FIXME: 논의 필요
-                    .build();
-            deliveryRepository.save(delivery);
+    public void regularPay() {
+        SubscriptionListGetResponse response = memberFeign.getSubscriptionToPay();
+
+        List<SubscriptionListGetResponse.SubscriptionGetResponse> subscriptions = response.subscriptions();
+        for (SubscriptionListGetResponse.SubscriptionGetResponse subscription : subscriptions) {
+            makeOrder(subscription.getMemberId(), new PaymentRequest(subscription.getPackageId(), null));
         }
     }
 
-    protected void useCoupon() {
+    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
+        Receipt receipt = Receipt.builder().order(order)
+                .payedAt(order.getCreatedAt())
+                .beforePrice(packageProduct.price())
+                .discountPrice(packageProduct.price() - paidAmount)
+                .totalPrice(packageProduct.price())
+                .build();
 
-    }
-
-    protected void scheduleNextPayment() {
-
+        receiptRepository.save(receipt);
     }
 }

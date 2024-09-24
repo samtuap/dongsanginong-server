@@ -46,6 +46,11 @@ public class PackageProductController {
         return ResponseEntity.ok(packageProductCreateResponse);
     }
 
+    @GetMapping("/product/info")
+    List<PackageProductResponse> getPackageProductList(@RequestBody List<Long> ids) {
+        return packageProductService.getProductInfoList(ids);
+    }
+
     //  Feign 요청용 메서드
     @PostMapping("/subscription/list")
     public List<PackageProductSubsResponse> getProductSubsList(@RequestBody List<Long> subscriptionIds){

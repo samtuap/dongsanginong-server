@@ -7,7 +7,6 @@ import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.entity.FarmCategory;
 import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
-import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
@@ -20,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.samtuap.inong.common.exceptionType.SellerExceptionType.*;
 
+import java.util.List;
+
+
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -27,7 +29,6 @@ public class SellerService {
 
     private final SellerRepository sellerRepository;
     private final FarmRepository farmRepository;
-    private final FarmCategoryRepository farmCategoryRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
     private final MailService mailService;
@@ -96,11 +97,27 @@ public class SellerService {
 
     public SellerInfoResponse getSellerInfo(Long sellerId) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-        Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
-        FarmCategoryRelation categoryRelation = farmCategoryRelationRepository.findByFarmId(farm.getId());
-        FarmCategory farmCategory = farmCategoryRepository.findByIdOrThrow(categoryRelation.getCategory().getId());
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+        List<FarmCategoryRelation> categoryRelation = farmCategoryRelationRepository.findAllByFarmId(farm.getId());
+        List<String> farmCategory = categoryRelation.stream()
+                .map(farmCategoryRelation -> farmCategoryRelation.getCategory().getTitle())
+                .toList();
 
         return SellerInfoResponse.fromEntity(seller, farm, farmCategory);
     }
 
+
+    public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
+        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+        farm.updateInfo(infoUpdateRequest);
+        farmCategoryRelationRepository.deleteAllByFarm(farm);
+        for (FarmCategory category : infoUpdateRequest.category()) {
+            FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
+                    .farm(farm)
+                    .category(category)
+                    .build();
+            farmCategoryRelationRepository.save(newRelation);
+        }
+    }
 }
