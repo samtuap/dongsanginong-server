@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.MemberExceptionType;
+import org.samtuap.inong.domain.favorites.entity.Favorites;
+import org.samtuap.inong.domain.favorites.repository.FavoritesRepository;
 import org.samtuap.inong.domain.member.dto.*;
 import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.entity.MemberRole;
@@ -18,6 +20,8 @@ import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.samtuap.inong.common.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
@@ -27,6 +31,7 @@ import static org.samtuap.inong.common.exceptionType.MemberExceptionType.MEMBER_
 public class MemberService {
     private final MemberRepository memberRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final FavoritesRepository favoritesRepository;
     private final ProductFeign productFeign;
     private final KakaoService kakaoService;
     private final GoogleService googleService;
@@ -121,4 +126,19 @@ public class MemberService {
 
         return MemberSubscriptionResponse.fromEntity(packageProduct);
     }
+
+    public List<MemberFavoriteFarmResponse> getFavoriteFarm(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        List<Long> farmFavoriteIds = favoritesRepository.findAllByMember(member).stream()
+                .map(Favorites::getFarmId)
+                .toList();
+        List<FarmFavoriteResponse> favoriteFarmResponse = productFeign.getFarmFavoriteList(farmFavoriteIds);
+        return favoriteFarmResponse.stream()
+                .map(farmFavoriteResponse -> MemberFavoriteFarmResponse.builder()
+                        .farmName(farmFavoriteResponse.farmName())
+                        .profileImageUrl(farmFavoriteResponse.profileImageUrl())
+                        .build())
+                .toList();
+    }
+
 }

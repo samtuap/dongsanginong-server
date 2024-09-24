@@ -2,6 +2,7 @@ package org.samtuap.inong.common.client;
 
 
 import org.samtuap.inong.config.FeignConfig;
+import org.samtuap.inong.domain.member.dto.FarmFavoriteResponse;
 import org.samtuap.inong.domain.favorites.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.member.dto.PackageProductResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -17,6 +18,9 @@ public interface ProductFeign {
     @GetMapping("/product/info/{id}")
     PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId);
 
+    @PostMapping("/farm/favorite/list")
+    List<FarmFavoriteResponse> getFarmFavoriteList(@RequestBody List<Long> farmFavoriteIds);
+
     @PostMapping("/farm/favorites/list")
-    List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList);
+    List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> farmFavoriteIds);
 }
