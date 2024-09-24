@@ -1,6 +1,7 @@
 package org.samtuap.inong.common.client;
 
 import org.samtuap.inong.config.FeignConfig;
+import org.samtuap.inong.domain.delivery.dto.FarmDetailGetResponse;
 import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,5 +12,8 @@ public interface ProductFeign {
 
     @GetMapping(value = "/product/info/{id}")
     PackageProductResponse getPackageProduct(@PathVariable("id") Long packageProductId);
+
+    @GetMapping(value = "/farm/seller/{sellerId}")
+    FarmDetailGetResponse getFarmInfoWithSeller(@PathVariable("sellerId") Long sellerId);
 
 }
