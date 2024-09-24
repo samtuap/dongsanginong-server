@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,8 +32,8 @@ public class DeliveryService {
     public Page<DeliveryUpComingListResponse> upcomingDelivery(Pageable pageable) {
 
         // 오늘날짜 포함 5일 뒤까지 내역 중 BEFORE_DELIVERY인 데이터
-        Page<Delivery> deliveries = deliveryRepository.findByDeliveryStatusAndDeliveryAtBefore(
-                DeliveryStatus.BEFORE_DELIVERY, LocalDateTime.now().plusDays(4), pageable);
+        Page<Delivery> deliveries = deliveryRepository.findByDeliveryStatusAndDeliveryDueDateBefore(
+                DeliveryStatus.BEFORE_DELIVERY, LocalDate.now().plusDays(4), pageable);
 
         return deliveries.map(delivery -> {
             // delivery > ordering > memberId > feignClient로 memberName 가져오기
@@ -45,16 +46,17 @@ public class DeliveryService {
     }
 
     /**
-     * 사장님 페이지 > 운송장 번호를 등록하면 delivery 엔티티의 status가 IN_DELIVERY로 변경
+     * 사장님 페이지 > 운송장 번호를 등록하면 delivery 엔티티의 status가 IN_DELIVERY로 변경 + 현재 시각을 delivery_at에 추가
      */
     @Transactional
     public void createBillingNumber(Long id, BillingNumberCreateRequest dto) {
 
         Delivery delivery = deliveryRepository.findByIdOrThrow(id);
+        LocalDateTime now = LocalDateTime.now();
 
         // delivery의 운송장 번호 추가 및 상태 변경
         if (dto.billingNumber() != null) {
-            delivery.updateDelivery(dto.billingNumber(), DeliveryStatus.IN_DELIVERY);
+            delivery.updateDelivery(dto.billingNumber(), DeliveryStatus.IN_DELIVERY, now);
         }
         deliveryRepository.save(delivery);
     }

@@ -2,8 +2,10 @@ package org.samtuap.inong.domain.order.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
@@ -14,6 +16,8 @@ import org.samtuap.inong.domain.common.BaseEntity;
 @SQLDelete(sql = "UPDATE ordering SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ordering extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
