@@ -8,7 +8,7 @@ public record DeliveryUpComingListResponse(
         Long id,
         String memberName,
         String packageProductName,
-        String deliveryAt
+        String deliveryDueDate
         // 다가오는 배송에서 '운송장 번호'는 빈값이므로 dto에서 제외
 ) {
 
@@ -17,7 +17,7 @@ public record DeliveryUpComingListResponse(
                 .id(delivery.getId())
                 .memberName(memberName)
                 .packageProductName(packageProductName)
-                .deliveryAt(String.valueOf(delivery.getDeliveryAt()))
+                .deliveryDueDate(String.valueOf(delivery.getDeliveryDueDate()))
                 .build();
     }
 }

@@ -26,7 +26,7 @@ public class DeliveryController {
      */
     @GetMapping("/upcoming/list")
     public ResponseEntity<Page<DeliveryUpComingListResponse>> upcomingDelivery(
-            @PageableDefault(size = 10, sort = "deliveryAt", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "deliveryDueDate", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<DeliveryUpComingListResponse> list = deliveryService.upcomingDelivery(pageable);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }

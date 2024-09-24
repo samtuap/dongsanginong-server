@@ -33,7 +33,7 @@ public class Delivery extends BaseEntity {
 
     private String billingNumber; // 운송장번호 => 배송 시점에 생기므로 null 가능
 
-    private LocalDateTime deliveryAt; // 배송 시작 시점
+    private LocalDateTime deliveryAt; // 배송 시작 시점 (운송장 번호 등록)
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -44,11 +44,12 @@ public class Delivery extends BaseEntity {
     private Ordering ordering;
 
     @NotNull
-    private LocalDate deliveryDueDate;
+    private LocalDate deliveryDueDate; // 배송 '예정' 날짜
 
-    public void updateDelivery(String billingNumber, DeliveryStatus deliveryStatus) {
+    public void updateDelivery(String billingNumber, DeliveryStatus deliveryStatus, LocalDateTime now) {
         this.billingNumber = billingNumber;
         this.deliveryStatus = deliveryStatus;
+        this.deliveryAt = now;
     }
 
 }
