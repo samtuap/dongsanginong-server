@@ -53,8 +53,16 @@ public class JwtGlobalFilter implements GlobalFilter {
                 Claims claims = Jwts.parser().verifyWith(Keys.hmacShaKeyFor(keyBytes)).build().parseSignedClaims(accessToken).getPayload();
                 String memberId = claims.getSubject();
                 String role = claims.get("role", String.class);
+                String idName;
+                if(role.equals("SELLER")){
+                    idName = "sellerId";
+                }
+                else{
+                    idName = "myId";
+                }
+                System.out.println(idName+"@@@@@@@@@@@@@@@@@@@@@");
                 request = exchange.getRequest().mutate()
-                        .header("myId", memberId)
+                        .header(idName, memberId)
                         .header("myRole", role)
                         .build();
                 exchange = exchange.mutate().request(request).build();
