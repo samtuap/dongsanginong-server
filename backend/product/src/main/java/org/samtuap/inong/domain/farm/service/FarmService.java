@@ -96,5 +96,13 @@ public class FarmService {
                 })
                 .toList();
     }
+
+    /**
+     * feign 요청용 (sellerId로 입력받음)
+     */
+    public FarmDetailGetResponse getFarmInfoWithSeller(Long sellerId) {
+        Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
+        return FarmDetailGetResponse.fromEntity(farm);
+    }
   
 }

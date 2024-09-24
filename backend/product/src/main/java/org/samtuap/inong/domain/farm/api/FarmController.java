@@ -63,4 +63,13 @@ public class FarmController {
 
 
     }
+
+    /**
+     * feign 요청용 (sellerId로 입력받음)
+     * sellerId에 해당하는 사장님의 '농장' 정보 반환
+     */
+    @GetMapping("/seller/{sellerId}")
+    public FarmDetailGetResponse getFarmInfoWithSeller(@PathVariable("sellerId") Long sellerId) {
+        return farmService.getFarmInfoWithSeller(sellerId);
+    }
 }

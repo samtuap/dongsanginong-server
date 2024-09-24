@@ -8,6 +8,8 @@ import org.samtuap.inong.domain.delivery.dto.*;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.entity.DeliveryStatus;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
+import org.samtuap.inong.domain.order.entity.Ordering;
+import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,24 +25,25 @@ import java.util.List;
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+    private final OrderRepository orderRepository;
     private final MemberFeign memberFeign;
     private final ProductFeign productFeign;
 
     /**
      * 사장님 페이지 > 다가오는 배송 처리
      */
-    public Page<DeliveryUpComingListResponse> upcomingDelivery(Pageable pageable) {
+    public Page<DeliveryUpComingListResponse> upcomingDelivery(Long sellerId, Pageable pageable) {
+        // 사장이 내농장 찾아옴
+        FarmDetailGetResponse farm = productFeign.getFarmInfoWithSeller(sellerId);
+        List<Ordering> orderingList = orderRepository.findByFarmId(farm.id());
 
         // 오늘날짜 포함 5일 뒤까지 내역 중 BEFORE_DELIVERY인 데이터
-        Page<Delivery> deliveries = deliveryRepository.findByDeliveryStatusAndDeliveryDueDateBefore(
-                DeliveryStatus.BEFORE_DELIVERY, LocalDate.now().plusDays(4), pageable);
+        Page<Delivery> deliveries = deliveryRepository.findByOrderingInAndDeliveryStatusAndDeliveryDueDateBefore(
+                orderingList, DeliveryStatus.BEFORE_DELIVERY, LocalDate.now().plusDays(4), pageable);
 
         return deliveries.map(delivery -> {
-            // delivery > ordering > memberId > feignClient로 memberName 가져오기
             MemberDetailResponse member = memberFeign.getMemberById(delivery.getOrdering().getMemberId());
-            // delivery > ordering > productId > feignClient로 productName 가져오기
             PackageProductResponse packageProduct = productFeign.getPackageProduct(delivery.getOrdering().getPackageId());
-            // DeliveryUpComingListResponse 생성
             return DeliveryUpComingListResponse.from(delivery, member.name(), packageProduct.packageName());
         });
     }
