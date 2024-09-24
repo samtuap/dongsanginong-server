@@ -1,11 +1,14 @@
 package org.samtuap.inong.domain.subscription.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 import org.samtuap.inong.domain.member.entity.Member;
+
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -21,4 +24,7 @@ public class Subscription extends BaseEntity {
     private Member member;
 
     private Long packageId;
+
+    @NotNull
+    private LocalDate payDate;
 }

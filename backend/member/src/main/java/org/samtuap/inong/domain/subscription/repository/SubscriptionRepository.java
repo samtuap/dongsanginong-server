@@ -5,6 +5,8 @@ import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.subscription.entity.Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.samtuap.inong.common.exceptionType.SubscriptionExceptionType.SUBSCRIPTION_NOT_FOUND;
@@ -15,4 +17,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     default Subscription findByMemberOrThrow(Member member){
         return findByMember(member).orElseThrow(()->new BaseCustomException(SUBSCRIPTION_NOT_FOUND));
     }
+
+    List<Subscription> findAllByPayDateAndCanceledAtIsNull(LocalDate payDate);
 }

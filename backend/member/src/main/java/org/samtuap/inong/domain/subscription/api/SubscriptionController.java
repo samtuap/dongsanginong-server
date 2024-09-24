@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.subscription.api;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.subscription.dto.BillingKeyRegisterRequest;
+import org.samtuap.inong.domain.subscription.dto.SubscriptionListGetResponse;
 import org.samtuap.inong.domain.subscription.service.SubscriptionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,11 @@ public class SubscriptionController {
         subscriptionService.registerBillingKey(memberId, dto.billingKey());
 
         return ResponseEntity.ok(null);
+    }
+
+    @GetMapping("/payment")
+    public SubscriptionListGetResponse getSubscriptionToPay() {
+        return subscriptionService.getSubscriptionToPay();
     }
 
 }

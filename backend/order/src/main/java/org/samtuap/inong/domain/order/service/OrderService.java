@@ -18,7 +18,6 @@ import org.samtuap.inong.domain.order.dto.PaymentResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,9 +98,6 @@ public class OrderService {
         // 4. 최초 결제하기
         firstPayment(memberInfo, packageProduct, paidAmount, order);
 
-        // TODO: 5. 다음 결제 예약하기
-        scheduleNextPayment(memberInfo, packageProduct);
-
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
                 .createdAt(savedOrder.getCreatedAt())
@@ -177,57 +173,6 @@ public class OrderService {
             deliveryRepository.save(delivery);
         }
     }
-
-    public void scheduleNextPayment(MemberAllInfoResponse memberInfo, PackageProductResponse packageProduct) {
-        int term = 28;
-        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
-        String url = "https://api.portone.io/payments/" + paymentId + "/schedule";
-        RestTemplate restTemplate = new RestTemplate();
-        String billingKey = memberInfo.billingKey();
-
-        // Set headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "PortOne " + API_SECRET);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // Set body
-        Map<String, Object> payment = new HashMap<>();
-        payment.put("billingKey", billingKey);
-        payment.put("storeId", STORE_ID);
-        payment.put("channelKey", CHANNEL_KEY);
-        payment.put("orderName", packageProduct.packageName());
-
-        Map<String, String> customer = new HashMap<>();
-        customer.put("customerId", Long.toString(memberInfo.id()));
-        customer.put("customerEmail", memberInfo.email());
-        customer.put("customerName", memberInfo.name());
-        payment.put("customer", customer);
-
-        Map<String, Integer> amount = new HashMap<>();
-        amount.put("total", Math.toIntExact(packageProduct.price()));
-        payment.put("amount", amount);
-
-        payment.put("currency", "KRW");
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("payment", payment);
-        body.put("timeToPay", LocalDateTime.now().plusDays(term));
-        // Create request
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("Payment scheduled successfully: " + response.getBody());
-            } else {
-                throw new RuntimeException("Failed to schedule payment: " + response.getBody());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 
     // TODO: 삭제
     public void scheduleNextPaymentTest(Long term, Long memberId) {
