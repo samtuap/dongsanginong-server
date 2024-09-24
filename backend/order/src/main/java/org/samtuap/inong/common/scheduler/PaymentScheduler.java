@@ -17,8 +17,6 @@ public class PaymentScheduler {
     @SchedulerLock(name = "shedLock_regular_payment", lockAtLeastFor = "1m", lockAtMostFor = "59m")
     @Scheduled(cron = "0 0 13 * * *")
     public void regularPayment() {
-        // 오늘 결제해야하는 내용 가져오기
-        log.info("line 22 Scheduler: 결제결제");
         orderService.regularPay();
     }
 }

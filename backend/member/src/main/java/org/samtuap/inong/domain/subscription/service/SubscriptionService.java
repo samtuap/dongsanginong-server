@@ -22,7 +22,6 @@ import java.util.List;
 public class SubscriptionService {
     private final MemberRepository memberRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final ProductFeign productFeign;
 
     @Transactional
     public void registerBillingKey(Long memberId, String billingKey) {
@@ -34,16 +33,9 @@ public class SubscriptionService {
     public SubscriptionListGetResponse getSubscriptionToPay() {
         List<Subscription> subscriptions = subscriptionRepository.findAllByPayDate(LocalDate.now());
 
-        for (Subscription subscription : subscriptions) {
-            log.info("line 36: {}, {}, {}", subscription.getId(), subscription.getPayDate(), subscription.getPackageId());
-
-        }
-
         List<Long> packageProductIds = subscriptions.stream()
                 .map(Subscription::getId)
                 .toList();
-
-//        List<PackageProductResponse> packageProductInfos = productFeign.getPackageProductList(new PackageProductListGetRequest(packageProductIds));
 
         List<SubscriptionListGetResponse.SubscriptionGetResponse> list = subscriptions.stream()
                 .map(SubscriptionListGetResponse.SubscriptionGetResponse::fromEntity)

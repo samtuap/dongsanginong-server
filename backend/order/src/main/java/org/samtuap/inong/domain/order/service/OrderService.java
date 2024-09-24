@@ -66,7 +66,6 @@ public class OrderService {
 
     @Transactional
     public PaymentResponse makeOrder(Long memberId, PaymentRequest reqDto) {
-        log.info("line 68");
         // 1. 멤버 정보, 패키지 상품 정보 가져오기
         MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
         PackageProductResponse packageProduct = productFeign.getPackageProduct(reqDto.packageId());
@@ -123,7 +122,6 @@ public class OrderService {
                                 PackageProductResponse packageInfo,
                                 Long paidAmount,
                                 Ordering order) {
-        log.info("line 118");
         // 포트원 빌링키 결제 API URL
         String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
@@ -179,7 +177,6 @@ public class OrderService {
     }
 
     protected void saveDeliveries(Ordering ordering, PackageProductResponse packageProduct) {
-        log.info("line 169");
         int times = 28 / packageProduct.delivery_cycle();
         for(int time = 0; time < times; time++) {
             Delivery delivery = Delivery.builder()
