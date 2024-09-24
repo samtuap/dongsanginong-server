@@ -10,13 +10,11 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
 @SQLDelete(sql = "UPDATE ordering SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ordering extends BaseEntity {

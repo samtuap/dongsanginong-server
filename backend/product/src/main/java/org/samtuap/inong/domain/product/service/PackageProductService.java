@@ -106,6 +106,7 @@ public class PackageProductService {
         List<PackageProduct> packageProducts = packageProductRepository.findAllById(ids);
         return packageProducts.stream()
                 .map(p -> PackageProductResponse.fromEntity(p, new ArrayList<>())).toList();
+    }
   
     @Transactional
     public List<PackageProductSubsResponse> getProductSubsList(List<Long> subscriptionIds) {
