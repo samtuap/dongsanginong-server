@@ -67,11 +67,14 @@ public class DeliveryService {
     /**
      * 사장님 페이지 > 처리한 배송 조회
      */
-    public Page<DeliveryCompletedListResponse> completedDelivery(Pageable pageable) {
+    public Page<DeliveryCompletedListResponse> completedDelivery(Long sellerId, Pageable pageable) {
+        // 사장이 내농장 찾아옴
+        FarmDetailGetResponse farm = productFeign.getFarmInfoWithSeller(sellerId);
+        List<Ordering> orderingList = orderRepository.findByFarmId(farm.id());
 
         // IN_DELIVERY, AFTER_DELIVERY인 배송건 가져오기
         List<DeliveryStatus> statuses = List.of(DeliveryStatus.IN_DELIVERY, DeliveryStatus.AFTER_DELIVERY);
-        Page<Delivery> deliveries = deliveryRepository.findByDeliveryStatusIn(statuses, pageable);
+        Page<Delivery> deliveries = deliveryRepository.findByOrderingInAndDeliveryStatusIn(orderingList, statuses, pageable);
 
         return deliveries.map(delivery -> {
             MemberDetailResponse member = memberFeign.getMemberById(delivery.getOrdering().getMemberId());

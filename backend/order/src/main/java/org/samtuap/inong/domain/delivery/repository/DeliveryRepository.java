@@ -26,5 +26,7 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
         return findById(id).orElseThrow(()->new BaseCustomException(DELIVERY_NOT_FOUND));
     }
 
-    Page<Delivery> findByDeliveryStatusIn(List<DeliveryStatus> statuses, Pageable pageable);
+    Page<Delivery> findByOrderingInAndDeliveryStatusIn(List<Ordering> orderList,
+                                                       List<DeliveryStatus> statuses,
+                                                       Pageable pageable);
 }

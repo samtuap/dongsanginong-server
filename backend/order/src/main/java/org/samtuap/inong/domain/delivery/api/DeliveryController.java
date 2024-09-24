@@ -50,8 +50,9 @@ public class DeliveryController {
      */
     @GetMapping("/completed/list")
     public ResponseEntity<Page<DeliveryCompletedListResponse>> completedDelivery(
+            @RequestHeader("sellerId") Long sellerId,
             @PageableDefault(size = 10, sort = {"deliveryStatus", "deliveryAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<DeliveryCompletedListResponse> list = deliveryService.completedDelivery(pageable);
+        Page<DeliveryCompletedListResponse> list = deliveryService.completedDelivery(sellerId, pageable);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 }
