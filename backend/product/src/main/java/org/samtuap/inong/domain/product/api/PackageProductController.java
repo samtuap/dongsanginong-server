@@ -48,4 +48,10 @@ public class PackageProductController {
         PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(request);
         return ResponseEntity.ok(packageProductCreateResponse);
     }
+
+    @GetMapping("/product/info")
+    List<PackageProductResponse> getPackageProductList(@RequestBody List<Long> ids) {
+        return packageProductService.getProductInfoList(ids);
+    }
+
 }

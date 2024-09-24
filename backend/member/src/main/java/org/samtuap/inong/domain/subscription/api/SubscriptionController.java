@@ -24,6 +24,7 @@ public class SubscriptionController {
     @GetMapping("/payment")
     public SubscriptionListGetResponse getSubscriptionToPay() {
         return subscriptionService.getSubscriptionToPay();
+
     }
 
 }

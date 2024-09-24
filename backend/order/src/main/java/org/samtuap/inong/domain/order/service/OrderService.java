@@ -1,5 +1,6 @@
 package org.samtuap.inong.domain.order.service;
 
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.MemberFeign;
@@ -15,8 +16,11 @@ import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.MemberAllInfoResponse;
 import org.samtuap.inong.domain.order.dto.PaymentRequest;
 import org.samtuap.inong.domain.order.dto.PaymentResponse;
+import org.samtuap.inong.domain.order.dto.SubscriptionListGetResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
+import org.samtuap.inong.domain.receipt.entity.Receipt;
+import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,7 @@ import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
 
 @Slf4j
+@Builder
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -41,6 +46,7 @@ public class OrderService {
     private final CouponRepository couponRepository;
     private final DeliveryRepository deliveryRepository;
     private final MemberCouponRelationRepository memberCouponRelationRepository;
+    private final ReceiptRepository receiptRepository;
 
     @Value("${portone.api-secret}")
     private String API_SECRET;
@@ -59,7 +65,7 @@ public class OrderService {
     }
 
     @Transactional
-    public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
+    public PaymentResponse makeOrder(Long memberId, PaymentRequest reqDto) {
         // 1. 멤버 정보, 패키지 상품 정보 가져오기
         MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
         PackageProductResponse packageProduct = productFeign.getPackageProduct(reqDto.packageId());
@@ -96,7 +102,7 @@ public class OrderService {
         }
 
         // 4. 최초 결제하기
-        firstPayment(memberInfo, packageProduct, paidAmount, order);
+        kakaoPay(memberInfo, packageProduct, paidAmount, order);
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -105,7 +111,7 @@ public class OrderService {
     }
 
 
-    protected void firstPayment(MemberAllInfoResponse memberInfo,
+    protected void kakaoPay(MemberAllInfoResponse memberInfo,
                                 PackageProductResponse packageInfo,
                                 Long paidAmount,
                                 Ordering order) {
@@ -148,9 +154,6 @@ public class OrderService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-            // 응답 처리
-            response.getBody();
-            log.info("line 156: {}", response.getBody());
         } catch(Exception e) {
             e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
@@ -174,61 +177,6 @@ public class OrderService {
         }
     }
 
-    // TODO: 삭제
-    public void scheduleNextPaymentTest(Long term, Long memberId) {
-        // 1. 멤버 정보, 패키지 상품 정보 가져오기
-        MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
-        PackageProductResponse packageProduct = productFeign.getPackageProduct(1L);
-//        Coupon coupon = couponRepository.findByIdOrThrow(1L);
-
-        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
-        String url = "https://api.portone.io/payments/" + paymentId + "/schedule";
-        RestTemplate restTemplate = new RestTemplate();
-        String billingKey = "billing-key-0191ff60-d67e-b307-b6cd-8afc0e61c816";
-
-        // Set headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "PortOne " + API_SECRET);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // Set body
-        Map<String, Object> payment = new HashMap<>();
-        log.info("line 249: {}", billingKey);
-        payment.put("billingKey", billingKey);
-        payment.put("storeId", STORE_ID);
-        payment.put("channelKey", CHANNEL_KEY);
-        payment.put("orderName", "[Test] 월간 이용권 정기결제");
-
-        Map<String, String> customer = new HashMap<>();
-        customer.put("customerId", Long.toString(memberInfo.id()));
-        customer.put("customerEmail", memberInfo.email());
-        customer.put("customerName", memberInfo.name());
-        payment.put("customer", customer);
-
-        Map<String, Integer> amount = new HashMap<>();
-        amount.put("total", 8900000);
-        payment.put("amount", amount);
-        payment.put("currency", "KRW");
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("payment", payment);
-        String time = LocalDateTime.now().plusMinutes(term).toString() + "Z";
-        body.put("timeToPay", time); // FIXME: 테스트 용도
-        // Create request
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("Payment scheduled successfully: " + response.getBody());
-            } else {
-                throw new RuntimeException("Failed to schedule payment: " + response.getBody());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     protected void useCoupon(Coupon coupon, Ordering order, PackageProductResponse packageInfo, Long memberId) {
         // 구매하려는 상품에 적용할 수 있는 쿠폰인지 검증
@@ -254,4 +202,22 @@ public class OrderService {
         memberCoupon.updateUsedAt(LocalDateTime.now());
         memberCoupon.updateOrderId(order.getId());
     }
+
+    public void regularPay() {
+        SubscriptionListGetResponse response = memberFeign.getSubscriptionToPay();
+
+        List<PackageProductResponse> packageProducts = response.packageProducts();
+        List<SubscriptionListGetResponse.SubscriptionGetResponse> subscriptions = response.subscriptions();
+        for (SubscriptionListGetResponse.SubscriptionGetResponse subscription : subscriptions) {
+            makeOrder(subscription.getMemberId(), new PaymentRequest(subscription.getPackageId(), null));
+        }
+    }
+
+//    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
+//        Receipt.builder().order(order)
+//                .payedAt()
+//                .beforePrice(packageProduct.price())
+//                .discountPrice(packageProduct.price() - paidAmount)
+//
+//    }
 }

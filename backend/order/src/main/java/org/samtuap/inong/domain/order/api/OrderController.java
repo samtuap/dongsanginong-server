@@ -28,13 +28,9 @@ public class OrderController {
     @PostMapping("/first")
     public ResponseEntity<PaymentResponse> kakaoPay(@RequestHeader("myId") Long memberId,
                                                     @RequestBody PaymentRequest reqDto) {
-        PaymentResponse paymentResponse = orderService.makeFirstOrder(memberId, reqDto);
+        PaymentResponse paymentResponse = orderService.makeOrder(memberId, reqDto);
 
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping("/schedule/test")
-    public void testApi(@RequestParam Long term, @RequestParam Long memberId) {
-        orderService.scheduleNextPaymentTest(term, memberId);
-    }
 }

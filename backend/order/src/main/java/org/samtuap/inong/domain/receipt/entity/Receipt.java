@@ -1,6 +1,9 @@
 package org.samtuap.inong.domain.receipt.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
@@ -8,6 +11,9 @@ import org.samtuap.inong.domain.order.entity.Ordering;
 
 import java.time.LocalDateTime;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @SQLDelete(sql = "UPDATE receipt SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")

@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.samtuap.inong.domain.member.dto.PackageProductResponse;
 import org.samtuap.inong.domain.subscription.entity.Subscription;
 
 import java.util.List;
 
 @Builder
-public record SubscriptionListGetResponse(List<SubscriptionGetResponse> subscriptions) {
+public record SubscriptionListGetResponse(List<SubscriptionGetResponse> subscriptions,
+                                          List<PackageProductResponse> packageProducts) {
 
     @Getter
     @Builder

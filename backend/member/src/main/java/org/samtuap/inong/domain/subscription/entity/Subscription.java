@@ -27,4 +27,8 @@ public class Subscription extends BaseEntity {
 
     @NotNull
     private LocalDate payDate;
+
+    public void updatePayDate(LocalDate payDate) {
+        this.payDate = payDate;
+    }
 }

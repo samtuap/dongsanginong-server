@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,5 +99,11 @@ public class PackageProductService {
 
         // 수정된 상품 정보 저장
         packageProductRepository.save(packageProduct);
+    }
+
+    public List<PackageProductResponse> getProductInfoList(List<Long> ids) {
+        List<PackageProduct> packageProducts = packageProductRepository.findAllById(ids);
+        return packageProducts.stream()
+                .map(p -> PackageProductResponse.fromEntity(p, new ArrayList<>())).toList();
     }
 }

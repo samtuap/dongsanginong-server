@@ -18,5 +18,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
         return findByMember(member).orElseThrow(()->new BaseCustomException(SUBSCRIPTION_NOT_FOUND));
     }
 
-    List<Subscription> findAllByPayDateAndCanceledAtIsNull(LocalDate payDate);
+    List<Subscription> findAllByPayDate(LocalDate payDate);
 }
