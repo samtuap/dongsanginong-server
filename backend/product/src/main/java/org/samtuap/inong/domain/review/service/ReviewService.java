@@ -5,7 +5,7 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
-import org.samtuap.inong.domain.review.dto.ReviewResponse;
+import org.samtuap.inong.domain.review.dto.ReviewListResponse;
 import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
 import org.samtuap.inong.domain.review.entity.Review;
 import org.samtuap.inong.domain.review.entity.ReviewImage;
@@ -76,13 +76,13 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewsByPackageProductId(Long packageProductId) {
+    public List<ReviewListResponse> getReviewsByPackageProductId(Long packageProductId) {
         List<Review> reviews = reviewRepository.findAllByPackageProductId(packageProductId);
         return reviews.stream()
                 .map(review -> {
                     // 리뷰에 연결된 이미지들 조회
                     List<ReviewImage> images = reviewImageRepository.findAllByReviewId(review.getId());
-                    return ReviewResponse.fromEntity(review, images);
+                    return ReviewListResponse.fromEntity(review, images);
                 })
                 .collect(Collectors.toList());
     }
