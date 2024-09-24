@@ -25,24 +25,26 @@ public class JwtProvider {
     @Value("${JWT_TOKEN_REFRESH_EXPIRATION_TIME}")
     private Long refreshExpirationTime;
 
-    public String createToken(Long sellerId) {
+    public String createToken(Long sellerId, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("sellerId", sellerId);
+        claims.put("role", role);
 
         Date now = new Date();
 
         return Jwts.builder()
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessExpirationTime))
+                .subject(Long.toString(sellerId))
                 .claims(claims)
                 .signWith(secretKeyFactory.createSecretKey())
                 .compact();
     }
 
-    public String createRefreshToken(Long sellerId) {
+    public String createRefreshToken(Long sellerId, String role) {
         Date now = new Date();
         String refreshToken = Jwts.builder()
                 .subject(String.valueOf(sellerId))
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + refreshExpirationTime))
                 .signWith(secretKeyFactory.createSecretKey())
