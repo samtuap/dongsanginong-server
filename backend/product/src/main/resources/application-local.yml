@@ -40,6 +40,7 @@ spring:
         endpoints: http://localhost:9200
       connection-timeout: 1000 # 연결 시간 제한 (밀리초)
       socket-timeout: 30000    # 소켓 시간 제한 (밀리초)
+      uris: ${SPRING.ELASTICSEARCH.URIS}
 
   mail:
     host: smtp.gmail.com
@@ -57,8 +58,6 @@ spring:
           timeout: 5000
           writetimeout: 5000
       auth-code-expiration-millis: 1800000  # 30 * 60 * 1000 == 30분
-  elasticsearch:
-    uris: ${SPRING.ELASTICSEARCH.URIS}
 
 eureka:
   client:
