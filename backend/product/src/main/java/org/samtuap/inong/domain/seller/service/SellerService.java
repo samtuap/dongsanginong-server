@@ -9,11 +9,9 @@ import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
-import org.samtuap.inong.domain.seller.dto.SellerInfoResponse;
-import org.samtuap.inong.domain.seller.dto.SellerSignInRequest;
-import org.samtuap.inong.domain.seller.dto.SellerSignInResponse;
-import org.samtuap.inong.domain.seller.dto.SellerSignUpRequest;
+import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
+import org.samtuap.inong.domain.seller.entity.SellerRole;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
 import org.samtuap.inong.domain.seller.repository.SellerRepository;
@@ -35,17 +33,21 @@ public class SellerService {
     private final JwtService jwtService;
 
     @Transactional
-    public Seller signUp(SellerSignUpRequest dto) {
+    public SellerSignUpResponse signUp(SellerSignUpRequest dto) {
         if (sellerRepository.findByEmail(dto.email()).isPresent()) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
         String encodedPassword = BCrypt.hashpw(dto.password(), BCrypt.gensalt());
-        return sellerRepository.save(SellerSignUpRequest.toEntity(dto, encodedPassword));
+        Seller seller = SellerSignUpRequest.toEntity(dto, encodedPassword);
+        sellerRepository.save(seller);
+        JwtToken jwtToken = jwtService.issueToken(seller.getId(), SellerRole.SELLER.toString());
+        return SellerSignUpResponse.fromEntity(seller, jwtToken);
     }
 
+    @Transactional
     public SellerSignInResponse signIn(SellerSignInRequest dto) {
         Seller seller = validateSellerCredentials(dto);
-        JwtToken jwtToken = jwtService.issueToken(seller.getId());
+        JwtToken jwtToken = jwtService.issueToken(seller.getId(), SellerRole.SELLER.toString());
         return SellerSignInResponse.fromEntity(seller, jwtToken);
     }
 

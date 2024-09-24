@@ -6,7 +6,6 @@ import org.samtuap.inong.domain.product.dto.PackageProductUpdateRequest;
 import org.samtuap.inong.domain.product.dto.SellerPackageListGetResponse;
 import org.samtuap.inong.domain.product.service.PackageProductService;
 import org.samtuap.inong.domain.seller.dto.*;
-import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.service.SellerService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -23,8 +22,8 @@ public class SellerController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signup(@Valid @RequestBody SellerSignUpRequest dto) {
-        Seller seller = sellerService.signUp(dto);
-        return new ResponseEntity<>("회원가입이 완료되었습니다: " + seller.getBusinessName(), HttpStatus.CREATED);
+        SellerSignUpResponse response = sellerService.signUp(dto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/sign-in")
