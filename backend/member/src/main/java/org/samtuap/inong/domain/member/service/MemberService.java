@@ -144,6 +144,14 @@ public class MemberService {
                 .toList();
     }
 
+    public MemberSubsCancelRequest cancelSubscription(Long memberId, Long subsId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        Subscription subscription = subscriptionRepository.findByIdOrThrow(subsId);
+        PackageProductResponse cancelPackage = productFeign.getPackageProduct(subscription.getPackageId());
+        subscriptionRepository.delete(subscription);
+        return MemberSubsCancelRequest.from(cancelPackage);
+    }
+
     public List<MemberFavoriteFarmResponse> getFavoriteFarm(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         List<Long> farmFavoriteIds = favoritesRepository.findAllByMember(member).stream()
@@ -157,6 +165,5 @@ public class MemberService {
                         .build())
                 .toList();
     }
-
 
 }
