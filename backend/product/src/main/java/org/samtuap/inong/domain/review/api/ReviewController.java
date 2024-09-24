@@ -19,7 +19,7 @@ public class ReviewController {
     @PostMapping("/{packageProductId}/create")
     public ResponseEntity<ReviewResponse> createReview(
             @PathVariable Long packageProductId,
-            @RequestHeader("memberId") Long memberId,
+            @RequestHeader("myId") Long memberId,
             @RequestBody ReviewCreateRequest request) {
 
         ReviewResponse response = reviewService.createReview(packageProductId, memberId, request);
@@ -29,7 +29,7 @@ public class ReviewController {
     @PutMapping("/{reviewId}/update")
     public ResponseEntity<ReviewResponse> updateReview(
             @PathVariable Long reviewId,
-            @RequestHeader("memberId") Long memberId,
+            @RequestHeader("myId") Long memberId,
             @RequestBody ReviewUpdateRequest request) {
 
         ReviewResponse response = reviewService.updateReview(reviewId, memberId, request);
@@ -39,7 +39,7 @@ public class ReviewController {
     @DeleteMapping("/{reviewId}/delete")
     public ResponseEntity<Void> deleteReview(
             @PathVariable Long reviewId,
-            @RequestHeader("memberId") Long memberId) {
+            @RequestHeader("myId") Long memberId) {
         reviewService.deleteReview(reviewId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
