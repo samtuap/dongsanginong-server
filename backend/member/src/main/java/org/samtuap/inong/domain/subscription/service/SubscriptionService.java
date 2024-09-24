@@ -43,7 +43,7 @@ public class SubscriptionService {
                 .map(Subscription::getId)
                 .toList();
 
-        List<PackageProductResponse> packageProductInfos = productFeign.getPackageProductList(new PackageProductListGetRequest(packageProductIds));
+//        List<PackageProductResponse> packageProductInfos = productFeign.getPackageProductList(new PackageProductListGetRequest(packageProductIds));
 
         List<SubscriptionListGetResponse.SubscriptionGetResponse> list = subscriptions.stream()
                 .map(SubscriptionListGetResponse.SubscriptionGetResponse::fromEntity)
@@ -52,7 +52,7 @@ public class SubscriptionService {
         // 다음 결제일 변경
         updatePayDates(subscriptions);
 
-        return new SubscriptionListGetResponse(list, packageProductInfos);
+        return new SubscriptionListGetResponse(list);
     }
 
     private void updatePayDates(List<Subscription> subscriptions) {

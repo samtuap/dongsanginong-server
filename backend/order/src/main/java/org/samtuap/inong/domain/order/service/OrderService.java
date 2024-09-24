@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.common.exceptionType.OrderExceptionType;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
@@ -36,7 +37,6 @@ import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
 
 @Slf4j
-@Builder
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -66,10 +66,15 @@ public class OrderService {
 
     @Transactional
     public PaymentResponse makeOrder(Long memberId, PaymentRequest reqDto) {
+        log.info("line 68");
         // 1. 멤버 정보, 패키지 상품 정보 가져오기
         MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
         PackageProductResponse packageProduct = productFeign.getPackageProduct(reqDto.packageId());
-        Coupon coupon = couponRepository.findByIdOrThrow(reqDto.couponId());
+
+        Coupon coupon = null;
+        if(reqDto.couponId() != null) {
+            coupon = couponRepository.findByIdOrThrow(reqDto.couponId());
+        }
 
         // 2. 최초 결제 정보 저장하기
         Long originalAmount = packageProduct.price();
@@ -115,10 +120,16 @@ public class OrderService {
                                 PackageProductResponse packageInfo,
                                 Long paidAmount,
                                 Ordering order) {
+        log.info("line 118");
         // 포트원 빌링키 결제 API URL
         String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
         order.updatePaymentId(paymentId);
+
+        if(memberInfo.billingKey() == null || memberInfo.billingKey().isEmpty()) {
+            throw new BaseCustomException(BILLING_KEY_NOT_FOUND);
+        }
+
 
         // 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();
@@ -165,6 +176,7 @@ public class OrderService {
     }
 
     protected void saveDeliveries(Ordering ordering, PackageProductResponse packageProduct) {
+        log.info("line 169");
         int times = 28 / packageProduct.delivery_cycle();
         for(int time = 0; time < times; time++) {
             Delivery delivery = Delivery.builder()
@@ -206,18 +218,18 @@ public class OrderService {
     public void regularPay() {
         SubscriptionListGetResponse response = memberFeign.getSubscriptionToPay();
 
-        List<PackageProductResponse> packageProducts = response.packageProducts();
         List<SubscriptionListGetResponse.SubscriptionGetResponse> subscriptions = response.subscriptions();
         for (SubscriptionListGetResponse.SubscriptionGetResponse subscription : subscriptions) {
             makeOrder(subscription.getMemberId(), new PaymentRequest(subscription.getPackageId(), null));
         }
     }
 
-//    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
-//        Receipt.builder().order(order)
-//                .payedAt()
-//                .beforePrice(packageProduct.price())
-//                .discountPrice(packageProduct.price() - paidAmount)
-//
-//    }
+    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
+        Receipt.builder().order(order)
+                .payedAt(order.getCreatedAt())
+                .beforePrice(packageProduct.price())
+                .discountPrice(packageProduct.price() - paidAmount)
+                .totalPrice(packageProduct.price())
+                .build();
+    }
 }

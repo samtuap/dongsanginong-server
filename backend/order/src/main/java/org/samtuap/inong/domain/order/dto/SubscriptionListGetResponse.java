@@ -7,8 +7,7 @@ import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 
 import java.util.List;
 
-public record SubscriptionListGetResponse(List<SubscriptionGetResponse> subscriptions,
-                                          List<PackageProductResponse> packageProducts) {
+public record SubscriptionListGetResponse(List<SubscriptionGetResponse> subscriptions) {
 
     @Getter
     @AllArgsConstructor

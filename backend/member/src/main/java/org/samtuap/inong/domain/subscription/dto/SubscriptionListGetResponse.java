@@ -9,9 +9,7 @@ import org.samtuap.inong.domain.subscription.entity.Subscription;
 
 import java.util.List;
 
-@Builder
-public record SubscriptionListGetResponse(List<SubscriptionGetResponse> subscriptions,
-                                          List<PackageProductResponse> packageProducts) {
+public record SubscriptionListGetResponse(List<SubscriptionGetResponse> subscriptions) {
 
     @Getter
     @Builder
