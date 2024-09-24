@@ -13,14 +13,14 @@ public record ReviewUpdateRequest(
         List<String> imageUrls
 ) {
     // 새로운 리뷰 엔티티를 생성
-    public Review toUpdatedEntity(Review review) {
+    public static Review toUpdatedEntity(ReviewUpdateRequest dto,Review review) {
         return Review.builder()
                 .id(review.getId())
                 .packageProduct(review.getPackageProduct())
                 .memberId(review.getMemberId())
-                .title(this.title != null ? this.title : review.getTitle())
-                .rating(this.rating != null ? this.rating : review.getRating())
-                .contents(this.contents != null ? this.contents : review.getContents())
+                .title(dto.title)
+                .rating(dto.rating)
+                .contents(dto.contents)
                 .build();
     }
 

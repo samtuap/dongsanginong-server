@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.REVIEW_FOUND;
+import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.REVIEW_ALREADY_EXIST;
 import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.REVIEW_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class ReviewService {
 
         // 이미 리뷰가 존재하는지 확인
         if (reviewRepository.findByPackageProductIdAndMemberId(packageProductId, memberId).isPresent()) {
-            throw new BaseCustomException(REVIEW_FOUND);
+            throw new BaseCustomException(REVIEW_ALREADY_EXIST);
         }
 
         // Review 엔티티 생성
@@ -55,7 +55,7 @@ public class ReviewService {
                 .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
 
         // 새로운 리뷰 엔티티 생성
-        Review updatedReview = request.toUpdatedEntity(existingReview);
+        Review updatedReview = ReviewUpdateRequest.toUpdatedEntity(request, existingReview);
         reviewRepository.save(updatedReview);
 
         // 기존 이미지 삭제 후 새로운 이미지 저장
