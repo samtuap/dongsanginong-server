@@ -71,6 +71,12 @@ public class MemberController {
         return memberService.findMember(memberId);
     }
 
+    // feign 요청용
+    @GetMapping("/all-info/{id}")
+    public MemberAllInfoResponse findAllInfoOfMember(@PathVariable("id") Long memberId) {
+        return memberService.findAllInfoOfMember(memberId);
+    }
+
     @PatchMapping("/update-info")
     public ResponseEntity<MemberUpdateInfoRequest> updateMemberInfo(@RequestBody MemberUpdateInfoRequest updateInfo, @RequestParam("id") Long memberId){
         memberService.updateMemberInfo(updateInfo, memberId);

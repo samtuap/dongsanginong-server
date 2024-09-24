@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
                 .body(CustomErrorResponse.builder()
                         .name(HttpStatus.INTERNAL_SERVER_ERROR.name())
                         .httpStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .message("서버 에러입니다.")
+                        .message(e.getMessage())
                         .build());
     }
 }

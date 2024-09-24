@@ -15,7 +15,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
     generate-ddl: true
@@ -42,3 +42,10 @@ logging:
   level:
     org.hibernate.sql: debug
     org.hibernate.type: info
+
+
+portone:
+  api-secret: ${PORTONE_KAKAO_API_SECRET}
+  payment-prefix: ${PORTONE_PAYMENT_PREFIX}
+  store-id: ${PORTONE_STORE_ID}
+  channel-key: ${PORTONE_CHANNELKEY}

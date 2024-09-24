@@ -8,14 +8,13 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-
 import javax.annotation.PostConstruct;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import static org.samtuap.inong.config.NotificationExceptionType.INVALID_SECRET_FILE;
-import static org.samtuap.inong.config.NotificationExceptionType.SECRET_FILE_NOT_FOUND;
+import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.INVALID_SECRET_FILE;
+import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.SECRET_FILE_NOT_FOUND;
+
 
 @Slf4j
 @Configuration

@@ -38,3 +38,6 @@ out/
 
 ## secret
 src/main/resources/application-secret.properties
+
+## data
+src/main/resources/data.sql

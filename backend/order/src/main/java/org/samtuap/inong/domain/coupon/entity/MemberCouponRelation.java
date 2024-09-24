@@ -9,9 +9,9 @@ import org.samtuap.inong.domain.common.BaseEntity;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Builder
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberCouponRelation extends BaseEntity {
@@ -28,4 +28,16 @@ public class MemberCouponRelation extends BaseEntity {
     private String useYn;
     private LocalDateTime usedAt;
     private LocalDateTime issuedAt;
+
+    public void updateIsUsed(String yn) {
+        this.useYn = yn;
+    }
+
+    public void updateUsedAt(LocalDateTime usedAt) {
+        this.usedAt = usedAt;
+    }
+
+    public void updateOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
 }

@@ -13,6 +13,7 @@ import org.samtuap.inong.domain.common.BaseEntity;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.delivery.entity.DeliveryStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,7 +33,6 @@ public class Delivery extends BaseEntity {
 
     private String billingNumber; // 운송장번호 => 배송 시점에 생기므로 null 가능
 
-    @NotNull
     private LocalDateTime deliveryAt; // 배송 시작 시점
 
     @NotNull
@@ -42,6 +42,9 @@ public class Delivery extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ordering_id")
     private Ordering ordering;
+
+    @NotNull
+    private LocalDate deliveryDueDate;
 
     public void updateDelivery(String billingNumber, DeliveryStatus deliveryStatus) {
         this.billingNumber = billingNumber;
