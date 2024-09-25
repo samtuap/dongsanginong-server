@@ -11,6 +11,8 @@ import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.samtuap.inong.domain.product.repository.PackageProductImageRepository;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
+import org.samtuap.inong.search.document.PackageProductDocument;
+import org.samtuap.inong.search.service.PackageProductSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,8 @@ public class PackageProductService {
     private final OrderFeign orderFeign;
     private final FarmRepository farmRepository;
     private final PackageProductImageService packageProductImageService;
+    private final PackageProductSearchService packageProductSearchService;
+
     public List<TopPackageGetResponse> getTopPackages() {
         List<Long> topPackages = orderFeign.getTopPackages();
         List<PackageProduct> products = packageProductRepository.findAllByIds(topPackages);
@@ -64,6 +68,10 @@ public class PackageProductService {
 
         // 이미지 저장 로직 호출
         packageProductImageService.saveImages(savedPackageProduct, imageUrls);
+
+        // elasticsearch : open search에 인덱싱
+        PackageProductDocument packageProductDocument = PackageProductDocument.convertToDocument(savedPackageProduct);
+        packageProductSearchService.indexProductDocument(packageProductDocument);
 
         // 저장된 엔티티를 DTO로 반환
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
