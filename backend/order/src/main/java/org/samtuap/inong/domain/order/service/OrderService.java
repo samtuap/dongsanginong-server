@@ -104,8 +104,6 @@ public class OrderService {
                 .memberId(memberId)
                 .packageId(reqDto.packageId())
                 .farmId(packageProduct.farmId())
-                .totalPrice(paidAmount)
-                .discountPrice(discountAmount)
                 .build();
         Ordering savedOrder = orderRepository.save(order);
 
@@ -279,29 +277,63 @@ public class OrderService {
             rollbackRequest = objectMapper.readValue(message, KafkaOrderRollbackRequest.class);
             this.rollbackOrder(rollbackRequest);
         } catch (JsonProcessingException e) {
+            log.info("[rollback error] line 283");
+            e.printStackTrace();
             throw new BaseCustomException(INVALID_ROLLBACK_REQUEST);
         } catch(Exception e) {
-            throw new BaseCustomException(FAIL_TO_ROLLBACK_ORDER);
+            log.info("[rollback log] line 284");
+            e.printStackTrace();
+//            throw new BaseCustomException(FAIL_TO_ROLLBACK_ORDER);
         }
     }
 
     protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
         log.info("[line 264] Kafka 롤백 이벤트 수신");
-        Ordering order = orderRepository
-                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId())
-                .orElseThrow(() -> new BaseCustomException(ORDER_NOT_FOUND));
+        Optional<Ordering> orderOpt = orderRepository
+                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
+
+        if(!orderOpt.isPresent()) {
+            log.info("kafka error!!! 주문이 존재하지 않음");
+            return;
+        }
+
+        Ordering order = orderOpt.get();
         Receipt receipt = receiptRepository.findByOrderOrThrow(order);
 
         order.updateCanceledAt(LocalDateTime.now());
         order.updateCancelReason(SYSTEM_ERROR);
-
-        kakaoPayRefund(receipt);
-
-        receipt.updatePaymentStatus(PaymentStatus.REFUNDED);
+        receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
     }
 
     private void kakaoPayRefund(Receipt receipt) {
+        log.info("line 304: refund 시작!");
         String paymentId = receipt.getPortOnePaymentId();
+        String url = "https://api.portone.io/payments/" + paymentId + "/cancel";
+
+        log.info("line 316: {}", paymentId);
+
+
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "PortOne " + API_SECRET);
+
+        // 요청 바디 설정
+        Map<String, Object> body = new HashMap<>();
+        body.put("reason", SYSTEM_ERROR.getDescription()); // 취소 사유
+
+        // HttpEntity에 요청 데이터 추가
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            log.info("line 324: {}", response.getBody());
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new BaseCustomException(FAIL_TO_PAY);
+        }
 
     }
 }
