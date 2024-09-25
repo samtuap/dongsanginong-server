@@ -20,6 +20,7 @@ import org.samtuap.inong.domain.order.dto.*;
 import org.samtuap.inong.domain.order.entity.CancelReason;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
+import org.samtuap.inong.domain.receipt.entity.PaymentMethod;
 import org.samtuap.inong.domain.receipt.entity.PaymentStatus;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
@@ -118,11 +119,13 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 4. 영수증 만들기
-        makeReceipt(savedOrder, packageProduct, paidAmount);
-
         // 5. 최초 결제하기
-        kakaoPay(memberInfo, packageProduct, paidAmount, order);
+        String paymentId = kakaoPay(memberInfo, packageProduct, paidAmount, order);
+
+        // 4. 영수증 만들기
+        makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
+
+
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -131,7 +134,7 @@ public class OrderService {
     }
 
 
-    protected void kakaoPay(MemberAllInfoResponse memberInfo,
+    protected String kakaoPay(MemberAllInfoResponse memberInfo,
                                 PackageProductResponse packageInfo,
                                 Long paidAmount,
                                 Ordering order) {
@@ -183,6 +186,8 @@ public class OrderService {
             e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
         }
+
+        return paymentId;
     }
 
     protected Long calculateDiscountAmount(Coupon coupon, Long originalPrice) {
@@ -237,13 +242,15 @@ public class OrderService {
         }
     }
 
-    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
+    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount, String paymentId) {
         Receipt receipt = Receipt.builder().order(order)
-                .payedAt(order.getCreatedAt())
+                .paidAt(order.getCreatedAt())
                 .beforePrice(packageProduct.price())
                 .discountPrice(packageProduct.price() - paidAmount)
                 .totalPrice(packageProduct.price())
                 .paymentStatus(PaymentStatus.PAID)
+                .paymentMethod(PaymentMethod.KAKAOPAY) // TODO: 추후 확장 가능성 있음
+                .portOnePaymentId(paymentId)
                 .build();
 
         receiptRepository.save(receipt);
@@ -269,17 +276,17 @@ public class OrderService {
         Ordering order = orderRepository
                 .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId())
                 .orElseThrow(() -> new BaseCustomException(ORDER_NOT_FOUND));
-
         Receipt receipt = receiptRepository.findByOrderOrThrow(order);
-        receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
 
         order.updateCanceledAt(LocalDateTime.now());
         order.updateCancelReason(SYSTEM_ERROR);
 
+        kakaoPayRefund(receipt);
 
+        receipt.updatePaymentStatus(PaymentStatus.REFUNDED);
     }
 
-    private void kakaoPayRefund() {
+    private void kakaoPayRefund(Receipt receipt) {
 
     }
 }

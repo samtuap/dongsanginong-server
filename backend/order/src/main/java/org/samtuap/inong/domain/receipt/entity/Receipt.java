@@ -26,7 +26,7 @@ public class Receipt extends BaseEntity {
     @JoinColumn(name = "order_id")
     private Ordering order;
 
-    private LocalDateTime payedAt;
+    private LocalDateTime paidAt;
 
     private Long beforePrice; // 쿠폰 적용 전
     private Long discountPrice; // 할인 액
