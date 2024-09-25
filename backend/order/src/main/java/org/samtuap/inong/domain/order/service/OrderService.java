@@ -1,5 +1,7 @@
 package org.samtuap.inong.domain.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -240,5 +243,25 @@ public class OrderService {
                 .build();
 
         receiptRepository.save(receipt);
+    }
+
+    //== Kafka로 주문/결제 취소 ==//
+    @KafkaListener(topics = "order-rollback-topic", groupId = "member-group",/*member group으로 부터 메시지가 들어오면*/ containerFactory = "kafkaListenerContainerFactory")
+    public void consumeRollbackEvent(String message) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        KafkaOrderRollbackRequest rollbackRequest = null;
+        try {
+            rollbackRequest = objectMapper.readValue(message, KafkaOrderRollbackRequest.class);
+            this.rollbackOrder(rollbackRequest);
+        } catch (JsonProcessingException e) {
+            throw new BaseCustomException(INVALID_ROLLBACK_REQUEST);
+        } catch(Exception e) {
+            throw new BaseCustomException(FAIL_TO_ROLLBACK_ORDER);
+        }
+    }
+
+    protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
+
+
     }
 }
