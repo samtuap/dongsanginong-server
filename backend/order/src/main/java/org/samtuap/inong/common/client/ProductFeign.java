@@ -16,4 +16,5 @@ public interface ProductFeign {
     @GetMapping(value = "/farm/seller/{sellerId}")
     FarmDetailGetResponse getFarmInfoWithSeller(@PathVariable("sellerId") Long sellerId);
 
+
 }

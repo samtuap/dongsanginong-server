@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.order.api;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.domain.order.dto.OrderListResponse;
 import org.samtuap.inong.domain.order.dto.PaymentRequest;
 import org.samtuap.inong.domain.order.dto.PaymentResponse;
 import org.samtuap.inong.domain.order.dto.TopPackageResponse;
@@ -31,5 +32,10 @@ public class OrderController {
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }
 
-
+    // feign 요청용
+    @GetMapping("/list")
+    public ResponseEntity<List<OrderListResponse>> getOrderList(@RequestHeader("myId") Long memberId){
+        List<OrderListResponse> myOrderList = orderService.getOrderList(memberId);
+        return new ResponseEntity<>(myOrderList, HttpStatus.OK);
+    }
 }
