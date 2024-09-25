@@ -15,6 +15,8 @@ public record PackageProductResponse(Long id,
                                      Integer delivery_cycle,
                                      Long price,
                                      Long farmId,
+                                     String farmName,
+                                     String productDescription,
                                      List<String> imageUrls) {
     public static PackageProductResponse fromEntity(PackageProduct packageProduct, List<PackageProductImage> packageProductImage){
         List<String> imageUrls = packageProductImage.stream()
@@ -27,6 +29,8 @@ public record PackageProductResponse(Long id,
                 .delivery_cycle(packageProduct.getDelivery_cycle())
                 .price(packageProduct.getPrice())
                 .farmId(packageProduct.getFarm().getId())
+                .farmName(packageProduct.getFarm().getFarmName())
+                .productDescription(packageProduct.getProductDescription())
                 .imageUrls(imageUrls)
                 .build();
     }

@@ -9,6 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
 import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.entity.Farm;
+import org.samtuap.inong.domain.farm.entity.FarmCategory;
+import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
+import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
+import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +30,8 @@ import java.util.stream.Collectors;
 public class FarmService {
     private final FarmRepository farmRepository;
     private final LiveFeign liveFeign;
+    private final FarmCategoryRepository farmCategoryRepository;
+    private final FarmCategoryRelationRepository farmCategoryRelationRepository;
 
     // 최신순, 스크랩순, 판매량 순
     public Page<FarmListGetResponse> getFarmList(Pageable pageable) {
@@ -102,6 +108,7 @@ public class FarmService {
         return FarmDetailGetResponse.fromEntity(farm);
     }
 
+
     /**
      * feign 요청용 (farmId로 입력받음)
      */
@@ -110,4 +117,21 @@ public class FarmService {
         return FarmSellerResponse.fromEntity(farm);
     }
   
+
+    @Transactional
+    public FarmCreateResponse createFarm(FarmCreateRequest request, Long sellerId) {
+        Farm farm = FarmCreateRequest.toEntity(request, sellerId);
+        farm = farmRepository.save(farm);
+
+        for (Long categoryId : request.categories()) {
+            FarmCategory farmCategory = farmCategoryRepository.findByIdOrThrow(categoryId);
+            FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
+                    .farm(farm)
+                    .category(farmCategory)
+                    .build();
+            farmCategoryRelationRepository.save(newRelation);
+        }
+
+        return FarmCreateResponse.fromEntity(farm);
+    }
 }

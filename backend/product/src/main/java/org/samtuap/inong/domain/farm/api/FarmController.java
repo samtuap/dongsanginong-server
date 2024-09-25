@@ -70,11 +70,18 @@ public class FarmController {
         return farmService.getFarmInfoWithSeller(sellerId);
     }
 
+
     /**
      * feign 요청용 (farmId로 입력받음)
      */
     @GetMapping("/seller-by-farm/{farmId}")
     public FarmSellerResponse getSellerIdByFarm(@PathVariable("farmId") Long farmId) {
         return farmService.getSellerIdByFarm(farmId);
+  
+    @PostMapping("/create")
+    public ResponseEntity<FarmCreateResponse> createFarm(@RequestBody FarmCreateRequest request,
+                                         @RequestHeader("sellerId") Long sellerId) {
+        FarmCreateResponse response = farmService.createFarm(request, sellerId);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

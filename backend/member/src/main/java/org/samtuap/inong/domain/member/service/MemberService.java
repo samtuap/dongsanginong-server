@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.client.OrderFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.MemberExceptionType;
@@ -20,7 +21,6 @@ import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -118,39 +118,6 @@ public class MemberService {
         return MemberUpdateInfoRequest.newInfo(member);
     }
 
-    public MemberSubscriptionResponse getSubscription(Long memberId) {
-        Member member = memberRepository.findByIdOrThrow(memberId);
-        Subscription subscription = subscriptionRepository.findByMemberOrThrow(member);
-        Long packageProductId = subscription.getPackageId();
-        PackageProductResponse packageProduct = productFeign.getPackageProduct(packageProductId);
-
-        return MemberSubscriptionResponse.fromEntity(packageProduct);
-    }
-
-    public List<MemberSubscriptionListResponse> getSubscriptionList(Long memberId) {
-        Member member = memberRepository.findByIdOrThrow(memberId);
-        List<Long> subscriptionIds = subscriptionRepository.findAllByMember(member).stream()
-                .map(Subscription::getPackageId)
-                .toList();
-        List<PackageProductSubsResponse> subscriptionList = productFeign.getProductSubsList(subscriptionIds);
-        return subscriptionList.stream()
-                .map(subscriptionProductList -> MemberSubscriptionListResponse.builder()
-                        .packageId(subscriptionProductList.packageId())
-                        .packageName(subscriptionProductList.packageName())
-                        .imageUrl(subscriptionProductList.imageUrl())
-                        .farmId(subscriptionProductList.farmId())
-                        .farmName(subscriptionProductList.farmName())
-                        .build())
-                .toList();
-    }
-
-    public MemberSubsCancelRequest cancelSubscription(Long memberId, Long subsId) {
-        Member member = memberRepository.findByIdOrThrow(memberId);
-        Subscription subscription = subscriptionRepository.findByIdOrThrow(subsId);
-        PackageProductResponse cancelPackage = productFeign.getPackageProduct(subscription.getPackageId());
-        subscriptionRepository.delete(subscription);
-        return MemberSubsCancelRequest.from(cancelPackage);
-    }
 
     public List<MemberFavoriteFarmResponse> getFavoriteFarm(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
@@ -165,5 +132,7 @@ public class MemberService {
                         .build())
                 .toList();
     }
+
+
 
 }
