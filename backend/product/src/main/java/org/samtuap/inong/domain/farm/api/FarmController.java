@@ -1,10 +1,7 @@
 package org.samtuap.inong.domain.farm.api;
 
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
-import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
-import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
-import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
+import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.service.FarmService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,5 +68,13 @@ public class FarmController {
     @GetMapping("/seller/{sellerId}")
     public FarmDetailGetResponse getFarmInfoWithSeller(@PathVariable("sellerId") Long sellerId) {
         return farmService.getFarmInfoWithSeller(sellerId);
+    }
+
+    /**
+     * feign 요청용 (farmId로 입력받음)
+     */
+    @GetMapping("/seller-by-farm/{farmId}")
+    public FarmSellerResponse getSellerIdByFarm(@PathVariable("farmId") Long farmId) {
+        return farmService.getSellerIdByFarm(farmId);
     }
 }

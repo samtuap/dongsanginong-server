@@ -7,10 +7,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
-import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
-import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
-import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
-import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
+import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.springframework.data.domain.Page;
@@ -103,6 +100,14 @@ public class FarmService {
     public FarmDetailGetResponse getFarmInfoWithSeller(Long sellerId) {
         Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
         return FarmDetailGetResponse.fromEntity(farm);
+    }
+
+    /**
+     * feign 요청용 (farmId로 입력받음)
+     */
+    public FarmSellerResponse getSellerIdByFarm(Long farmId) {
+        Farm farm = farmRepository.findByIdOrThrow(farmId);
+        return FarmSellerResponse.fromEntity(farm);
     }
   
 }
