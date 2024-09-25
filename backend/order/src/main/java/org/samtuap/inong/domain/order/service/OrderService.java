@@ -287,6 +287,7 @@ public class OrderService {
     }
 
     private void kakaoPayRefund(Receipt receipt) {
+        String paymentId = receipt.getPortOnePaymentId();
 
     }
 }
