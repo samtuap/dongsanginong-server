@@ -17,9 +17,10 @@ import org.samtuap.inong.domain.seller.repository.SellerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.samtuap.inong.common.exceptionType.SellerExceptionType.*;
+
 import java.util.List;
 
-import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
 @RequiredArgsConstructor
 @Service
@@ -30,18 +31,40 @@ public class SellerService {
     private final FarmRepository farmRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
+    private final MailService mailService;
+
+    @Transactional
+    public SellerSignUpResponse verifyAndSignUp(EmailRequestDto requestDto) {
+        if (!mailService.verifyAuthCode(requestDto.email(), requestDto.code())) {
+            throw new BaseCustomException(CODE_INVALID);
+        }
+
+        SellerSignUpRequest dto = mailService.getUserData(requestDto.email(), SellerSignUpRequest.class);
+        return signUp(dto);
+    }
 
     @Transactional
     public SellerSignUpResponse signUp(SellerSignUpRequest dto) {
-        if (sellerRepository.findByEmail(dto.email()).isPresent()) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
-        }
+        validateSignUpRequest(dto);
         String encodedPassword = BCrypt.hashpw(dto.password(), BCrypt.gensalt());
+
         Seller seller = SellerSignUpRequest.toEntity(dto, encodedPassword);
         sellerRepository.save(seller);
         JwtToken jwtToken = jwtService.issueToken(seller.getId(), SellerRole.SELLER.toString());
+
         return SellerSignUpResponse.fromEntity(seller, jwtToken);
     }
+
+    private void validateSignUpRequest(SellerSignUpRequest dto) {
+        if (sellerRepository.findByEmail(dto.email()).isPresent()) {
+            throw new BaseCustomException(EMAIL_ALREADY_REGISTERED);
+        }
+
+        if (dto.password().length() < 8) {
+            throw new BaseCustomException(PASSWORD_TOO_SHORT);
+        }
+    }
+
 
     @Transactional
     public SellerSignInResponse signIn(SellerSignInRequest dto) {
