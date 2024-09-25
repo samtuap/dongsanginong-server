@@ -177,10 +177,15 @@ public class FarmNoticeService {
      * 공지 생성 (판매자가 공지 등록)
      */
     @Transactional
-    public void createNotice(Long farmId, NoticeCreateRequest dto) {
+    public void createNotice(Long farmId, Long sellerId, NoticeCreateRequest dto) {
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
+
+        // sellerId 검사
+        if (!farm.getSellerId().equals(sellerId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
 
         FarmNotice farmNotice = NoticeCreateRequest.toEntity(dto, farm);
         farmNoticeRepository.save(farmNotice);
@@ -188,7 +193,7 @@ public class FarmNoticeService {
         // 이미지 저장
         saveNoticeImages(farmNotice, dto.imageUrls());
 
-        //== Kafka를 통한 알림 전송 ==//
+        // Kafka를 통한 알림 전송
         issueNotificationToFollowers(farm, dto);
     }
 
@@ -208,10 +213,15 @@ public class FarmNoticeService {
      * 공지 수정 (판매자가 공지 수정)
      */
     @Transactional
-    public void updateNotice(Long farmId, Long noticeId, NoticeUpdateRequest dto) {
+    public void updateNotice(Long farmId, Long noticeId, Long sellerId, NoticeUpdateRequest dto) {
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
+
+        // sellerId 검사
+        if (!farm.getSellerId().equals(sellerId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         if (farmNotice == null) {
@@ -253,13 +263,16 @@ public class FarmNoticeService {
      * 공지 삭제 (판매자가 공지 삭제)
      */
     @Transactional
-    public void deleteNotice(Long farmId, Long noticeId) {
-        // 해당 id에 일치하는 농장 가져오기
+    public void deleteNotice(Long farmId, Long noticeId, Long sellerId) {
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
-        // 해당 농장에 속하는 공지 가져오기
+        // sellerId 검사
+        if (!farm.getSellerId().equals(sellerId)) {
+            throw new BaseCustomException(UNAUTHORIZED_ACTION);
+        }
+
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         if (farmNotice == null) {
             throw new BaseCustomException(NOTICE_NOT_FOUND);
