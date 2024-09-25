@@ -3,10 +3,7 @@ package org.samtuap.inong.search.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.core.IndexRequest;
-import org.opensearch.client.opensearch.core.IndexResponse;
-import org.opensearch.client.opensearch.core.SearchRequest;
-import org.opensearch.client.opensearch.core.SearchResponse;
+import org.opensearch.client.opensearch.core.*;
 import org.opensearch.client.opensearch.core.search.Hit;
 import org.opensearch.client.opensearch.indices.CreateIndexRequest;
 import org.opensearch.client.opensearch.indices.ExistsRequest;
@@ -104,5 +101,18 @@ public class PackageProductSearchService {
             e.printStackTrace();
         }
         return products;
+    }
+
+    // 삭제
+    public void deleteProduct(String id) {
+        try {
+            DeleteRequest deleteRequest = DeleteRequest.of(builder ->
+                    builder.index(INDEX_NAME)
+                            .id(id));
+            DeleteResponse response = openSearchClient.delete(deleteRequest);
+            log.info("삭제 응답 : {}", response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

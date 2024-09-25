@@ -29,4 +29,11 @@ public class PackageProductSearchController {
         List<PackageProductDocument> products = packageProductSearchService.searchProducts(keyword);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
+
+    // 삭제
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable String id) {
+        packageProductSearchService.deleteProduct(id);
+        return new ResponseEntity<>("삭제 완료", HttpStatus.OK);
+    }
 }

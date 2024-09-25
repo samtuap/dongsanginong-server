@@ -91,6 +91,9 @@ public class PackageProductService {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
         packageProductRepository.delete(packageProduct);
+
+        // elasticsearch : 삭제
+        packageProductSearchService.deleteProduct(String.valueOf(packageId));
     }
 
     @Transactional
