@@ -6,7 +6,8 @@ import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 
 @Builder
-public record OrderPaymentListResponse(Long packageId,
+public record OrderPaymentListResponse(Long receiptId,
+                                       Long packageId,
                                        String packageName,
                                        Long farmId,
                                        String farmName,
@@ -15,6 +16,7 @@ public record OrderPaymentListResponse(Long packageId,
                                        Long totalPrice) {
     public static OrderPaymentListResponse from(Ordering ordering, PackageProductResponse product, Receipt receipt) {
         return OrderPaymentListResponse.builder()
+                .receiptId(receipt.getId())
                 .packageId(product.id())
                 .packageName(product.packageName())
                 .farmId(product.farmId())
