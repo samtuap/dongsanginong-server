@@ -66,6 +66,12 @@ public class SellerController {
         return new ResponseEntity<>(sellerInfo, HttpStatus.OK);
     }
 
+    @PatchMapping("/info/password/update")
+    public ResponseEntity<?> updatePassword(@RequestHeader("sellerId") Long sellerId, @RequestBody SellerPasswordUpdateRequest passwordUpdate){
+        sellerService.updatePassword(sellerId, passwordUpdate);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @GetMapping("/{sellerId}/packages")
     public ResponseEntity<Page<SellerPackageListGetResponse>> getSellerPackages(
             @PathVariable Long sellerId,
