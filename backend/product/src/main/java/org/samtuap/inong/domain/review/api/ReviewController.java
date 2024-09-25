@@ -39,12 +39,23 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{reviewId}/delete")
-    public ResponseEntity<?> deleteReview(
+    public ResponseEntity<?> deleteReviewByMember(
             @PathVariable Long reviewId,
             @RequestHeader("myId") Long memberId) {
-        reviewService.deleteReview(reviewId, memberId);
+
+        reviewService.deleteReviewByMember(reviewId, memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @DeleteMapping("/seller/{reviewId}/delete")
+    public ResponseEntity<?> deleteReviewBySeller(
+            @PathVariable Long reviewId,
+            @RequestHeader("sellerId") Long sellerId) {
+
+        reviewService.deleteReviewBySeller(reviewId, sellerId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 
     @GetMapping("/{packageProductId}/list")
     public ResponseEntity<List<ReviewListResponse>> ReviewList(@PathVariable Long packageProductId) {

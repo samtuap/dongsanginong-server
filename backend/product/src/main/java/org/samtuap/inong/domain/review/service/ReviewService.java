@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.review.service;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
@@ -17,8 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.REVIEW_ALREADY_EXIST;
-import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.REVIEW_NOT_FOUND;
+import static org.samtuap.inong.common.exceptionType.ReviewExceptionType.*;
 
 @RequiredArgsConstructor
 @Service
@@ -64,7 +64,7 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(Long reviewId, Long memberId) {
+    public void deleteReviewByMember(Long reviewId, Long memberId) {
         Review review = reviewRepository.findByIdAndMemberId(reviewId, memberId)
                 .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
 
@@ -74,6 +74,29 @@ public class ReviewService {
         // 리뷰 삭제
         reviewRepository.delete(review);
     }
+
+    @Transactional
+    public void deleteReviewBySeller(Long reviewId, Long sellerId) {
+        // 리뷰 조회
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
+
+        PackageProduct packageProduct = review.getPackageProduct();
+        Farm farm = packageProduct.getFarm();
+
+        // sellerId가 일치하지 않으면 예외 발생
+        if (!farm.getSellerId().equals(sellerId)) {
+            throw new BaseCustomException(AUTHORITY_NOT_FOUND);
+        }
+
+        // 리뷰에 속한 이미지를 먼저 삭제
+        reviewImageRepository.deleteAllByReviewId(reviewId);
+
+        // 리뷰 삭제
+        reviewRepository.delete(review);
+    }
+
+
 
     @Transactional(readOnly = true)
     public List<ReviewListResponse> getReviewsByPackageProductId(Long packageProductId) {
