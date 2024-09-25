@@ -33,6 +33,7 @@ public class PackageProductService {
     private final OrderFeign orderFeign;
     private final FarmRepository farmRepository;
     private final PackageProductImageService packageProductImageService;
+    private final ImageService imageService;
     public List<TopPackageGetResponse> getTopPackages() {
         List<Long> topPackages = orderFeign.getTopPackages();
         List<PackageProduct> products = packageProductRepository.findAllByIds(topPackages);
@@ -57,27 +58,13 @@ public class PackageProductService {
         PackageProduct packageProduct = PackageProductCreateRequest.toEntity(farm, request);
         PackageProduct savedPackageProduct = packageProductRepository.save(packageProduct);
 
-        List<String> preSignedUrls = request.imageUrls();
-        List<String> imageUrls = new ArrayList<>();  // 실제 URL을 저장할 리스트
+//        실제 URL
+        List<String> imageUrls = imageService.extractImageUrls(request.imageUrls());
 
-        // for 문으로 쿼리 파라미터 제거 후 실제 URL 리스트 생성
-        for (String preSignedUrl : preSignedUrls) {
-            String imageUrl = extractImageUrl(preSignedUrl);  // 쿼리 파라미터 제거
-            imageUrls.add(imageUrl);
-        }
-
+//        DB에 저장
         packageProductImageService.saveImages(savedPackageProduct, imageUrls);
 
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
-    }
-
-    // 쿼리 파라미터 제거 로직
-    private String extractImageUrl(String presignedUrl) {
-        int queryIndex = presignedUrl.indexOf('?');
-        if (queryIndex != -1) {
-            return presignedUrl.substring(0, queryIndex);  // 쿼리 파라미터 제거
-        }
-        return presignedUrl;  // 쿼리 파라미터가 없으면 그대로 반환
     }
 
     @Transactional
@@ -93,6 +80,13 @@ public class PackageProductService {
         if (!packageProduct.getFarm().getSellerId().equals(sellerId)) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
+
+        List<String> imageUrls = packageProductImageService.findAllImageUrlsByPackageProduct(packageProduct);
+//        s3 에서 삭제
+        imageService.deleteImagesFromS3(imageUrls);
+//        DB 에서 삭제
+        packageProductImageRepository.deleteByPackageProductAndImageUrlIn(packageProduct, imageUrls);
+//        패키지 삭제
         packageProductRepository.delete(packageProduct);
     }
 
@@ -105,7 +99,6 @@ public class PackageProductService {
         if (!packageProduct.getFarm().getSellerId().equals(sellerId)) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
-
         // 상품 정보 및 이미지 수정
         request.updatePackageProduct(packageProduct, packageProductImageService);
 

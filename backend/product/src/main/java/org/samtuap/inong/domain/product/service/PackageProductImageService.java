@@ -7,6 +7,7 @@ import org.samtuap.inong.domain.product.repository.PackageProductImageRepository
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,7 +15,7 @@ import java.util.List;
 public class PackageProductImageService {
 
     private final PackageProductImageRepository packageProductImageRepository;
-    private final S3Service s3Service;
+    private final ImageService imageService;
 
     // 이미지 저장 로직 분리
     @Transactional
@@ -30,13 +31,21 @@ public class PackageProductImageService {
     }
 
     @Transactional
-    public void deleteImages(PackageProduct packageProduct, List<String> imageUrls) {
-        for (String imageUrl : imageUrls) {
-            // DB에서 이미지 삭제
-            packageProductImageRepository.deleteByPackageProductAndImageUrl(packageProduct, imageUrl);
-
-            // S3에서 이미지 삭제 (이미지 URL을 기반으로 S3 객체 삭제)
-            s3Service.deleteFileFromS3(imageUrl);
+    public List<String> findAllImageUrlsByPackageProduct(PackageProduct packageProduct) {
+        List<PackageProductImage> productImages = packageProductImageRepository.findAllByPackageProduct(packageProduct);
+        List<String> imageUrls = new ArrayList<>();
+        for (PackageProductImage productImage : productImages) {
+            imageUrls.add(productImage.getImageUrl());
         }
+        return imageUrls;
+    }
+
+    @Transactional
+    public void deleteImages(PackageProduct packageProduct, List<String> imageUrls) {
+        // DB에서 이미지 삭제
+        for (String imageUrl : imageUrls) {
+            packageProductImageRepository.deleteByPackageProductAndImageUrl(packageProduct, imageUrl);
+        }
+        imageService.deleteImagesFromS3(imageUrls);
     }
 }
