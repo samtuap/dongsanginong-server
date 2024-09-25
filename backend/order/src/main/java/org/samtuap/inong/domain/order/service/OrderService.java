@@ -246,14 +246,13 @@ public class OrderService {
     public List<OrderListResponse> getOrderList(Long memberId) {
         return orderRepository.findByMemberId(memberId).stream()
                 .map(ordering -> {
+                    PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
                     Delivery delivery = deliveryRepository.findByOrdering(ordering);
                     return delivery != null && delivery.getDeliveryAt() != null
-                            ? OrderListResponse.fromEntity(ordering, delivery)
+                            ? OrderListResponse.fromEntity(ordering, product, delivery)
                             : null;
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-
-
 }

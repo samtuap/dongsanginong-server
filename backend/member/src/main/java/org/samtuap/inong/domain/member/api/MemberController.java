@@ -107,9 +107,4 @@ public class MemberController {
         return new ResponseEntity<>(favoriteFarmResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/my-order/list")
-    public ResponseEntity<List<MemberOrderListResponse>> getMyOrderList(@RequestHeader("myId") Long memberId){
-        List<MemberOrderListResponse> myOrderList = memberService.getMyOrderList(memberId);
-        return new ResponseEntity<>(myOrderList, HttpStatus.OK);
-    }
 }
