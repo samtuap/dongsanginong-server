@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Entity
 @SQLDelete(sql = "UPDATE receipt SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
@@ -33,11 +35,13 @@ public class Receipt extends BaseEntity {
     private Long totalPrice; // 최종 결제 금액
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
     private LocalDateTime refundedAt;
 
     private String portOnePaymentId;
 
+    @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
 
