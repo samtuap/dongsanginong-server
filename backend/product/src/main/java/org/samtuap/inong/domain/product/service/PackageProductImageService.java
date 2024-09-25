@@ -18,17 +18,13 @@ public class PackageProductImageService {
 
     // 이미지 저장 로직 분리
     @Transactional
-    public void saveImages(PackageProduct packageProduct, List<String> imageKeys) {
-        for (String imageKey : imageKeys) {
-            // Presigned URL 생성
-            String presignedUrl = s3Service.generatePreSignedUrl(imageKey);
-
+    public void saveImages(PackageProduct packageProduct, List<String> imageUrls) {
+        for (String imageUrl : imageUrls) {
             // PackageProductImage 엔티티 생성 및 저장
             PackageProductImage productImage = PackageProductImage.builder()
-                    .imageUrl(presignedUrl)
+                    .imageUrl(imageUrl)
                     .packageProduct(packageProduct)
                     .build();
-
             packageProductImageRepository.save(productImage);
         }
     }

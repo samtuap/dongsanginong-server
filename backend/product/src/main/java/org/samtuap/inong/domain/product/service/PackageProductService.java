@@ -14,7 +14,6 @@ import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,21 +51,33 @@ public class PackageProductService {
 
     @Transactional
     public PackageProductCreateResponse createPackageProduct(PackageProductCreateRequest request) {
-        // 농장 조회 후 사용
         Farm farm = farmRepository.findById(request.farmId())
                 .orElseThrow(() -> new BaseCustomException(FARM_NOT_FOUND));
 
-        // 상품 엔티티 생성 및 저장
         PackageProduct packageProduct = PackageProductCreateRequest.toEntity(farm, request);
         PackageProduct savedPackageProduct = packageProductRepository.save(packageProduct);
 
-        List<String> imageUrls = request.imageUrls();
+        List<String> preSignedUrls = request.imageUrls();
+        List<String> imageUrls = new ArrayList<>();  // 실제 URL을 저장할 리스트
 
-        // 이미지 저장 로직 호출
+        // for 문으로 쿼리 파라미터 제거 후 실제 URL 리스트 생성
+        for (String preSignedUrl : preSignedUrls) {
+            String imageUrl = extractImageUrl(preSignedUrl);  // 쿼리 파라미터 제거
+            imageUrls.add(imageUrl);
+        }
+
         packageProductImageService.saveImages(savedPackageProduct, imageUrls);
 
-        // 저장된 엔티티를 DTO로 반환
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
+    }
+
+    // 쿼리 파라미터 제거 로직
+    private String extractImageUrl(String presignedUrl) {
+        int queryIndex = presignedUrl.indexOf('?');
+        if (queryIndex != -1) {
+            return presignedUrl.substring(0, queryIndex);  // 쿼리 파라미터 제거
+        }
+        return presignedUrl;  // 쿼리 파라미터가 없으면 그대로 반환
     }
 
     @Transactional
