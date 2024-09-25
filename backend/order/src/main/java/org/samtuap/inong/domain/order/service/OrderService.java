@@ -35,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
@@ -256,6 +257,19 @@ public class OrderService {
         receiptRepository.save(receipt);
     }
 
+    public List<OrderListResponse> getOrderList(Long memberId) {
+        return orderRepository.findByMemberId(memberId).stream()
+                .map(ordering -> {
+                    PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
+                    Delivery delivery = deliveryRepository.findByOrdering(ordering);
+                    return delivery != null && delivery.getDeliveryAt() != null
+                            ? OrderListResponse.fromEntity(ordering, product, delivery)
+                            : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+  
     //== Kafka로 주문/결제 취소 ==//
     @KafkaListener(topics = "order-rollback-topic", groupId = "member-group",/*member group으로 부터 메시지가 들어오면*/ containerFactory = "kafkaListenerContainerFactory")
     public void consumeRollbackEvent(String message) {
