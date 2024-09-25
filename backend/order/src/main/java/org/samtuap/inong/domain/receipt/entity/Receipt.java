@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Entity
 @SQLDelete(sql = "UPDATE receipt SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")

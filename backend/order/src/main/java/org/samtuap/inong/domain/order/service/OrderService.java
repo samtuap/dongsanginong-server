@@ -135,7 +135,7 @@ public class OrderService {
                                 Long paidAmount,
                                 Ordering order) {
         // 포트원 빌링키 결제 API URL
-        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
+        String paymentId = PAYMENT_PREFIX + "-" + UUID.randomUUID();
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
         order.updatePaymentId(paymentId);
 
@@ -276,6 +276,7 @@ public class OrderService {
     }
 
     //== Kafka로 주문/결제 취소 ==//
+    @Transactional
     @KafkaListener(topics = "order-rollback-topic", groupId = "member-group",/*member group으로 부터 메시지가 들어오면*/ containerFactory = "kafkaListenerContainerFactory")
     public void consumeRollbackEvent(String message) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -290,19 +291,13 @@ public class OrderService {
         } catch(Exception e) {
             log.info("[rollback log] line 284");
             e.printStackTrace();
-//            throw new BaseCustomException(FAIL_TO_ROLLBACK_ORDER);
         }
     }
 
     protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
-        log.info("[line 264] Kafka 롤백 이벤트 수신");
+        log.info("line 297 : rollback 시작!!");
         Optional<Ordering> orderOpt = orderRepository
                 .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
-
-        if(!orderOpt.isPresent()) {
-            log.info("kafka error!!! 주문이 존재하지 않음");
-            return;
-        }
 
         Ordering order = orderOpt.get();
         Receipt receipt = receiptRepository.findByOrderOrThrow(order);
@@ -310,14 +305,14 @@ public class OrderService {
         order.updateCanceledAt(LocalDateTime.now());
         order.updateCancelReason(SYSTEM_ERROR);
         receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
+
+//        kakaoPayRefund(receipt);
     }
 
     private void kakaoPayRefund(Receipt receipt) {
         log.info("line 304: refund 시작!");
         String paymentId = receipt.getPortOnePaymentId();
         String url = "https://api.portone.io/payments/" + paymentId + "/cancel";
-
-        log.info("line 316: {}", paymentId);
 
 
         // 요청 헤더 설정
@@ -336,7 +331,6 @@ public class OrderService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-            log.info("line 324: {}", response.getBody());
         } catch(Exception e) {
             e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);

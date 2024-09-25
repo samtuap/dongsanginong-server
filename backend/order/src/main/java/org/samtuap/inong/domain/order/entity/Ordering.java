@@ -37,6 +37,7 @@ public class Ordering extends BaseEntity {
 
     private LocalDateTime canceledAt;
 
+    @Enumerated(value = EnumType.STRING)
     private CancelReason cancelReason;
 
     public void updateCanceledAt(LocalDateTime canceledAt) {
