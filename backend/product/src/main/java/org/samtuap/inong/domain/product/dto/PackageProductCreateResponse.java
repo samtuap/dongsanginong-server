@@ -14,7 +14,8 @@ public record PackageProductCreateResponse(
         Long price,
         String farmName,
         List<String> imageUrls,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String productDescription
 ) {
 
     public static PackageProductCreateResponse fromEntity(PackageProduct packageProduct, List<String> imageUrls) {
@@ -26,6 +27,7 @@ public record PackageProductCreateResponse(
                 .farmName(packageProduct.getFarm().getFarmName())
                 .imageUrls(imageUrls)
                 .createdAt(packageProduct.getCreatedAt())
+                .productDescription(packageProduct.getProductDescription())
                 .build();
     }
 }

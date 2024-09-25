@@ -36,6 +36,8 @@ public class PackageProduct extends BaseEntity {
     @NotNull
     private Long price;
 
+    private String productDescription;
+
     public void updatePackageName(String packageName) {
         this.packageName = packageName;
     }
@@ -46,5 +48,9 @@ public class PackageProduct extends BaseEntity {
 
     public void updatePrice(Long price) {
         this.price = price;
+    }
+
+    public void updateProductDescription(String productDescription) {
+        this.productDescription = productDescription;
     }
 }

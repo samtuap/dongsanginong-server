@@ -12,7 +12,8 @@ public record PackageProductCreateRequest(
         Integer deliveryCycle,
         Long price,
         Long farmId,
-        List<String> imageUrls
+        List<String> imageUrls,
+        String productDescription
 ) {
 
     public static PackageProduct toEntity(Farm farm, PackageProductCreateRequest request) {
@@ -20,6 +21,7 @@ public record PackageProductCreateRequest(
                 .packageName(request.packageName)
                 .delivery_cycle(request.deliveryCycle)
                 .price(request.price)
+                .productDescription(request.productDescription)
                 .farm(farm)
                 .build();
     }
