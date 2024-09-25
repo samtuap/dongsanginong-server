@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.client.OrderFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.MemberExceptionType;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.MemberExceptionType.MEMBER_NOT_FOUND;
 
@@ -33,6 +35,7 @@ public class MemberService {
     private final SubscriptionRepository subscriptionRepository;
     private final FavoritesRepository favoritesRepository;
     private final ProductFeign productFeign;
+    private final OrderFeign orderFeign;
     private final KakaoService kakaoService;
     private final GoogleService googleService;
     private final JwtService jwtService;
@@ -164,6 +167,16 @@ public class MemberService {
                         .profileImageUrl(farmFavoriteResponse.profileImageUrl())
                         .build())
                 .toList();
+    }
+
+    public List<MemberOrderListResponse> getMyOrderList(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        return orderFeign.getOrderList(member.getId()).stream()
+                .map(orderListResponse -> {
+                    PackageProductResponse packageProductResponse = productFeign.getPackageProduct(orderListResponse.packageId());
+                    return MemberOrderListResponse.from(orderListResponse, packageProductResponse);
+                })
+                .collect(Collectors.toList());
     }
 
 }

@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
@@ -241,4 +242,18 @@ public class OrderService {
 
         receiptRepository.save(receipt);
     }
+
+    public List<OrderListResponse> getOrderList(Long memberId) {
+        return orderRepository.findByMemberId(memberId).stream()
+                .map(ordering -> {
+                    Delivery delivery = deliveryRepository.findByOrdering(ordering);
+                    return delivery != null && delivery.getDeliveryAt() != null
+                            ? OrderListResponse.fromEntity(ordering, delivery)
+                            : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+
 }
