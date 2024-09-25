@@ -294,7 +294,7 @@ public class OrderService {
         }
     }
 
-    protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
+    protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) throws InterruptedException {
         Optional<Ordering> orderOpt = orderRepository
                 .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
 
@@ -314,12 +314,15 @@ public class OrderService {
             memberCoupon.updateOrderId(null);
         }
 
+        // 포트원 환불
+        kakaoPayRefund(receipt);
     }
 
     private void kakaoPayRefund(Receipt receipt) {
-        log.info("line 304: refund 시작!");
         String paymentId = receipt.getPortOnePaymentId();
         String url = "https://api.portone.io/payments/" + paymentId + "/cancel";
+
+        log.info("line 326: {}", paymentId);
 
 
         // 요청 헤더 설정
@@ -330,6 +333,7 @@ public class OrderService {
         // 요청 바디 설정
         Map<String, Object> body = new HashMap<>();
         body.put("reason", SYSTEM_ERROR.getDescription()); // 취소 사유
+        body.put("storeId", STORE_ID); // 스토어 아이디
 
         // HttpEntity에 요청 데이터 추가
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
@@ -342,7 +346,6 @@ public class OrderService {
             e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
         }
-
     }
 
 }
