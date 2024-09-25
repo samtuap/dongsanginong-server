@@ -120,9 +120,8 @@ public class SubscriptionService {
             throw new BaseCustomException(INVALID_SUBSCRIPTION_REQUEST);
         } catch(Exception e) {
             assert subscribeRequest != null;
-            KafkaOrderRollbackRequest rollbackRequest = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId());
+            KafkaOrderRollbackRequest rollbackRequest = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId());
             sendRollbackOrderMessage(rollbackRequest);
-//            throw new BaseCustomException(FAIL_TO_SUBSCRIBE);
         }
     }
 
@@ -134,12 +133,10 @@ public class SubscriptionService {
                 .payDate(LocalDate.now().plusDays(28))
                 .build();
         subscriptionRepository.save(subscription);
-
-        throw new IllegalArgumentException("에러!!!!"); // TODO: [삭제 필요] 롤백 테스트용 임시 에러
     }
 
     private void sendRollbackOrderMessage(KafkaOrderRollbackRequest subscribeRequest) {
-        KafkaOrderRollbackRequest rollbackMessage = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId());
+        KafkaOrderRollbackRequest rollbackMessage = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId());
         kafkaTemplate.send("order-rollback-topic", rollbackMessage);
     }
 }

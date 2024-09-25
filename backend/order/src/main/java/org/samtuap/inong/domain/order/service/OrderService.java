@@ -71,7 +71,7 @@ public class OrderService {
     @Transactional
     public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
         PaymentResponse paymentResponse = makeOrder(memberId, reqDto);
-        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId);
+        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId());
         kafkaTemplate.send("subscription-topic", request);
         return paymentResponse;
     }
@@ -306,7 +306,13 @@ public class OrderService {
         order.updateCancelReason(SYSTEM_ERROR);
         receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
 
-//        kakaoPayRefund(receipt);
+        // 쿠폰 롤백
+        log.info("line 310: 쿠폰 롤백 시작!");
+        MemberCouponRelation memberCoupon = memberCouponRelationRepository.findByCouponIdAndMemberId(rollbackRequest.couponId(), rollbackRequest.memberId())
+                .orElseThrow(() -> new BaseCustomException(COUPON_NOT_FOUND));
+        memberCoupon.updateIsUsed("N");
+        memberCoupon.updateUsedAt(null);
+        memberCoupon.updateOrderId(null);
     }
 
     private void kakaoPayRefund(Receipt receipt) {
