@@ -71,9 +71,9 @@ public class FarmController {
     }
 
     @PostMapping("/create")
-    public FarmCreateResponse createFarm(@RequestBody FarmCreateRequest request,
+    public ResponseEntity<FarmCreateResponse> createFarm(@RequestBody FarmCreateRequest request,
                                          @RequestHeader("sellerId") Long sellerId) {
         FarmCreateResponse response = farmService.createFarm(request, sellerId);
-        return new ResponseEntity<>(response, HttpStatus.CREATED).getBody();
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
