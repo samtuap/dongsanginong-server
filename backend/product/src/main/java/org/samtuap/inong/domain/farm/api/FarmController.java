@@ -77,7 +77,8 @@ public class FarmController {
     @GetMapping("/seller-by-farm/{farmId}")
     public FarmSellerResponse getSellerIdByFarm(@PathVariable("farmId") Long farmId) {
         return farmService.getSellerIdByFarm(farmId);
-  
+    }
+
     @PostMapping("/create")
     public ResponseEntity<FarmCreateResponse> createFarm(@RequestBody FarmCreateRequest request,
                                          @RequestHeader("sellerId") Long sellerId) {
