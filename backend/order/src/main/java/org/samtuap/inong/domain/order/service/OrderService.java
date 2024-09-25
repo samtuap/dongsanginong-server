@@ -1,5 +1,7 @@
 package org.samtuap.inong.domain.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +17,16 @@ import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.*;
+import org.samtuap.inong.domain.order.entity.CancelReason;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
+import org.samtuap.inong.domain.receipt.entity.PaymentMethod;
+import org.samtuap.inong.domain.receipt.entity.PaymentStatus;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +40,7 @@ import java.util.stream.Collectors;
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
+import static org.samtuap.inong.domain.order.entity.CancelReason.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -113,11 +120,13 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 4. 영수증 만들기
-        makeReceipt(savedOrder, packageProduct, paidAmount);
-
         // 5. 최초 결제하기
-        kakaoPay(memberInfo, packageProduct, paidAmount, order);
+        String paymentId = kakaoPay(memberInfo, packageProduct, paidAmount, order);
+
+        // 4. 영수증 만들기
+        makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
+
+
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -126,7 +135,7 @@ public class OrderService {
     }
 
 
-    protected void kakaoPay(MemberAllInfoResponse memberInfo,
+    protected String kakaoPay(MemberAllInfoResponse memberInfo,
                                 PackageProductResponse packageInfo,
                                 Long paidAmount,
                                 Ordering order) {
@@ -178,6 +187,8 @@ public class OrderService {
             e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
         }
+
+        return paymentId;
     }
 
     protected Long calculateDiscountAmount(Coupon coupon, Long originalPrice) {
@@ -232,12 +243,15 @@ public class OrderService {
         }
     }
 
-    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
+    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount, String paymentId) {
         Receipt receipt = Receipt.builder().order(order)
-                .payedAt(order.getCreatedAt())
+                .paidAt(order.getCreatedAt())
                 .beforePrice(packageProduct.price())
                 .discountPrice(packageProduct.price() - paidAmount)
                 .totalPrice(packageProduct.price())
+                .paymentStatus(PaymentStatus.PAID)
+                .paymentMethod(PaymentMethod.KAKAOPAY) // TODO: 추후 확장 가능성 있음
+                .portOnePaymentId(paymentId)
                 .build();
 
         receiptRepository.save(receipt);
@@ -254,5 +268,39 @@ public class OrderService {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+  
+    //== Kafka로 주문/결제 취소 ==//
+    @KafkaListener(topics = "order-rollback-topic", groupId = "member-group",/*member group으로 부터 메시지가 들어오면*/ containerFactory = "kafkaListenerContainerFactory")
+    public void consumeRollbackEvent(String message) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        KafkaOrderRollbackRequest rollbackRequest = null;
+        try {
+            rollbackRequest = objectMapper.readValue(message, KafkaOrderRollbackRequest.class);
+            this.rollbackOrder(rollbackRequest);
+        } catch (JsonProcessingException e) {
+            throw new BaseCustomException(INVALID_ROLLBACK_REQUEST);
+        } catch(Exception e) {
+            throw new BaseCustomException(FAIL_TO_ROLLBACK_ORDER);
+        }
+    }
+
+    protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
+        log.info("[line 264] Kafka 롤백 이벤트 수신");
+        Ordering order = orderRepository
+                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId())
+                .orElseThrow(() -> new BaseCustomException(ORDER_NOT_FOUND));
+        Receipt receipt = receiptRepository.findByOrderOrThrow(order);
+
+        order.updateCanceledAt(LocalDateTime.now());
+        order.updateCancelReason(SYSTEM_ERROR);
+
+        kakaoPayRefund(receipt);
+
+        receipt.updatePaymentStatus(PaymentStatus.REFUNDED);
+    }
+
+    private void kakaoPayRefund(Receipt receipt) {
+
     }
 }

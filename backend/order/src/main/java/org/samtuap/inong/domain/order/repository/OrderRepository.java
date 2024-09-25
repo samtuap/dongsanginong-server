@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Ordering, Long> {
 
@@ -18,5 +19,7 @@ public interface OrderRepository extends JpaRepository<Ordering, Long> {
     List<Ordering> findByFarmId(Long farm);
 
     List<Ordering> findByMemberId(Long memberId);
+
+    Optional<Ordering> findByPackageIdAndMemberId(Long packageId, Long memberId);
 
 }

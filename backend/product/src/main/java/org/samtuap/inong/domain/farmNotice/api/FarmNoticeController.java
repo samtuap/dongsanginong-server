@@ -81,8 +81,9 @@ public class FarmNoticeController {
      */
     @PostMapping("/{farm_id}/notice/create")
     public void createNotice(@PathVariable("farm_id") Long farmId,
+                             @RequestHeader("sellerId") Long sellerId,
                              @RequestBody NoticeCreateRequest dto) {
-        farmNoticeService.createNotice(farmId, dto);
+        farmNoticeService.createNotice(farmId, sellerId, dto);
     }
 
     /**
@@ -91,8 +92,9 @@ public class FarmNoticeController {
     @PutMapping("/{farm_id}/notice/{notice_id}/update")
     public void updateNotice(@PathVariable("farm_id") Long farmId,
                              @PathVariable("notice_id") Long noticeId,
+                             @RequestHeader("sellerId") Long sellerId,
                              @RequestBody NoticeUpdateRequest dto) {
-        farmNoticeService.updateNotice(farmId, noticeId, dto);
+        farmNoticeService.updateNotice(farmId, noticeId, sellerId, dto);
     }
 
     /**
@@ -100,8 +102,9 @@ public class FarmNoticeController {
      */
     @DeleteMapping("/{farm_id}/notice/{notice_id}/delete")
     public void deleteNotice(@PathVariable("farm_id") Long farmId,
-                             @PathVariable("notice_id") Long noticeId) {
-        farmNoticeService.deleteNotice(farmId, noticeId);
+                             @PathVariable("notice_id") Long noticeId,
+                             @RequestHeader("sellerId") Long sellerId) {
+        farmNoticeService.deleteNotice(farmId, noticeId, sellerId);
     }
 
 }

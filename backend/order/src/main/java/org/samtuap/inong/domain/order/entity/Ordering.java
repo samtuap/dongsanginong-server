@@ -10,6 +10,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 
+import java.time.LocalDateTime;
+
 @Entity
 @SQLDelete(sql = "UPDATE ordering SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")
@@ -38,6 +40,17 @@ public class Ordering extends BaseEntity {
     private Long farmId; // farm_id 추가
 
     private String paymentId; // portone payment id
+
+    private LocalDateTime canceledAt;
+
+    private CancelReason cancelReason;
+
+    public void updateCanceledAt(LocalDateTime canceledAt) {
+        this.canceledAt = canceledAt;
+    }
+    public void updateCancelReason(CancelReason cancelReason) {
+        this.cancelReason = cancelReason;
+    }
 
     public void updatePaymentId(String paymentId) {
         this.paymentId = paymentId;

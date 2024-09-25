@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.receipt.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -25,9 +26,34 @@ public class Receipt extends BaseEntity {
     @JoinColumn(name = "order_id")
     private Ordering order;
 
-    private LocalDateTime payedAt;
+    private LocalDateTime paidAt;
 
     private Long beforePrice; // 쿠폰 적용 전
     private Long discountPrice; // 할인 액
     private Long totalPrice; // 최종 결제 금액
+
+    @NotNull
+    private PaymentStatus paymentStatus;
+    private LocalDateTime refundedAt;
+
+    private String portOnePaymentId;
+
+    private PaymentMethod paymentMethod;
+
+
+    public void updatePaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public void updateRefundedAt(LocalDateTime refundedAt) {
+        this.refundedAt = refundedAt;
+    }
+
+    public void updatePortOnePaymentId(String portOnePaymentId) {
+        this.portOnePaymentId = portOnePaymentId;
+    }
+
+    public void updatePaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
 }

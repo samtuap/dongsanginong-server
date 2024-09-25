@@ -1,7 +1,7 @@
 package org.samtuap.inong.search.document;
 
-import org.springframework.data.annotation.Id;
 import lombok.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
 
 @AllArgsConstructor
@@ -9,33 +9,24 @@ import org.springframework.data.elasticsearch.annotations.*;
 @Getter
 @ToString
 @Builder
-@Document(indexName = "farm")
+@Document(indexName = "package_product")
 @Mapping(mappingPath = "static/elastic-mapping.json")
 @Setting(settingPath = "static/elastic-token.json")
-public class FarmDocument {
+public class PackageProductDocument {
 
     @Id
     @Field(name = "id", type = FieldType.Keyword)
     private String id;
 
-    @Field(type = FieldType.Integer)
-    private Long sellerId;
+    @Field(type = FieldType.Text)
+    private String farmId;
 
     @Field(type = FieldType.Text)
-    private String farmName;
-
-    @Field(type = FieldType.Text)
-    private String bannerImageUrl;
-
-    @Field(type = FieldType.Text)
-    private String profileImageUrl;
-
-    @Field(type = FieldType.Text)
-    private String farmIntro;
+    private String packageName;
 
     @Field(type = FieldType.Integer)
-    private Long favoriteCount;
+    private Integer delivery_cycle;
 
     @Field(type = FieldType.Integer)
-    private Long orderCount;
+    private Long price;
 }
