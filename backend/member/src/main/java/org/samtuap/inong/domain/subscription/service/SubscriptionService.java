@@ -7,16 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.SubscriptionExceptionType;
-import org.samtuap.inong.domain.member.dto.PackageProductResponse;
+import org.samtuap.inong.domain.member.dto.*;
 import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
+import org.samtuap.inong.domain.subscription.dto.KafkaOrderRollbackRequest;
 import org.samtuap.inong.domain.subscription.dto.KafkaSubscribeProductRequest;
 import org.samtuap.inong.domain.subscription.dto.PackageProductListGetRequest;
 import org.samtuap.inong.domain.subscription.dto.SubscriptionListGetResponse;
 import org.samtuap.inong.domain.subscription.entity.Subscription;
 import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,9 @@ import static org.samtuap.inong.common.exceptionType.SubscriptionExceptionType.*
 public class SubscriptionService {
     private final MemberRepository memberRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final ProductFeign productFeign;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
 
     @Transactional
     public void registerBillingKey(Long memberId, String billingKey) {
@@ -62,28 +67,60 @@ public class SubscriptionService {
         subscriptions.forEach(s -> s.updatePayDate(s.getPayDate().plusDays(28)));
     }
 
-    @Transactional
-    public void cancelSubscription(Long memberId, Long subscriptionId) {
-        Subscription subscription = subscriptionRepository.findByIdOrThrow(subscriptionId);
+
+    public MemberSubscriptionResponse getSubscription(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        Subscription subscription = subscriptionRepository.findByMemberOrThrow(member);
+        Long packageProductId = subscription.getPackageId();
+        PackageProductResponse packageProduct = productFeign.getPackageProduct(packageProductId);
+
+        return MemberSubscriptionResponse.fromEntity(packageProduct);
+    }
+
+    public List<MemberSubscriptionListResponse> getSubscriptionList(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        List<Long> subscriptionIds = subscriptionRepository.findAllByMember(member).stream()
+                .map(Subscription::getPackageId)
+                .toList();
+        List<PackageProductSubsResponse> subscriptionList = productFeign.getProductSubsList(subscriptionIds);
+        return subscriptionList.stream()
+                .map(subscriptionProductList -> MemberSubscriptionListResponse.builder()
+                        .packageId(subscriptionProductList.packageId())
+                        .packageName(subscriptionProductList.packageName())
+                        .imageUrl(subscriptionProductList.imageUrl())
+                        .farmId(subscriptionProductList.farmId())
+                        .farmName(subscriptionProductList.farmName())
+                        .build())
+                .toList();
+    }
+
+    public MemberSubsCancelRequest cancelSubscription(Long memberId, Long subsId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        Subscription subscription = subscriptionRepository.findByIdOrThrow(subsId);
+        PackageProductResponse cancelPackage = productFeign.getPackageProduct(subscription.getPackageId());
 
         if(!subscription.getMember().getId().equals(memberId)) {
             throw new BaseCustomException(FORBIDDEN);
         }
 
         subscriptionRepository.delete(subscription);
+        return MemberSubsCancelRequest.from(cancelPackage);
     }
 
     //== Kafka를 통한 정기 구독 비동기 처리 ==//
     @KafkaListener(topics = "subscription-topic", groupId = "order-group",/*order group으로 부터 메시지가 들어오면*/ containerFactory = "kafkaListenerContainerFactory")
     public void consumeIssueNotification(String message /*listen 하면 스트링 형태로 메시지가 들어온다*/) {
         ObjectMapper objectMapper = new ObjectMapper();
+        KafkaSubscribeProductRequest subscribeRequest = null;
         try {
-            KafkaSubscribeProductRequest subscribeRequest = objectMapper.readValue(message, KafkaSubscribeProductRequest.class);
+            subscribeRequest = objectMapper.readValue(message, KafkaSubscribeProductRequest.class);
             subscribePackageProduct(subscribeRequest);
         } catch (JsonProcessingException e) {
-            throw new BaseCustomException(INVALID_FCM_REQUEST);
+            throw new BaseCustomException(INVALID_SUBSCRIPTION_REQUEST);
         } catch(Exception e) {
-            throw new BaseCustomException(FCM_SEND_FAIL);
+            assert subscribeRequest != null;
+            sendRollbackOrderMessage(subscribeRequest);
+            throw new BaseCustomException(FAIL_TO_SUBSCRIBE);
         }
     }
 
@@ -95,5 +132,10 @@ public class SubscriptionService {
                 .payDate(LocalDate.now().plusDays(28))
                 .build();
         subscriptionRepository.save(subscription);
+    }
+
+    private void sendRollbackOrderMessage(KafkaSubscribeProductRequest subscribeRequest) {
+        KafkaOrderRollbackRequest rollbackMessage = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId());
+        kafkaTemplate.send("order-rollback-topic", rollbackMessage);
     }
 }
