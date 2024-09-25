@@ -116,7 +116,6 @@ public class SubscriptionService {
         try {
             subscribeRequest = objectMapper.readValue(message, KafkaSubscribeProductRequest.class);
             subscribePackageProduct(subscribeRequest);
-            throw new IllegalArgumentException("에러!!");
         } catch (JsonProcessingException e) {
             throw new BaseCustomException(INVALID_SUBSCRIPTION_REQUEST);
         } catch(Exception e) {

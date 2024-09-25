@@ -346,6 +346,10 @@ public class OrderService {
             e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
         }
+
+        receipt.updatePaymentStatus(PaymentStatus.REFUNDED);
+        receipt.updateRefundedAt(LocalDateTime.now());
+        receiptRepository.save(receipt);
     }
 
 }
