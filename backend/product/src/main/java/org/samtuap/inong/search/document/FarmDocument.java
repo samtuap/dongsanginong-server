@@ -10,8 +10,6 @@ import org.springframework.data.elasticsearch.annotations.*;
 @ToString
 @Builder
 @Document(indexName = "farm")
-@Mapping(mappingPath = "static/elastic-mapping.json")
-@Setting(settingPath = "static/elastic-token.json")
 public class FarmDocument {
 
     @Id
