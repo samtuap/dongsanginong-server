@@ -13,8 +13,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Optional<Review> findByIdAndMemberId(Long id, Long memberId);
 
-    @Query("SELECT f.sellerId FROM Review r JOIN r.packageProduct p JOIN p.farm f WHERE r.id = :reviewId")
-    Optional<Long> findSellerIdByReviewId(@Param("reviewId") Long reviewId);
-
     List<Review> findAllByPackageProductId(Long packageProductId);
 }

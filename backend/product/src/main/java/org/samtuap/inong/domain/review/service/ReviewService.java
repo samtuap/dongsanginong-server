@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.review.service;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
@@ -76,12 +77,15 @@ public class ReviewService {
 
     @Transactional
     public void deleteReviewBySeller(Long reviewId, Long sellerId) {
-        // sellerId 직접 조회
-        Long actualSellerId = reviewRepository.findSellerIdByReviewId(reviewId)
+        // 리뷰 조회
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
 
+        PackageProduct packageProduct = review.getPackageProduct();
+        Farm farm = packageProduct.getFarm();
+
         // sellerId가 일치하지 않으면 예외 발생
-        if (!actualSellerId.equals(sellerId)) {
+        if (!farm.getSellerId().equals(sellerId)) {
             throw new BaseCustomException(AUTHORITY_NOT_FOUND);
         }
 
@@ -89,8 +93,9 @@ public class ReviewService {
         reviewImageRepository.deleteAllByReviewId(reviewId);
 
         // 리뷰 삭제
-        reviewRepository.deleteById(reviewId);
+        reviewRepository.delete(review);
     }
+
 
 
     @Transactional(readOnly = true)
