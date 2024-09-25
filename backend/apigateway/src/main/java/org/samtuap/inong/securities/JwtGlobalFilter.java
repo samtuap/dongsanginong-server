@@ -60,7 +60,6 @@ public class JwtGlobalFilter implements GlobalFilter {
                 else{
                     idName = "myId";
                 }
-                System.out.println(idName+"@@@@@@@@@@@@@@@@@@@@@");
                 request = exchange.getRequest().mutate()
                         .header(idName, memberId)
                         .header("myRole", role)
