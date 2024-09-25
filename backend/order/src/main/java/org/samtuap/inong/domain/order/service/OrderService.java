@@ -17,8 +17,10 @@ import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.*;
+import org.samtuap.inong.domain.order.entity.CancelReason;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
+import org.samtuap.inong.domain.receipt.entity.PaymentStatus;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +38,7 @@ import java.util.*;
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
+import static org.samtuap.inong.domain.order.entity.CancelReason.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -240,6 +243,7 @@ public class OrderService {
                 .beforePrice(packageProduct.price())
                 .discountPrice(packageProduct.price() - paidAmount)
                 .totalPrice(packageProduct.price())
+                .paymentStatus(PaymentStatus.PAID)
                 .build();
 
         receiptRepository.save(receipt);
@@ -261,7 +265,21 @@ public class OrderService {
     }
 
     protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
+        log.info("[line 264] Kafka 롤백 이벤트 수신");
+        Ordering order = orderRepository
+                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId())
+                .orElseThrow(() -> new BaseCustomException(ORDER_NOT_FOUND));
 
+        Receipt receipt = receiptRepository.findByOrderOrThrow(order);
+        receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
+
+        order.updateCanceledAt(LocalDateTime.now());
+        order.updateCancelReason(SYSTEM_ERROR);
+
+
+    }
+
+    private void kakaoPayRefund() {
 
     }
 }
