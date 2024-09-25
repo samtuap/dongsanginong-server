@@ -1,10 +1,7 @@
 package org.samtuap.inong.domain.farm.api;
 
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.farm.dto.FarmDetailGetResponse;
-import org.samtuap.inong.domain.farm.dto.FarmFavoriteResponse;
-import org.samtuap.inong.domain.farm.dto.FarmListGetResponse;
-import org.samtuap.inong.domain.farm.dto.FavoritesLiveListResponse;
+import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.service.FarmService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,5 +68,12 @@ public class FarmController {
     @GetMapping("/seller/{sellerId}")
     public FarmDetailGetResponse getFarmInfoWithSeller(@PathVariable("sellerId") Long sellerId) {
         return farmService.getFarmInfoWithSeller(sellerId);
+    }
+
+    @PostMapping("/create")
+    public FarmCreateResponse createFarm(@RequestBody FarmCreateRequest request,
+                                         @RequestHeader("sellerId") Long sellerId) {
+        FarmCreateResponse response = farmService.createFarm(request, sellerId);
+        return new ResponseEntity<>(response, HttpStatus.CREATED).getBody();
     }
 }
