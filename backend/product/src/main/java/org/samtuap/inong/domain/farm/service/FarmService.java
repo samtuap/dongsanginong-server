@@ -108,6 +108,16 @@ public class FarmService {
         return FarmDetailGetResponse.fromEntity(farm);
     }
 
+
+    /**
+     * feign 요청용 (farmId로 입력받음)
+     */
+    public FarmSellerResponse getSellerIdByFarm(Long farmId) {
+        Farm farm = farmRepository.findByIdOrThrow(farmId);
+        return FarmSellerResponse.fromEntity(farm);
+    }
+  
+
     @Transactional
     public FarmCreateResponse createFarm(FarmCreateRequest request, Long sellerId) {
         Farm farm = FarmCreateRequest.toEntity(request, sellerId);

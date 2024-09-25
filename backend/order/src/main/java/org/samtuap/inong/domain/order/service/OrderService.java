@@ -2,13 +2,11 @@ package org.samtuap.inong.domain.order.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
-import org.samtuap.inong.common.exceptionType.OrderExceptionType;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
@@ -17,7 +15,6 @@ import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.*;
-import org.samtuap.inong.domain.order.entity.CancelReason;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.samtuap.inong.domain.receipt.entity.PaymentMethod;
@@ -255,19 +252,29 @@ public class OrderService {
         receiptRepository.save(receipt);
     }
 
-    public List<OrderListResponse> getOrderList(Long memberId) {
+    public List<OrderDeliveryListResponse> getOrderDeliveryList(Long memberId) {
         return orderRepository.findByMemberId(memberId).stream()
                 .map(ordering -> {
                     PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
                     Delivery delivery = deliveryRepository.findByOrdering(ordering);
                     return delivery != null && delivery.getDeliveryAt() != null
-                            ? OrderListResponse.fromEntity(ordering, product, delivery)
+                            ? OrderDeliveryListResponse.fromEntity(ordering, product, delivery)
                             : null;
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-  
+
+    public List<OrderPaymentListResponse> getOrderPaymentList(Long memberId) {
+        return orderRepository.findAllByMemberId(memberId).stream()
+                .map(ordering -> {
+                    PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
+                    Receipt receipt = receiptRepository.findByOrderOrThrow(ordering);
+                    return OrderPaymentListResponse.from(ordering, product, receipt);
+                })
+                .collect(Collectors.toList());
+    }
+
     //== Kafka로 주문/결제 취소 ==//
     @KafkaListener(topics = "order-rollback-topic", groupId = "member-group",/*member group으로 부터 메시지가 들어오면*/ containerFactory = "kafkaListenerContainerFactory")
     public void consumeRollbackEvent(String message) {
@@ -336,4 +343,5 @@ public class OrderService {
         }
 
     }
+
 }

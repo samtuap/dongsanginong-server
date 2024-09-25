@@ -15,7 +15,6 @@ import org.samtuap.inong.domain.member.jwt.service.JwtService;
 import org.samtuap.inong.domain.member.oauth.google.service.GoogleService;
 import org.samtuap.inong.domain.member.oauth.kakao.service.KakaoService;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
-import org.samtuap.inong.domain.subscription.entity.Subscription;
 import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ import static org.samtuap.inong.common.exceptionType.MemberExceptionType.MEMBER_
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final SubscriptionRepository subscriptionRepository;
     private final FavoritesRepository favoritesRepository;
     private final ProductFeign productFeign;
     private final KakaoService kakaoService;
