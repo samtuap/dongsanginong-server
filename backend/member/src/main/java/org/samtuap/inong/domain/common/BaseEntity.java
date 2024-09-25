@@ -27,8 +27,4 @@ public abstract class BaseEntity {
 
     private LocalDateTime deletedAt;
 
-    @PreRemove
-    public void setDeletedAt() {
-        this.deletedAt = LocalDateTime.from(Instant.now().atZone(ZoneId.of("Asia/Seoul")).toInstant());
-    }
 }

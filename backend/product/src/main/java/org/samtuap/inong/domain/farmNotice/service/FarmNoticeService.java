@@ -201,7 +201,7 @@ public class FarmNoticeService {
                     .content(dto.title())
                     .build();
         kafkaTemplate.send("send-notification-topic", notification);
-        };
+        }
     }
 
     /**
