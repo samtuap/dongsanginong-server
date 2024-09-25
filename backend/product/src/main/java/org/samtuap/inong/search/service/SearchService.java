@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.search.document.FarmDocument;
+import org.samtuap.inong.search.dto.BaseResponse;
 import org.samtuap.inong.search.repository.FarmSearchRepository;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +21,10 @@ public class SearchService {
     private final FarmRepository farmRepository;
     private final FarmSearchRepository farmSearchRepository;
 
-    public List<FarmDocument> searchFarms(String word1, String word2) {
-        return farmSearchRepository.findByFarmNameContainingOrFarmIntroContaining(word1, word2);
+    public BaseResponse<FarmDocument> searchFarms(String word1, String word2) {
+
+        SearchHits<FarmDocument> searchHits = farmSearchRepository.findByFarmNameContainingOrFarmIntroContaining(word1, word2);
+        return new BaseResponse<>(searchHits.getTotalHits(), searchHits.getSearchHits());
     }
 
 
