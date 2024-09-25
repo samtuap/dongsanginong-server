@@ -72,6 +72,7 @@ public class SellerService {
         jwtService.deleteRefreshToken(seller.getId());
     }
 
+    @Transactional
     public SellerInfoResponse getSellerInfo(Long sellerId) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
         Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
@@ -83,7 +84,7 @@ public class SellerService {
         return SellerInfoResponse.fromEntity(seller, farm, farmCategory);
     }
 
-
+    @Transactional
     public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
         Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
@@ -97,4 +98,15 @@ public class SellerService {
             farmCategoryRelationRepository.save(newRelation);
         }
     }
+
+    @Transactional
+    public void updatePassword(Long sellerId, SellerPasswordUpdateRequest passwordUpdate) {
+        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+        if (!BCrypt.checkpw(passwordUpdate.oldPassword(), seller.getPassword())) {
+            throw new BaseCustomException(INVALID_PASSWORD);
+        }
+        String encodedNewPassword = BCrypt.hashpw(passwordUpdate.newPassword(), BCrypt.gensalt());
+        seller.updatePassword(encodedNewPassword);
+    }
+
 }
