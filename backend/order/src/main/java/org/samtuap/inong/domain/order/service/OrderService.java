@@ -285,17 +285,16 @@ public class OrderService {
             rollbackRequest = objectMapper.readValue(message, KafkaOrderRollbackRequest.class);
             this.rollbackOrder(rollbackRequest);
         } catch (JsonProcessingException e) {
-            log.info("[rollback error] line 283");
+            log.error("[rollback error] line 283: 카프카 메시지 파싱 에러");
             e.printStackTrace();
             throw new BaseCustomException(INVALID_ROLLBACK_REQUEST);
         } catch(Exception e) {
-            log.info("[rollback log] line 284");
+            log.error("[rollback error] line 284: 결제 실패");
             e.printStackTrace();
         }
     }
 
     protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
-        log.info("line 297 : rollback 시작!!");
         Optional<Ordering> orderOpt = orderRepository
                 .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
 
@@ -306,13 +305,15 @@ public class OrderService {
         order.updateCancelReason(SYSTEM_ERROR);
         receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
 
-        // 쿠폰 롤백
-        log.info("line 310: 쿠폰 롤백 시작!");
-        MemberCouponRelation memberCoupon = memberCouponRelationRepository.findByCouponIdAndMemberId(rollbackRequest.couponId(), rollbackRequest.memberId())
-                .orElseThrow(() -> new BaseCustomException(COUPON_NOT_FOUND));
-        memberCoupon.updateIsUsed("N");
-        memberCoupon.updateUsedAt(null);
-        memberCoupon.updateOrderId(null);
+        // [쿠폰 롤백] 쿠폰을 사용하지 않은 상태로 되돌리기
+        if(rollbackRequest.couponId() != null) {
+            MemberCouponRelation memberCoupon = memberCouponRelationRepository.findByCouponIdAndMemberId(rollbackRequest.couponId(), rollbackRequest.memberId())
+                    .orElseThrow(() -> new BaseCustomException(COUPON_NOT_FOUND));
+            memberCoupon.updateIsUsed("N");
+            memberCoupon.updateUsedAt(null);
+            memberCoupon.updateOrderId(null);
+        }
+
     }
 
     private void kakaoPayRefund(Receipt receipt) {
