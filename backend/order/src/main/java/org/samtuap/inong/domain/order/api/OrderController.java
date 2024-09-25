@@ -32,7 +32,6 @@ public class OrderController {
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }
 
-    // feign 요청용
     @GetMapping("/list")
     public ResponseEntity<List<OrderListResponse>> getOrderList(@RequestHeader("myId") Long memberId){
         List<OrderListResponse> myOrderList = orderService.getOrderList(memberId);
