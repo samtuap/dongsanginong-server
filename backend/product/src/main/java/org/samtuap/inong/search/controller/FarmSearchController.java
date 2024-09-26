@@ -29,4 +29,11 @@ public class FarmSearchController {
         List<FarmDocument> farms = farmSearchService.searchFarms(keyword);
         return new ResponseEntity<>(farms, HttpStatus.OK);
     }
+
+    // 수정
+    @PutMapping("/update")
+    public ResponseEntity<String> updateFarm(@RequestBody FarmDocument farmDocument) {
+        farmSearchService.updateFarm(farmDocument);
+        return new ResponseEntity<>("수정 완료", HttpStatus.OK);
+    }
 }

@@ -38,7 +38,7 @@ public class PackageProductSearchController {
     }
 
     // 수정
-    @PutMapping("/update/{id}")
+    @PutMapping("/update")
     public ResponseEntity<String> updateProduct(@RequestBody PackageProductDocument packageProductDocument) {
         packageProductSearchService.updateProduct(packageProductDocument);
         return new ResponseEntity<>("수정 완료", HttpStatus.OK);

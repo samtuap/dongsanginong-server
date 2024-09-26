@@ -3,10 +3,7 @@ package org.samtuap.inong.search.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.core.IndexRequest;
-import org.opensearch.client.opensearch.core.IndexResponse;
-import org.opensearch.client.opensearch.core.SearchRequest;
-import org.opensearch.client.opensearch.core.SearchResponse;
+import org.opensearch.client.opensearch.core.*;
 import org.opensearch.client.opensearch.core.search.Hit;
 import org.opensearch.client.opensearch.indices.CreateIndexRequest;
 import org.opensearch.client.opensearch.indices.ExistsRequest;
@@ -104,5 +101,20 @@ public class FarmSearchService {
             e.printStackTrace();
         }
         return farms;
+    }
+
+    // 수정
+    public void updateFarm(FarmDocument farmDocument) {
+        try {
+            // index_name & id와 일치한 document 찾아서 > 받아온 값으로 업데이트
+            UpdateRequest<FarmDocument, Object> request = UpdateRequest.of(builder -> builder
+                    .index(INDEX_NAME)
+                    .id(farmDocument.getId())
+                    .doc(farmDocument));
+            UpdateResponse<FarmDocument> response = openSearchClient.update(request, FarmDocument.class);
+            log.info("수정 응답 : {}", response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
