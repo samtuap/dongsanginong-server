@@ -22,4 +22,12 @@ public class OrderBackOfficeController {
         SalesDataGetResponse salesData = orderBackOfficeService.getSalesData(request, sellerId);
         return new ResponseEntity<>(salesData, HttpStatus.OK);
     }
+
+
+    @PostMapping("/sales-list")
+    public ResponseEntity<SalesDataGetResponse> getSalesData(@RequestBody SalesTableGetRequest request,
+                                                             @RequestHeader("sellerId") Long sellerId) {
+        SalesDataGetResponse salesData = orderBackOfficeService.getSalesList(request, sellerId);
+        return new ResponseEntity<>(salesData, HttpStatus.OK);
+    }
 }

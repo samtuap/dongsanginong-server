@@ -27,4 +27,5 @@ public interface OrderRepository extends JpaRepository<Ordering, Long> {
 
     List<Ordering> findAllByMemberId(Long memberId);
 
+
 }

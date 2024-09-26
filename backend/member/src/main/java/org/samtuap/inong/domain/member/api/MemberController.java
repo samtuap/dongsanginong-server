@@ -90,4 +90,13 @@ public class MemberController {
         return new ResponseEntity<>(favoriteFarmResponse, HttpStatus.OK);
     }
 
+
+    // feign 요청 용
+    @PostMapping("/")
+    public List<MemberDetailResponse> findMemberList(@RequestBody List<Long> memberIds) {
+        return memberService.findMemberList(memberIds);
+    }
+
+
+
 }

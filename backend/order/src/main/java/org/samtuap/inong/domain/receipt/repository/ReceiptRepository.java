@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
@@ -30,4 +31,14 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "FROM Receipt r " +
             "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true")
     SalesDataGetResponse findSalesDataFirstOnly(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT r " +
+            "FROM Receipt r " +
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime")
+    List<Receipt> findAllByOrderFarmId(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT r " +
+            "FROM Receipt r " +
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true")
+    List<Receipt> findAllByOrderFarmIdFirstOnly(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 }
