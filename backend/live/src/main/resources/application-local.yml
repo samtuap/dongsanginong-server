@@ -42,3 +42,7 @@ logging:
   level:
     org.hibernate.sql: debug
     org.hibernate.type: info
+
+openvidu:
+  url: ${OPENVIDU_URL}
+  secret: ${OPENVIDU_SECRET}

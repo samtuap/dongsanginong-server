@@ -37,4 +37,14 @@ public class LiveController {
     public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList) {
         return liveService.getFavoritesFarmLiveList(favoriteFarmList);
     }
+
+    @GetMapping("/get")
+    public String test1() {
+        return "get ok";
+    }
+
+    @PostMapping("/post")
+    public String test2() {
+        return "post ok";
+    }
 }
