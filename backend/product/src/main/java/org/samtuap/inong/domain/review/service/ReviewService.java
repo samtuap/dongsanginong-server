@@ -5,7 +5,7 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
-import org.samtuap.inong.domain.product.service.ImageService;
+import org.samtuap.inong.common.S3.ImageService;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
 import org.samtuap.inong.domain.review.dto.ReviewListResponse;
 import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;

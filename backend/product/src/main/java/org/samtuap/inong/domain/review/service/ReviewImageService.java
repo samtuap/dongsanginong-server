@@ -1,7 +1,7 @@
 package org.samtuap.inong.domain.review.service;
 
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.product.service.ImageService;
+import org.samtuap.inong.common.S3.ImageService;
 import org.samtuap.inong.domain.review.entity.Review;
 import org.samtuap.inong.domain.review.entity.ReviewImage;
 import org.samtuap.inong.domain.review.repository.ReviewImageRepository;

@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.product.service;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.common.S3.ImageService;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.samtuap.inong.domain.product.repository.PackageProductImageRepository;

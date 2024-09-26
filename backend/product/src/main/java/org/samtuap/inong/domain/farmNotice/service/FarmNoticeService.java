@@ -13,7 +13,7 @@ import org.samtuap.inong.domain.farmNotice.entity.NoticeComment;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeImageRepository;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeRepository;
 import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
-import org.samtuap.inong.domain.product.service.ImageService;
+import org.samtuap.inong.common.S3.ImageService;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

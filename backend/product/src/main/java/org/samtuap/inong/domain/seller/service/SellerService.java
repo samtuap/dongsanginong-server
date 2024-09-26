@@ -8,7 +8,7 @@ import org.samtuap.inong.domain.farm.entity.FarmCategory;
 import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
-import org.samtuap.inong.domain.product.service.ImageService;
+import org.samtuap.inong.common.S3.ImageService;
 import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.entity.SellerRole;

@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.product.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.samtuap.inong.common.S3.ImageService;
 import org.samtuap.inong.common.client.OrderFeign;
 import org.samtuap.inong.domain.product.dto.*;
 import org.samtuap.inong.common.exception.BaseCustomException;

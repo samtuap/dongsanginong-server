@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.product.service;
+package org.samtuap.inong.common.S3;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
