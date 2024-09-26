@@ -40,6 +40,9 @@ public class Ordering extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private CancelReason cancelReason;
 
+    @NotNull
+    private boolean isFirst;
+
     public void updateCanceledAt(LocalDateTime canceledAt) {
         this.canceledAt = canceledAt;
     }

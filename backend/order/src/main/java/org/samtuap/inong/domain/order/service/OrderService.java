@@ -70,14 +70,14 @@ public class OrderService {
 
     @Transactional
     public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
-        PaymentResponse paymentResponse = makeOrder(memberId, reqDto);
+        PaymentResponse paymentResponse = makeOrder(memberId, reqDto, true);
         KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId());
         kafkaTemplate.send("subscription-topic", request);
         return paymentResponse;
     }
 
     @Transactional
-    public PaymentResponse makeOrder(Long memberId, PaymentRequest reqDto) {
+    public PaymentResponse makeOrder(Long memberId, PaymentRequest reqDto, boolean isFirst) {
         // 1. 멤버 정보, 패키지 상품 정보 가져오기
         MemberAllInfoResponse memberInfo = memberFeign.getMemberAllInfoById(memberId);
         PackageProductResponse packageProduct = productFeign.getPackageProduct(reqDto.packageId());
@@ -101,6 +101,7 @@ public class OrderService {
                 .memberId(memberId)
                 .packageId(reqDto.packageId())
                 .farmId(packageProduct.farmId())
+                .isFirst(isFirst)
                 .build();
         Ordering savedOrder = orderRepository.save(order);
 
@@ -234,7 +235,7 @@ public class OrderService {
 
         List<SubscriptionListGetResponse.SubscriptionGetResponse> subscriptions = response.subscriptions();
         for (SubscriptionListGetResponse.SubscriptionGetResponse subscription : subscriptions) {
-            makeOrder(subscription.getMemberId(), new PaymentRequest(subscription.getPackageId(), null));
+            makeOrder(subscription.getMemberId(), new PaymentRequest(subscription.getPackageId(), null), false);
         }
     }
 
