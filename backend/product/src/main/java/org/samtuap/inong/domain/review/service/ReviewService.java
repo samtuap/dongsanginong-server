@@ -113,12 +113,13 @@ public class ReviewService {
 
 
     @Transactional(readOnly = true)
-    public ReviewDetailResponse getReviewDetail(Long packageProductId, Long reviewId) {
-        Review review = reviewRepository.findByIdAndPackageProductId(reviewId, packageProductId)
+    public ReviewDetailResponse getReviewDetail(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
 
         List<ReviewImage> images = reviewImageRepository.findAllByReviewId(reviewId);
         return ReviewDetailResponse.fromEntity(review, images);
     }
+
 
 }

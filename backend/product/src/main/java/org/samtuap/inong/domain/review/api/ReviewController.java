@@ -65,11 +65,10 @@ public class ReviewController {
     }
 
 
-    @GetMapping("/{packageProductId}/detail/{reviewId}")
-    public ResponseEntity<ReviewDetailResponse> getReviewDetail(
-            @PathVariable Long packageProductId,
-            @PathVariable Long reviewId) {
-        ReviewDetailResponse reviewDetail = reviewService.getReviewDetail(packageProductId, reviewId);
+    @GetMapping("/detail/{reviewId}")
+    public ResponseEntity<ReviewDetailResponse> getReviewDetail(@PathVariable Long reviewId) {
+        ReviewDetailResponse reviewDetail = reviewService.getReviewDetail(reviewId);
         return ResponseEntity.status(HttpStatus.OK).body(reviewDetail);
     }
+
 }
