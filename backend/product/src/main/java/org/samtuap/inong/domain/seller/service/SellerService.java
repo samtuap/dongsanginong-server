@@ -8,6 +8,7 @@ import org.samtuap.inong.domain.farm.entity.FarmCategory;
 import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.entity.SellerRole;
@@ -32,7 +33,7 @@ public class SellerService {
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
     private final MailService mailService;
-    private final PackageProductDeleteService packageProductService;
+    private final PackageProductRepository packageProductRepository;
 
     @Transactional
     public SellerSignUpResponse verifyAndSignUp(EmailRequestDto requestDto) {
@@ -96,7 +97,7 @@ public class SellerService {
         Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
 
         // 패키지 중 삭제되지 않은 항목이 있는지 확인
-        boolean hasActivePackages = packageProductService.hasActivePackages(farm.getId());
+        boolean hasActivePackages = hasActivePackages(farm.getId());
         if (hasActivePackages) {
             throw new BaseCustomException(PACKAGES_EXIST);
         }
@@ -105,6 +106,11 @@ public class SellerService {
         farmRepository.delete(farm);
         sellerRepository.deleteById(seller.getId());
         jwtService.deleteRefreshToken(seller.getId());
+    }
+
+    // 농장에 삭제되지 않은 패키지가 있는지 확인
+    public boolean hasActivePackages(Long farmId) {
+        return packageProductRepository.existsByFarmIdAndDeletedAtIsNull(farmId);
     }
 
     @Transactional
