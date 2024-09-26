@@ -13,10 +13,10 @@ import org.samtuap.inong.domain.order.entity.Ordering;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Entity
 @SQLDelete(sql = "UPDATE receipt SET deleted_at = now() WHERE id = ?")
 @SQLRestriction("deleted_at is NULL")

@@ -14,6 +14,8 @@ import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.search.document.FarmDocument;
+import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,6 +34,7 @@ public class FarmService {
     private final LiveFeign liveFeign;
     private final FarmCategoryRepository farmCategoryRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
+    private final FarmSearchService farmSearchService;
 
     // 최신순, 스크랩순, 판매량 순
     public Page<FarmListGetResponse> getFarmList(Pageable pageable) {
@@ -131,6 +134,10 @@ public class FarmService {
                     .build();
             farmCategoryRelationRepository.save(newRelation);
         }
+
+        // elasticsearch : open search에 인덱싱
+        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
+        farmSearchService.indexFarmDocument(farmDocument);
 
         return FarmCreateResponse.fromEntity(farm);
     }

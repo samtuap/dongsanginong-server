@@ -1,5 +1,6 @@
 package org.samtuap.inong.search.document;
 
+import org.samtuap.inong.domain.farm.entity.Farm;
 import org.springframework.data.annotation.Id;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.*;
@@ -16,24 +17,17 @@ public class FarmDocument {
     @Field(name = "id", type = FieldType.Keyword)
     private String id;
 
-    @Field(type = FieldType.Integer)
-    private Long sellerId;
-
     @Field(type = FieldType.Text)
     private String farmName;
 
     @Field(type = FieldType.Text)
-    private String bannerImageUrl;
-
-    @Field(type = FieldType.Text)
-    private String profileImageUrl;
-
-    @Field(type = FieldType.Text)
     private String farmIntro;
 
-    @Field(type = FieldType.Integer)
-    private Long favoriteCount;
-
-    @Field(type = FieldType.Integer)
-    private Long orderCount;
+    public static FarmDocument convertToDocument(Farm farm) {
+        return FarmDocument.builder()
+                .id(farm.getId().toString())
+                .farmName(farm.getFarmName())
+                .farmIntro(farm.getFarmIntro())
+                .build();
+    }
 }

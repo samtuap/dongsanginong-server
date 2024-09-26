@@ -15,9 +15,10 @@ import org.samtuap.inong.domain.seller.entity.SellerRole;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
 import org.samtuap.inong.domain.seller.repository.SellerRepository;
+import org.samtuap.inong.search.document.FarmDocument;
+import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import static org.samtuap.inong.common.exceptionType.SellerExceptionType.*;
 
 import java.util.List;
@@ -34,6 +35,8 @@ public class SellerService {
     private final JwtService jwtService;
     private final MailService mailService;
     private final PackageProductRepository packageProductRepository;
+    private final FarmSearchService farmSearchService;
+
 
     @Transactional
     public SellerSignUpResponse verifyAndSignUp(EmailRequestDto requestDto) {
@@ -133,6 +136,10 @@ public class SellerService {
                     .build();
             farmCategoryRelationRepository.save(newRelation);
         }
+
+        // elasticsearch : open search에 수정
+        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
+        farmSearchService.updateFarm(farmDocument);
     }
 
     @Transactional

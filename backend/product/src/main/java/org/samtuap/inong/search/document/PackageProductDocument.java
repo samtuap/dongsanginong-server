@@ -1,6 +1,7 @@
 package org.samtuap.inong.search.document;
 
 import lombok.*;
+import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
 
@@ -17,14 +18,16 @@ public class PackageProductDocument {
     private String id;
 
     @Field(type = FieldType.Text)
-    private String farmId;
-
-    @Field(type = FieldType.Text)
     private String packageName;
 
-    @Field(type = FieldType.Integer)
-    private Integer delivery_cycle;
+    @Field(type = FieldType.Text)
+    private String productDescription;
 
-    @Field(type = FieldType.Integer)
-    private Long price;
+    public static PackageProductDocument convertToDocument(PackageProduct product) {
+        return PackageProductDocument.builder()
+                .id(product.getId().toString())
+                .packageName(product.getPackageName())
+                .productDescription(product.getProductDescription())
+                .build();
+    }
 }
