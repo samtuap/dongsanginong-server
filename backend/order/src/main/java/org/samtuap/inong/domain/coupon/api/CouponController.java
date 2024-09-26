@@ -17,18 +17,25 @@ import java.util.List;
 public class CouponController {
     private final CouponService couponService;
 
-    @PostMapping("/{id}/create")
-    public ResponseEntity<?> createCoupon(@PathVariable("id") Long farmId,
-                                          @RequestBody CouponCreateRequest request) {
-        couponService.createCoupon(farmId, request);
+    @PostMapping("/{farm_id}/create")
+    public ResponseEntity<?> createCoupon(
+            @PathVariable("farm_id") Long farmId,
+            @RequestHeader("sellerId") Long sellerId,
+            @RequestBody CouponCreateRequest request) {
+
+        couponService.createCoupon(farmId, sellerId, request);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}/list")
-    public ResponseEntity<List<Coupon>> getCouponsByFarmId(@PathVariable("id") Long farmId) {
+
+    @GetMapping("/{farm_id}/list")
+    public ResponseEntity<List<Coupon>> getCouponsByFarmId(
+            @PathVariable("farm_id") Long farmId) {
+
         List<Coupon> coupons = couponService.getCouponsByFarmId(farmId);
         return ResponseEntity.ok(coupons);
     }
+
 
     @PostMapping("/{id}/download")
     public ResponseEntity<MemberCouponRelationResponse> downloadCoupon(@PathVariable("id") Long couponId,
@@ -36,4 +43,15 @@ public class CouponController {
         MemberCouponRelationResponse response = couponService.downloadCoupon(couponId, memberId);
         return new ResponseEntity<>(response ,HttpStatus.OK);
     }
+
+
+    @GetMapping("/downloaded-coupons")
+    public ResponseEntity<List<MemberCouponRelationResponse>> getDownloadedCouponsByMember(
+            @RequestHeader("myId") String memberId) {
+
+        List<MemberCouponRelationResponse> response = couponService.getDownloadedCouponsByMember(memberId);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

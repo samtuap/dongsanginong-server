@@ -7,6 +7,7 @@ import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.common.S3.ImageService;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
+import org.samtuap.inong.domain.review.dto.ReviewDetailResponse;
 import org.samtuap.inong.domain.review.dto.ReviewListResponse;
 import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
 import org.samtuap.inong.domain.review.entity.Review;
@@ -109,5 +110,14 @@ public class ReviewService {
         imageService.deleteImagesFromS3(imageUrls);
         reviewImageRepository.deleteAllByReviewId(review.getId());
         reviewRepository.delete(review);
+    }
+
+    @Transactional(readOnly = true)
+    public ReviewDetailResponse getReviewDetail(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
+
+        List<ReviewImage> images = reviewImageRepository.findAllByReviewId(reviewId);
+        return ReviewDetailResponse.fromEntity(review, images);
     }
 }

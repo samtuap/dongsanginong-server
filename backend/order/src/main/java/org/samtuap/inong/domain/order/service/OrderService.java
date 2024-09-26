@@ -2,13 +2,11 @@ package org.samtuap.inong.domain.order.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
-import org.samtuap.inong.common.exceptionType.OrderExceptionType;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
@@ -17,9 +15,9 @@ import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.*;
-import org.samtuap.inong.domain.order.entity.CancelReason;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
+import org.samtuap.inong.domain.receipt.entity.PaymentMethod;
 import org.samtuap.inong.domain.receipt.entity.PaymentStatus;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
@@ -34,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
@@ -72,7 +71,7 @@ public class OrderService {
     @Transactional
     public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
         PaymentResponse paymentResponse = makeOrder(memberId, reqDto);
-        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId);
+        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId());
         kafkaTemplate.send("subscription-topic", request);
         return paymentResponse;
     }
@@ -102,8 +101,6 @@ public class OrderService {
                 .memberId(memberId)
                 .packageId(reqDto.packageId())
                 .farmId(packageProduct.farmId())
-                .totalPrice(paidAmount)
-                .discountPrice(discountAmount)
                 .build();
         Ordering savedOrder = orderRepository.save(order);
 
@@ -118,11 +115,13 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 4. 영수증 만들기
-        makeReceipt(savedOrder, packageProduct, paidAmount);
-
         // 5. 최초 결제하기
-        kakaoPay(memberInfo, packageProduct, paidAmount, order);
+        String paymentId = kakaoPay(memberInfo, packageProduct, paidAmount, order);
+
+        // 4. 영수증 만들기
+        makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
+
+
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -131,12 +130,12 @@ public class OrderService {
     }
 
 
-    protected void kakaoPay(MemberAllInfoResponse memberInfo,
+    protected String kakaoPay(MemberAllInfoResponse memberInfo,
                                 PackageProductResponse packageInfo,
                                 Long paidAmount,
                                 Ordering order) {
         // 포트원 빌링키 결제 API URL
-        String paymentId = PAYMENT_PREFIX + "_" + UUID.randomUUID();
+        String paymentId = PAYMENT_PREFIX + "-" + UUID.randomUUID();
         String url = "https://api.portone.io/payments/" + paymentId + "/billing-key";
         order.updatePaymentId(paymentId);
 
@@ -183,6 +182,8 @@ public class OrderService {
             e.printStackTrace();
             throw new BaseCustomException(FAIL_TO_PAY);
         }
+
+        return paymentId;
     }
 
     protected Long calculateDiscountAmount(Coupon coupon, Long originalPrice) {
@@ -237,19 +238,45 @@ public class OrderService {
         }
     }
 
-    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount) {
+    public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount, String paymentId) {
         Receipt receipt = Receipt.builder().order(order)
-                .payedAt(order.getCreatedAt())
+                .paidAt(order.getCreatedAt())
                 .beforePrice(packageProduct.price())
                 .discountPrice(packageProduct.price() - paidAmount)
                 .totalPrice(packageProduct.price())
                 .paymentStatus(PaymentStatus.PAID)
+                .paymentMethod(PaymentMethod.KAKAOPAY) // TODO: 추후 확장 가능성 있음
+                .portOnePaymentId(paymentId)
                 .build();
 
         receiptRepository.save(receipt);
     }
 
+    public List<OrderDeliveryListResponse> getOrderDeliveryList(Long memberId) {
+        return orderRepository.findByMemberId(memberId).stream()
+                .map(ordering -> {
+                    PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
+                    Delivery delivery = deliveryRepository.findByOrdering(ordering);
+                    return delivery != null && delivery.getDeliveryAt() != null
+                            ? OrderDeliveryListResponse.fromEntity(ordering, product, delivery)
+                            : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    public List<OrderPaymentListResponse> getOrderPaymentList(Long memberId) {
+        return orderRepository.findAllByMemberId(memberId).stream()
+                .map(ordering -> {
+                    PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
+                    Receipt receipt = receiptRepository.findByOrderOrThrow(ordering);
+                    return OrderPaymentListResponse.from(ordering, product, receipt);
+                })
+                .collect(Collectors.toList());
+    }
+
     //== Kafka로 주문/결제 취소 ==//
+    @Transactional
     @KafkaListener(topics = "order-rollback-topic", groupId = "member-group",/*member group으로 부터 메시지가 들어오면*/ containerFactory = "kafkaListenerContainerFactory")
     public void consumeRollbackEvent(String message) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -258,28 +285,71 @@ public class OrderService {
             rollbackRequest = objectMapper.readValue(message, KafkaOrderRollbackRequest.class);
             this.rollbackOrder(rollbackRequest);
         } catch (JsonProcessingException e) {
+            log.error("[rollback error] line 283: 카프카 메시지 파싱 에러");
+            e.printStackTrace();
             throw new BaseCustomException(INVALID_ROLLBACK_REQUEST);
         } catch(Exception e) {
-            throw new BaseCustomException(FAIL_TO_ROLLBACK_ORDER);
+            log.error("[rollback error] line 284: 결제 실패");
+            e.printStackTrace();
         }
     }
 
-    protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) {
-        log.info("[line 264] Kafka 롤백 이벤트 수신");
-        Ordering order = orderRepository
-                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId())
-                .orElseThrow(() -> new BaseCustomException(ORDER_NOT_FOUND));
+    protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) throws InterruptedException {
+        Optional<Ordering> orderOpt = orderRepository
+                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
 
+        Ordering order = orderOpt.get();
         Receipt receipt = receiptRepository.findByOrderOrThrow(order);
-        receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
 
         order.updateCanceledAt(LocalDateTime.now());
         order.updateCancelReason(SYSTEM_ERROR);
+        receipt.updatePaymentStatus(PaymentStatus.REFUND_PROCESSING);
 
+        // [쿠폰 롤백] 쿠폰을 사용하지 않은 상태로 되돌리기
+        if(rollbackRequest.couponId() != null) {
+            MemberCouponRelation memberCoupon = memberCouponRelationRepository.findByCouponIdAndMemberId(rollbackRequest.couponId(), rollbackRequest.memberId())
+                    .orElseThrow(() -> new BaseCustomException(COUPON_NOT_FOUND));
+            memberCoupon.updateIsUsed("N");
+            memberCoupon.updateUsedAt(null);
+            memberCoupon.updateOrderId(null);
+        }
 
+        // 포트원 환불
+        kakaoPayRefund(receipt);
     }
 
-    private void kakaoPayRefund() {
+    private void kakaoPayRefund(Receipt receipt) {
+        String paymentId = receipt.getPortOnePaymentId();
+        String url = "https://api.portone.io/payments/" + paymentId + "/cancel";
 
+        log.info("line 326: {}", paymentId);
+
+
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "PortOne " + API_SECRET);
+
+        // 요청 바디 설정
+        Map<String, Object> body = new HashMap<>();
+        body.put("reason", SYSTEM_ERROR.getDescription()); // 취소 사유
+        body.put("storeId", STORE_ID); // 스토어 아이디
+
+        // HttpEntity에 요청 데이터 추가
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new BaseCustomException(FAIL_TO_PAY);
+        }
+
+        receipt.updatePaymentStatus(PaymentStatus.REFUNDED);
+        receipt.updateRefundedAt(LocalDateTime.now());
+        receiptRepository.save(receipt);
     }
+
 }

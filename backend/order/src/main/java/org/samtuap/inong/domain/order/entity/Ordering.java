@@ -31,18 +31,13 @@ public class Ordering extends BaseEntity {
     private Long packageId;
 
     @NotNull
-    private Long totalPrice;
-
-    @NotNull
-    private Long discountPrice;
-
-    @NotNull
     private Long farmId; // farm_id 추가
 
     private String paymentId; // portone payment id
 
     private LocalDateTime canceledAt;
 
+    @Enumerated(value = EnumType.STRING)
     private CancelReason cancelReason;
 
     public void updateCanceledAt(LocalDateTime canceledAt) {

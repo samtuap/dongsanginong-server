@@ -1,9 +1,10 @@
 package org.samtuap.inong.domain.order.api;
 
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.domain.order.dto.OrderDeliveryListResponse;
+import org.samtuap.inong.domain.order.dto.OrderPaymentListResponse;
 import org.samtuap.inong.domain.order.dto.PaymentRequest;
 import org.samtuap.inong.domain.order.dto.PaymentResponse;
-import org.samtuap.inong.domain.order.dto.TopPackageResponse;
 import org.samtuap.inong.domain.order.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,5 +32,16 @@ public class OrderController {
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
     }
 
+    @GetMapping("/delivery/list")
+    public ResponseEntity<List<OrderDeliveryListResponse>> getOrderDeliveryList(@RequestHeader("myId") Long memberId){
+        List<OrderDeliveryListResponse> myOrderDeliveryList = orderService.getOrderDeliveryList(memberId);
+        return new ResponseEntity<>(myOrderDeliveryList, HttpStatus.OK);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<OrderPaymentListResponse>> getOrderPaymentList(@RequestHeader("myId") Long memberId){
+        List<OrderPaymentListResponse> myOrderPaymentList = orderService.getOrderPaymentList(memberId);
+        return new ResponseEntity<>(myOrderPaymentList, HttpStatus.OK);
+    }
 
 }

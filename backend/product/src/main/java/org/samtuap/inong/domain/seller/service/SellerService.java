@@ -9,15 +9,17 @@ import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.common.S3.ImageService;
+import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.entity.SellerRole;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
 import org.samtuap.inong.domain.seller.repository.SellerRepository;
+import org.samtuap.inong.search.document.FarmDocument;
+import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import static org.samtuap.inong.common.exceptionType.SellerExceptionType.*;
 
 import java.util.List;
@@ -34,6 +36,8 @@ public class SellerService {
     private final JwtService jwtService;
     private final MailService mailService;
     private final ImageService imageService;
+    private final PackageProductRepository packageProductRepository;
+    private final FarmSearchService farmSearchService;
 
     @Transactional
     public SellerSignUpResponse verifyAndSignUp(EmailRequestDto requestDto) {
@@ -91,8 +95,19 @@ public class SellerService {
         return seller;
     }
 
+    @Transactional
     public void withDraw(Long sellerId) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+
+        // 패키지 중 삭제되지 않은 항목이 있는지 확인
+        boolean hasActivePackages = packageProductRepository.existsByFarmIdAndDeletedAtIsNull(farm.getId());
+        if (hasActivePackages) {
+            throw new BaseCustomException(PACKAGES_EXIST);
+        }
+
+        // 삭제되지 않은 패키지가 없으면 농장과 판매자 삭제 진행
+        farmRepository.delete(farm);
         sellerRepository.deleteById(seller.getId());
         jwtService.deleteRefreshToken(seller.getId());
     }
@@ -127,6 +142,10 @@ public class SellerService {
                     .build();
             farmCategoryRelationRepository.save(newRelation);
         }
+
+        // elasticsearch : open search에 수정
+        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
+        farmSearchService.updateFarm(farmDocument);
     }
 
     @Transactional

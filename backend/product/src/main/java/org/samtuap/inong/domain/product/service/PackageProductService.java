@@ -12,6 +12,8 @@ import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.samtuap.inong.domain.product.repository.PackageProductImageRepository;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
+import org.samtuap.inong.search.document.PackageProductDocument;
+import org.samtuap.inong.search.service.PackageProductSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,8 @@ public class PackageProductService {
     private final FarmRepository farmRepository;
     private final PackageProductImageService packageProductImageService;
     private final ImageService imageService;
+    private final PackageProductSearchService packageProductSearchService;
+
     public List<TopPackageGetResponse> getTopPackages() {
         List<Long> topPackages = orderFeign.getTopPackages();
         List<PackageProduct> products = packageProductRepository.findAllByIds(topPackages);
@@ -65,6 +69,11 @@ public class PackageProductService {
 //        DB에 저장
         packageProductImageService.saveImages(savedPackageProduct, imageUrls);
 
+        // elasticsearch : open search에 인덱싱
+        PackageProductDocument packageProductDocument = PackageProductDocument.convertToDocument(savedPackageProduct);
+        packageProductSearchService.indexProductDocument(packageProductDocument);
+
+        // 저장된 엔티티를 DTO로 반환
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
     }
 
@@ -89,6 +98,9 @@ public class PackageProductService {
         packageProductImageRepository.deleteByPackageProductAndImageUrlIn(packageProduct, imageUrls);
 //        패키지 삭제
         packageProductRepository.delete(packageProduct);
+
+        // elasticsearch : 삭제
+        packageProductSearchService.deleteProduct(String.valueOf(packageId));
     }
 
     @Transactional
@@ -105,6 +117,10 @@ public class PackageProductService {
 
         // 수정된 상품 정보 저장
         packageProductRepository.save(packageProduct);
+
+        // elasticsearch : open search에 수정
+        PackageProductDocument updateProduct = PackageProductDocument.convertToDocument(packageProduct);
+        packageProductSearchService.updateProduct(updateProduct);
     }
 
     public List<PackageProductResponse> getProductInfoList(List<Long> ids) {

@@ -29,4 +29,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     Page<Delivery> findByOrderingInAndDeliveryStatusIn(List<Ordering> orderList,
                                                        List<DeliveryStatus> statuses,
                                                        Pageable pageable);
+
+    Delivery findByOrdering(Ordering ordering);
 }
