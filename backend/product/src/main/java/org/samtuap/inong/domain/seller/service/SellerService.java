@@ -32,6 +32,7 @@ public class SellerService {
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
     private final MailService mailService;
+    private final PackageProductDeleteService packageProductService;
 
     @Transactional
     public SellerSignUpResponse verifyAndSignUp(EmailRequestDto requestDto) {
@@ -89,8 +90,19 @@ public class SellerService {
         return seller;
     }
 
+    @Transactional
     public void withDraw(Long sellerId) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
+        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
+
+        // 패키지 중 삭제되지 않은 항목이 있는지 확인
+        boolean hasActivePackages = packageProductService.hasActivePackages(farm.getId());
+        if (hasActivePackages) {
+            throw new BaseCustomException(PACKAGES_EXIST);
+        }
+
+        // 삭제되지 않은 패키지가 없으면 농장과 판매자 삭제 진행
+        farmRepository.delete(farm);
         sellerRepository.deleteById(seller.getId());
         jwtService.deleteRefreshToken(seller.getId());
     }
