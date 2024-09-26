@@ -5,6 +5,7 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
+import org.samtuap.inong.domain.product.service.ImageService;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
 import org.samtuap.inong.domain.review.dto.ReviewListResponse;
 import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
@@ -27,6 +28,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
     private final PackageProductRepository packageProductRepository;
+    private final ReviewImageService reviewImageService;
+    private final ImageService imageService;
 
     @Transactional
     public void createReview(Long packageProductId, Long memberId, ReviewCreateRequest request) {
@@ -40,11 +43,11 @@ public class ReviewService {
 
         // Review 엔티티 생성 및 저장
         Review review = request.toEntity(packageProduct, memberId);
-        reviewRepository.save(review); // 리뷰 저장
+        Review savedReview = reviewRepository.save(review); // 리뷰 저장
 
-        // ReviewImage 리스트 생성 및 저장
-        List<ReviewImage> images = request.toReviewImages(review);
-        reviewImageRepository.saveAll(images); // 이미지 리스트 저장
+        List<String> imageUrls = imageService.extractImageUrls(request.imageUrls());
+
+        reviewImageService.saveImages(savedReview, imageUrls);
     }
 
     @Transactional
@@ -53,14 +56,16 @@ public class ReviewService {
         Review existingReview = reviewRepository.findByIdAndMemberId(reviewId, memberId)
                 .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
 
-        // 새로운 리뷰 엔티티 생성
         Review updatedReview = ReviewUpdateRequest.toUpdatedEntity(request, existingReview);
         reviewRepository.save(updatedReview);
 
-        // 기존 이미지 삭제 후 새로운 이미지 저장
-        reviewImageRepository.deleteAllByReviewId(reviewId);
-        List<ReviewImage> newImages = request.toReviewImages(updatedReview);
-        reviewImageRepository.saveAll(newImages);
+        // 기존 이미지 삭제
+        List<String> oldImageUrls = reviewImageService.findAllImageUrlsByReview(existingReview);
+        reviewImageService.deleteImages(existingReview, oldImageUrls);
+
+        // 새로운 이미지 저장
+        List<String> newImageUrls = imageService.extractImageUrls(request.imageUrls());
+        reviewImageService.saveImages(existingReview, newImageUrls);
     }
 
     @Transactional
@@ -68,16 +73,11 @@ public class ReviewService {
         Review review = reviewRepository.findByIdAndMemberId(reviewId, memberId)
                 .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
 
-        // 리뷰에 속한 이미지를 먼저 삭제
-        reviewImageRepository.deleteAllByReviewId(reviewId);
-
-        // 리뷰 삭제
-        reviewRepository.delete(review);
+        deleteReviewWithImages(review);
     }
 
     @Transactional
     public void deleteReviewBySeller(Long reviewId, Long sellerId) {
-        // 리뷰 조회
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new BaseCustomException(REVIEW_NOT_FOUND));
 
@@ -88,15 +88,8 @@ public class ReviewService {
         if (!farm.getSellerId().equals(sellerId)) {
             throw new BaseCustomException(AUTHORITY_NOT_FOUND);
         }
-
-        // 리뷰에 속한 이미지를 먼저 삭제
-        reviewImageRepository.deleteAllByReviewId(reviewId);
-
-        // 리뷰 삭제
-        reviewRepository.delete(review);
+        deleteReviewWithImages(review);
     }
-
-
 
     @Transactional(readOnly = true)
     public List<ReviewListResponse> getReviewsByPackageProductId(Long packageProductId) {
@@ -108,5 +101,13 @@ public class ReviewService {
                     return ReviewListResponse.fromEntity(review, images);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteReviewWithImages(Review review) {
+        List<String> imageUrls = reviewImageService.findAllImageUrlsByReview(review);
+        imageService.deleteImagesFromS3(imageUrls);
+        reviewImageRepository.deleteAllByReviewId(review.getId());
+        reviewRepository.delete(review);
     }
 }

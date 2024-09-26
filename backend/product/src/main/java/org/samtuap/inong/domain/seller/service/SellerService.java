@@ -8,6 +8,7 @@ import org.samtuap.inong.domain.farm.entity.FarmCategory;
 import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.product.service.ImageService;
 import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.entity.SellerRole;
@@ -32,6 +33,7 @@ public class SellerService {
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
     private final MailService mailService;
+    private final ImageService imageService;
 
     @Transactional
     public SellerSignUpResponse verifyAndSignUp(EmailRequestDto requestDto) {
@@ -111,8 +113,13 @@ public class SellerService {
     public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
         Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
-        farm.updateInfo(infoUpdateRequest);
+
+        String bannerImageUrl = imageService.extractImageUrl(infoUpdateRequest.bannerImageUrl());
+        String profileImageUrl = imageService.extractImageUrl(infoUpdateRequest.profileImageUrl());
+
+        farm.updateInfo(infoUpdateRequest, bannerImageUrl, profileImageUrl);
         farmCategoryRelationRepository.deleteAllByFarm(farm);
+
         for (FarmCategory category : infoUpdateRequest.category()) {
             FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
                     .farm(farm)

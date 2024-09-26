@@ -46,9 +46,9 @@ public class Farm extends BaseEntity {
     @NotNull
     private Long orderCount;
 
-    public void updateInfo(SellerFarmInfoUpdateRequest infoRequest) {
-        this.bannerImageUrl = infoRequest.bannerImageUrl();
-        this.profileImageUrl = infoRequest.profileImageUrl();
+    public void updateInfo(SellerFarmInfoUpdateRequest infoRequest, String bannerImageUrl, String profileImageUrl) {
+        this.bannerImageUrl = bannerImageUrl;
+        this.profileImageUrl = profileImageUrl;
         this.farmName = infoRequest.farmName();
         this.farmIntro = infoRequest.farmIntro();
     }

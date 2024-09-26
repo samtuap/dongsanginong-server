@@ -13,6 +13,7 @@ import org.samtuap.inong.domain.farmNotice.entity.NoticeComment;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeImageRepository;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeRepository;
 import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
+import org.samtuap.inong.domain.product.service.ImageService;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class FarmNoticeService {
     private final NoticeCommentRepository noticeCommentRepository;
     private final MemberFeign memberFeign;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final ImageService imageService;
 
     /**
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
@@ -191,7 +193,8 @@ public class FarmNoticeService {
         farmNoticeRepository.save(farmNotice);
 
         // 이미지 저장
-        saveNoticeImages(farmNotice, dto.imageUrls());
+        List<String> imageUrls = imageService.extractImageUrls(dto.imageUrls());
+        saveNoticeImages(farmNotice, imageUrls);
 
         // Kafka를 통한 알림 전송
         issueNotificationToFollowers(farm, dto);
@@ -231,8 +234,12 @@ public class FarmNoticeService {
         updateFarmNoticeFields(farmNotice, dto);
 
         // 기존 이미지 삭제 및 새로운 이미지 저장
+        List<String> existingImageUrls = farmNoticeImageRepository.findImageUrlsByFarmNotice(farmNotice);
+        imageService.deleteImagesFromS3(existingImageUrls);
         farmNoticeImageRepository.deleteByFarmNotice(farmNotice);
-        saveNoticeImages(farmNotice, dto.imageUrls());
+
+        List<String> newImageUrls = imageService.extractImageUrls(dto.imageUrls());
+        saveNoticeImages(farmNotice, newImageUrls);
     }
 
     private void updateFarmNoticeFields(FarmNotice farmNotice, NoticeUpdateRequest dto) {
@@ -279,9 +286,11 @@ public class FarmNoticeService {
         }
 
         // 관련 이미지 삭제
-        farmNoticeImageRepository.deleteByFarmNotice(farmNotice);
+        List<String> imageUrls = farmNoticeImageRepository.findImageUrlsByFarmNotice(farmNotice);
+        imageService.deleteImagesFromS3(imageUrls);
 
         // 관련 댓글 삭제
+        farmNoticeImageRepository.deleteByFarmNotice(farmNotice);
         noticeCommentRepository.deleteByFarmNotice(farmNotice);
 
         // 공지 삭제

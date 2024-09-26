@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.entity.FarmCategory;
@@ -14,6 +15,7 @@ import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.product.service.ImageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.samtuap.inong.common.exceptionType.FarmExceptionType.FARM_CATEGORY_NOT_FOUND;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -32,6 +36,7 @@ public class FarmService {
     private final LiveFeign liveFeign;
     private final FarmCategoryRepository farmCategoryRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
+    private final ImageService imageService;
 
     // 최신순, 스크랩순, 판매량 순
     public Page<FarmListGetResponse> getFarmList(Pageable pageable) {
@@ -110,18 +115,21 @@ public class FarmService {
 
     @Transactional
     public FarmCreateResponse createFarm(FarmCreateRequest request, Long sellerId) {
-        Farm farm = FarmCreateRequest.toEntity(request, sellerId);
+        String bannerImageUrl = imageService.extractImageUrl(request.bannerImageUrl());
+        String profileImageUrl = imageService.extractImageUrl(request.profileImageUrl());
+
+        Farm farm = FarmCreateRequest.toEntity(request, sellerId, bannerImageUrl, profileImageUrl);
         farm = farmRepository.save(farm);
 
         for (Long categoryId : request.categories()) {
-            FarmCategory farmCategory = farmCategoryRepository.findByIdOrThrow(categoryId);
+            FarmCategory farmCategory = farmCategoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new BaseCustomException(FARM_CATEGORY_NOT_FOUND));
             FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
                     .farm(farm)
                     .category(farmCategory)
                     .build();
             farmCategoryRelationRepository.save(newRelation);
         }
-
         return FarmCreateResponse.fromEntity(farm);
     }
 }

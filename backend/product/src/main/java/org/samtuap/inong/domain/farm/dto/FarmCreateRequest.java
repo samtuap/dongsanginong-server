@@ -13,12 +13,12 @@ public record FarmCreateRequest(
         String farmIntro,
         List<Long> categories
 ) {
-    public static Farm toEntity(FarmCreateRequest request, Long sellerId) {
+    public static Farm toEntity(FarmCreateRequest request, Long sellerId, String bannerImageUrl, String profileImageUrl) {
         return Farm.builder()
                 .sellerId(sellerId)
                 .farmName(request.farmName())
-                .bannerImageUrl(request.bannerImageUrl())
-                .profileImageUrl(request.profileImageUrl())
+                .bannerImageUrl(bannerImageUrl)
+                .profileImageUrl(profileImageUrl)
                 .farmIntro(request.farmIntro())
                 .favoriteCount(0L)
                 .orderCount(0L)
