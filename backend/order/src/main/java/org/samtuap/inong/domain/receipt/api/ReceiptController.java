@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/receipt")
 @RestController
 public class ReceiptController {
-    private ReceiptService receiptService;
+    private final ReceiptService receiptService;
 
     @GetMapping
     public ResponseEntity<ReceiptInfoResponse> getReceiptInfo(@RequestParam("id") Long receiptId){

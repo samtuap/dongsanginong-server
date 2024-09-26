@@ -16,7 +16,8 @@ public record ReceiptInfoResponse(Long orderId,
                                   Long beforePrice,
                                   Long discountPrice,
                                   Long totalPrice,
-                                  String paymentMethod
+                                  String paymentMethod,
+                                  String paymentStatus
                                   ) {
     public static ReceiptInfoResponse from(Receipt receipt, PackageProductResponse product) {
         return ReceiptInfoResponse.builder()
@@ -31,6 +32,7 @@ public record ReceiptInfoResponse(Long orderId,
                 .discountPrice(receipt.getDiscountPrice())
                 .totalPrice(receipt.getTotalPrice())
                 .paymentMethod(receipt.getPaymentMethod().toString())
+                .paymentStatus(receipt.getPaymentStatus().toString())
                 .build();
     }
 }
