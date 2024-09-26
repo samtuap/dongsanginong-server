@@ -111,6 +111,10 @@ public class PackageProductService {
 
         // 수정된 상품 정보 저장
         packageProductRepository.save(packageProduct);
+
+        // elasticsearch : open search에 수정
+        PackageProductDocument updateProduct = PackageProductDocument.convertToDocument(packageProduct);
+        packageProductSearchService.updateProduct(updateProduct);
     }
 
     public List<PackageProductResponse> getProductInfoList(List<Long> ids) {

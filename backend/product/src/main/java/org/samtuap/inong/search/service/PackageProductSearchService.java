@@ -40,6 +40,7 @@ public class PackageProductSearchService {
             log.error("Error initializing PackageProductSearchService: ", e);
         }
     }
+
     // 인덱스 생성
     public void createIndex() {
         try {
@@ -111,6 +112,21 @@ public class PackageProductSearchService {
                             .id(id));
             DeleteResponse response = openSearchClient.delete(deleteRequest);
             log.info("삭제 응답 : {}", response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 수정
+    public void updateProduct(PackageProductDocument packageProductDocument) {
+        try {
+            // index_name & id와 일치한 document 찾아서 > 받아온 값으로 업데이트
+            UpdateRequest<PackageProductDocument, Object> request = UpdateRequest.of(builder -> builder
+                    .index(INDEX_NAME)
+                    .id(packageProductDocument.getId())
+                    .doc(packageProductDocument));
+            UpdateResponse<PackageProductDocument> response = openSearchClient.update(request, PackageProductDocument.class);
+            log.info("수정 응답 : {}", response);
         } catch (IOException e) {
             e.printStackTrace();
         }

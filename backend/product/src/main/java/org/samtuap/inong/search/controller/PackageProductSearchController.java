@@ -36,4 +36,11 @@ public class PackageProductSearchController {
         packageProductSearchService.deleteProduct(id);
         return new ResponseEntity<>("삭제 완료", HttpStatus.OK);
     }
+
+    // 수정
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateProduct(@RequestBody PackageProductDocument packageProductDocument) {
+        packageProductSearchService.updateProduct(packageProductDocument);
+        return new ResponseEntity<>("수정 완료", HttpStatus.OK);
+    }
 }
