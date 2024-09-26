@@ -22,4 +22,6 @@ public interface PackageProductRepository extends JpaRepository<PackageProduct, 
     default PackageProduct findByIdOrThrow(Long packageId){
         return findById(packageId).orElseThrow(()->new BaseCustomException(PRODUCT_NOT_FOUND));
     }
+
+    boolean existsByFarmIdAndDeletedAtIsNull(Long farmId);
 }
