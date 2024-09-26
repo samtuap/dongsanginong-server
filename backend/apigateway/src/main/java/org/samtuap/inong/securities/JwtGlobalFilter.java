@@ -33,7 +33,7 @@ public class JwtGlobalFilter implements GlobalFilter {
 
     private final List<String> allowUrl = Arrays.asList("/member/sign-in", "/member/sign-up", "/seller/sign-in", "/seller/sign-up", "/seller/sign-up/verified", "/member/{id}", "/member/create-token",
                                                         "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**", "/live/active", "/farm/list", "/farm/search", "/farm/detail/{farmId}", "/farm/{farm_id}/notice/list",
-                                                        "/farm/{farm_id}/notice/{notice_id}", "/farm/{farm_id}/notice/{notice_id}/comment", "/reviews/{packageProductId}/list", "/reviews/detail/{reviewId}");
+                                                        "/farm/{farm_id}/notice/{notice_id}", "/farm/{farm_id}/notice/{notice_id}/comment", "/reviews/{packageProductId}/list", "/reviews/detail/{reviewId}", "/member/healthcheck");
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     @Override
