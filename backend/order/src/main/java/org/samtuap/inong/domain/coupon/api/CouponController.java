@@ -17,13 +17,12 @@ import java.util.List;
 public class CouponController {
     private final CouponService couponService;
 
-    @PostMapping("/{farm_id}/create")
+    @PostMapping("/create")
     public ResponseEntity<?> createCoupon(
-            @PathVariable("farm_id") Long farmId,
             @RequestHeader("sellerId") Long sellerId,
             @RequestBody CouponCreateRequest request) {
 
-        couponService.createCoupon(farmId, sellerId, request);
+        couponService.createCoupon(sellerId, request);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
