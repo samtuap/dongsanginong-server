@@ -46,7 +46,8 @@ public class PackageProductController {
         return ResponseEntity.ok(packageProductCreateResponse);
     }
 
-    @GetMapping("/product/info")
+    // Feign 요청용 메서드
+    @PostMapping("/info")
     List<PackageProductResponse> getPackageProductList(@RequestBody List<Long> ids) {
         return packageProductService.getProductInfoList(ids);
     }
@@ -55,5 +56,11 @@ public class PackageProductController {
     @PostMapping("/subscription/list")
     public List<PackageProductSubsResponse> getProductSubsList(@RequestBody List<Long> subscriptionIds){
         return packageProductService.getProductSubsList(subscriptionIds);
+    }
+
+    // Feign 요청용 메서드
+    @PostMapping("/info/contain-deleted")
+    List<PackageProductResponse> getPackageProductListContainDeleted(@RequestBody List<Long> ids) {
+        return packageProductService.getProductInfoListContainDeleted(ids);
     }
 }

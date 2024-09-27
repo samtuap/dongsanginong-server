@@ -85,16 +85,27 @@ public class MemberController {
         return new ResponseEntity<>(updateInfo, HttpStatus.OK);
     }
 
-
     @GetMapping("/favorite/farm")
     public ResponseEntity<List<MemberFavoriteFarmResponse>> getFavoriteFarm(@RequestHeader("myId") Long memberId){
         List<MemberFavoriteFarmResponse> favoriteFarmResponse = memberService.getFavoriteFarm(memberId);
         return new ResponseEntity<>(favoriteFarmResponse, HttpStatus.OK);
     }
 
+    // feign 요청 용
+    @PostMapping("/info-list")
+    public List<MemberDetailResponse> findMemberList(@RequestBody List<Long> memberIds) {
+        return memberService.findMemberList(memberIds);
+    }
+
+
+    // feign 요청 용
+    @PostMapping("/info-list-contain-deleted")
+    public List<MemberDetailResponse> findMemberListContainDeleted(@RequestBody List<Long> memberIds) {
+        return memberService.findAllByIdContainDeleted(memberIds);
+    }
+
     @GetMapping("/healthcheck")
     public String healthcheck() {
         return "ok!";
     }
-
 }
