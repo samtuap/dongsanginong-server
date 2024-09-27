@@ -11,11 +11,11 @@ public record CouponCreateRequest(
         @NotNull LocalDateTime expiration,
         @NotNull Long farmId
 ) {
-    public Coupon toEntity(Long farmId) {
+    public static Coupon toEntity(CouponCreateRequest dto, Long farmId) {
         return Coupon.builder()
-                .couponName(this.couponName)
-                .discountPercentage(this.discountPercentage)
-                .expiration(this.expiration)
+                .couponName(dto.couponName)
+                .discountPercentage(dto.discountPercentage)
+                .expiration(dto.expiration)
                 .farmId(farmId)
                 .build();
     }

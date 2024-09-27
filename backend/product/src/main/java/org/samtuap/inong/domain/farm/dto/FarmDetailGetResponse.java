@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Builder
 public record FarmDetailGetResponse(@NotNull Long id,
+                                    @NotNull Long sellerId,
                                     @NotNull String farmName,
                                     @NotNull String bannerImageUrl,
                                     @NotNull String profileImageUrl,
@@ -17,6 +18,7 @@ public record FarmDetailGetResponse(@NotNull Long id,
     public static FarmDetailGetResponse fromEntity(Farm farm) {
         return FarmDetailGetResponse.builder()
                 .id(farm.getId())
+                .sellerId(farm.getSellerId())
                 .farmName(farm.getFarmName())
                 .bannerImageUrl(farm.getBannerImageUrl())
                 .profileImageUrl(farm.getProfileImageUrl())
