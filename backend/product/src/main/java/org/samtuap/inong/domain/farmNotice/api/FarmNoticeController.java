@@ -79,32 +79,29 @@ public class FarmNoticeController {
     /**
      * 공지 생성 (판매자가 공지 등록)
      */
-    @PostMapping("/{farm_id}/notice/create")
-    public void createNotice(@PathVariable("farm_id") Long farmId,
-                             @RequestHeader("sellerId") Long sellerId,
+    @PostMapping("/notice/create")
+    public void createNotice(@RequestHeader("sellerId") Long sellerId,
                              @RequestBody NoticeCreateRequest dto) {
-        farmNoticeService.createNotice(farmId, sellerId, dto);
+        farmNoticeService.createNotice(sellerId, dto);
     }
 
     /**
      * 공지 수정 (판매자가 공지 수정)
      */
-    @PutMapping("/{farm_id}/notice/{notice_id}/update")
-    public void updateNotice(@PathVariable("farm_id") Long farmId,
-                             @PathVariable("notice_id") Long noticeId,
+    @PutMapping("/notice/{notice_id}/update")
+    public void updateNotice(@PathVariable("notice_id") Long noticeId,
                              @RequestHeader("sellerId") Long sellerId,
                              @RequestBody NoticeUpdateRequest dto) {
-        farmNoticeService.updateNotice(farmId, noticeId, sellerId, dto);
+        farmNoticeService.updateNotice(noticeId, sellerId, dto);
     }
 
     /**
      * 공지 삭제 (판매자가 공지 삭제)
      */
-    @DeleteMapping("/{farm_id}/notice/{notice_id}/delete")
-    public void deleteNotice(@PathVariable("farm_id") Long farmId,
-                             @PathVariable("notice_id") Long noticeId,
+    @DeleteMapping("/notice/{notice_id}/delete")
+    public void deleteNotice(@PathVariable("notice_id") Long noticeId,
                              @RequestHeader("sellerId") Long sellerId) {
-        farmNoticeService.deleteNotice(farmId, noticeId, sellerId);
+        farmNoticeService.deleteNotice(noticeId, sellerId);
     }
 
 }
