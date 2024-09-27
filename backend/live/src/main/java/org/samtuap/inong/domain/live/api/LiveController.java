@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.samtuap.inong.domain.live.dto.ActiveLiveListGetResponse;
 
-
 import java.util.List;
 
 @RequestMapping("/live")
@@ -22,7 +21,6 @@ import java.util.List;
 public class LiveController {
 
     private final LiveService liveService;
-
 
     @GetMapping("/active")
     public ResponseEntity<List<ActiveLiveListGetResponse>> getActiveLiveList() {
@@ -36,15 +34,5 @@ public class LiveController {
     @PostMapping("/farm")
     public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList) {
         return liveService.getFavoritesFarmLiveList(favoriteFarmList);
-    }
-
-    @GetMapping("/get")
-    public String test1() {
-        return "get ok";
-    }
-
-    @PostMapping("/post")
-    public String test2() {
-        return "post ok";
     }
 }

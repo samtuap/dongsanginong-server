@@ -1,19 +1,14 @@
 package org.samtuap.inong.domain.live.api;
 
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
-
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import io.openvidu.java.client.Connection;
 import io.openvidu.java.client.ConnectionProperties;
 import io.openvidu.java.client.OpenVidu;
@@ -22,7 +17,6 @@ import io.openvidu.java.client.OpenViduJavaClientException;
 import io.openvidu.java.client.Session;
 import io.openvidu.java.client.SessionProperties;
 
-//@CrossOrigin(origins = "*")
 @RestController
 public class OpenViduController {
 
@@ -40,9 +34,6 @@ public class OpenViduController {
     }
 
     /**
-     * @param params The Session properties
-     * @return The Session ID
-     *
      * (1) create session
      */
     @PostMapping("/api/sessions")
@@ -54,10 +45,6 @@ public class OpenViduController {
     }
 
     /**
-     * @param sessionId The Session in which to create the Connection
-     * @param params    The Connection properties
-     * @return The Token associated to the Connection
-     *
      * (2) create connection => 토큰 생성
      */
     @PostMapping("/api/sessions/{sessionId}/connections")
@@ -72,5 +59,4 @@ public class OpenViduController {
         Connection connection = session.createConnection(properties);
         return new ResponseEntity<>(connection.getToken(), HttpStatus.OK);
     }
-
 }
