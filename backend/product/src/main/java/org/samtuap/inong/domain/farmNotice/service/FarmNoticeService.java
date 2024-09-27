@@ -177,15 +177,10 @@ public class FarmNoticeService {
      * 공지 생성 (판매자가 공지 등록)
      */
     @Transactional
-    public void createNotice(Long farmId, Long sellerId, NoticeCreateRequest dto) {
-        Farm farm = farmRepository.findById(farmId).orElseThrow(
+    public void createNotice(Long sellerId, NoticeCreateRequest dto) {
+        Farm farm = farmRepository.findBySellerId(sellerId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
-
-        // sellerId 검사
-        if (!farm.getSellerId().equals(sellerId)) {
-            throw new BaseCustomException(UNAUTHORIZED_ACTION);
-        }
 
         FarmNotice farmNotice = NoticeCreateRequest.toEntity(dto, farm);
         farmNoticeRepository.save(farmNotice);
@@ -196,6 +191,7 @@ public class FarmNoticeService {
         // Kafka를 통한 알림 전송
         issueNotificationToFollowers(farm, dto);
     }
+
 
     private void issueNotificationToFollowers(Farm farm, NoticeCreateRequest dto) {
         FollowersGetResponse followers = memberFeign.getFollowers(farm.getId());
@@ -213,15 +209,10 @@ public class FarmNoticeService {
      * 공지 수정 (판매자가 공지 수정)
      */
     @Transactional
-    public void updateNotice(Long farmId, Long noticeId, Long sellerId, NoticeUpdateRequest dto) {
-        Farm farm = farmRepository.findById(farmId).orElseThrow(
+    public void updateNotice(Long noticeId, Long sellerId, NoticeUpdateRequest dto) {
+        Farm farm = farmRepository.findBySellerId(sellerId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
-
-        // sellerId 검사
-        if (!farm.getSellerId().equals(sellerId)) {
-            throw new BaseCustomException(UNAUTHORIZED_ACTION);
-        }
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         if (farmNotice == null) {
@@ -263,15 +254,10 @@ public class FarmNoticeService {
      * 공지 삭제 (판매자가 공지 삭제)
      */
     @Transactional
-    public void deleteNotice(Long farmId, Long noticeId, Long sellerId) {
-        Farm farm = farmRepository.findById(farmId).orElseThrow(
+    public void deleteNotice(Long noticeId, Long sellerId) {
+        Farm farm = farmRepository.findBySellerId(sellerId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
-
-        // sellerId 검사
-        if (!farm.getSellerId().equals(sellerId)) {
-            throw new BaseCustomException(UNAUTHORIZED_ACTION);
-        }
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         if (farmNotice == null) {
