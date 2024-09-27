@@ -96,7 +96,20 @@ public class MemberService {
         return MemberDetailResponse.from(member);
     }
 
+    /**
+     * feignClient 요청용
+     */
+    public List<MemberDetailResponse> findMemberList(List<Long> ids) {
+        return memberRepository.findByAllByIds(ids).stream()
+                .map(MemberDetailResponse::from)
+                .toList();
+    }
 
+    public List<MemberDetailResponse> findAllByIdContainDeleted(List<Long> ids) {
+        return memberRepository.findAllByIdContainDeleted(ids).stream()
+                .map(MemberDetailResponse::from)
+                .toList();
+    }
     /**
      * feignClient 요청용
      */

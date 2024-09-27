@@ -24,4 +24,7 @@ public interface PackageProductRepository extends JpaRepository<PackageProduct, 
     }
 
     boolean existsByFarmIdAndDeletedAtIsNull(Long farmId);
+
+    @Query(value = "SELECT p.* FROM package_product AS p WHERE p.id IN :ids", nativeQuery = true)
+    List<PackageProduct> findAllByIdContainDeleted(List<Long> ids);
 }
