@@ -11,6 +11,7 @@ import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
 import org.samtuap.inong.domain.coupon.repository.MemberCouponRelationRepository;
 import org.samtuap.inong.domain.coupon.dto.FarmSellerResponse;
+import org.samtuap.inong.domain.delivery.dto.FarmDetailGetResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +28,17 @@ public class CouponService {
     private final ProductFeign productFeign;
 
     @Transactional
-    public void createCoupon(Long farmId, Long sellerId, CouponCreateRequest request) {
+    public void createCoupon(Long sellerId, CouponCreateRequest request) {
 
-        FarmSellerResponse farm = productFeign.getSellerIdByFarm(sellerId);
+        FarmDetailGetResponse farm = productFeign.getFarmInfoWithSeller(sellerId);
 
-        // farmId로 조회한 sellerId와 요청에서 받은 sellerId 비교
-        if (!farm.sellerId().equals(farmId)) {
-            throw new BaseCustomException(FARM_NOT_FOUND);
-        }
+//        // farmId로 조회한 sellerId와 요청에서 받은 sellerId 비교
+//        if (!farm.sellerId().equals(sellerId)) {
+//            throw new BaseCustomException(FARM_NOT_FOUND);
+//        }
 
         // Coupon 엔티티 생성
-        Coupon coupon = request.toEntity(farmId);
+        Coupon coupon = request.toEntity(request, farm.id());
         couponRepository.save(coupon);
     }
 
