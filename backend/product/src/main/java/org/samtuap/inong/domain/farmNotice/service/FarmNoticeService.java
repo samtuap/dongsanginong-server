@@ -60,7 +60,6 @@ public class FarmNoticeService {
      * 공지 디테일 조회 => 제목, 내용, 사진(슬라이더) + 댓글
      */
     public NoticeDetailResponse noticeDetail(Long farmId, Long noticeId) {
-
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
@@ -84,7 +83,6 @@ public class FarmNoticeService {
      */
     @Transactional
     public void commentCreate(Long farmId, Long noticeId, String memberId, CommentCreateRequest dto) {
-
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
@@ -103,8 +101,7 @@ public class FarmNoticeService {
     /**
      * 공지에 달린 댓글 조회
      */
-    public List<CommentListResponse> commentList(Long farmId, Long noticeId) {
-
+    public Page<CommentListResponse> commentList(Long farmId, Long noticeId, Pageable pageable) {
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
@@ -117,22 +114,11 @@ public class FarmNoticeService {
         }
 
         // 해당 농장의 모든 댓글 가져오기
-        List<NoticeComment> noticeCommentList = noticeCommentRepository.findByFarmNotice(farmNotice);
-        List<CommentListResponse> dtoList = new ArrayList<>();
-
-        for (NoticeComment comment: noticeCommentList) { // 모든 댓글 돌면서 dto 변환 > dtoList에 넣기
-            // feignClient로 요청해서 member 찾아옴
-            log.info("요청전 member id 확인: {}", comment.getMemberId());
+        Page<NoticeComment> noticeCommentList = noticeCommentRepository.findByFarmNotice(farmNotice, pageable);
+        return noticeCommentList.map(comment -> {
             MemberDetailResponse member = memberFeign.getMemberById(comment.getMemberId());
-            log.info("member : {}", member);
-            log.info("member name : {}", member.name());
-            // 요청받은 이름으로 entity > dto 변환
-            CommentListResponse dto = CommentListResponse.from(comment, member.name());
-
-            dtoList.add(dto);
-        }
-        return dtoList;
-
+            return CommentListResponse.from(comment, member.name());
+        });
     }
 
     /**

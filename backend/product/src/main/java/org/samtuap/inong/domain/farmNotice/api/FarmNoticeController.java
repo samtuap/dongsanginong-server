@@ -5,12 +5,11 @@ import org.samtuap.inong.domain.farmNotice.dto.*;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/farm")
@@ -25,7 +24,6 @@ public class FarmNoticeController {
     @GetMapping("/{farm_id}/notice/list")
     public ResponseEntity<Page<NoticeListResponse>> noticeList(@PathVariable("farm_id") Long id,
                                                                @PageableDefault(size = 15)Pageable pageable) {
-
         return new ResponseEntity<>(farmNoticeService.noticeList(id, pageable), HttpStatus.OK);
     }
 
@@ -35,7 +33,6 @@ public class FarmNoticeController {
     @GetMapping("/{farm_id}/notice/{notice_id}")
     public NoticeDetailResponse noticeDetail(@PathVariable("farm_id") Long farmId,
                                              @PathVariable("notice_id") Long noticeId) {
-
         return farmNoticeService.noticeDetail(farmId, noticeId);
     }
 
@@ -47,7 +44,6 @@ public class FarmNoticeController {
                               @PathVariable("notice_id") Long noticeId,
                               @RequestHeader("myId") String memberId,
                               @RequestBody CommentCreateRequest dto) {
-
         farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
     }
 
@@ -55,10 +51,10 @@ public class FarmNoticeController {
      * 공지에 달린 댓글 조회
      */
     @GetMapping("/{farm_id}/notice/{notice_id}/comment")
-    public List<CommentListResponse> commentList(@PathVariable("farm_id") Long farmId,
-                                                 @PathVariable("notice_id") Long noticeId) {
-
-        return farmNoticeService.commentList(farmId, noticeId);
+    public ResponseEntity<Page<CommentListResponse>> commentList(@PathVariable("farm_id") Long farmId,
+                                                                 @PathVariable("notice_id") Long noticeId,
+                                                                 @PageableDefault(size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return new ResponseEntity<>(farmNoticeService.commentList(farmId, noticeId, pageable), HttpStatus.OK);
     }
 
     /**
