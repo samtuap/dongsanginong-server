@@ -13,6 +13,8 @@ import org.samtuap.inong.domain.farmNotice.entity.NoticeComment;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeImageRepository;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeRepository;
 import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,25 +40,20 @@ public class FarmNoticeService {
     /**
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
      */
-    public List<NoticeListResponse> noticeList(Long id) {
-
+    public Page<NoticeListResponse> noticeList(Long id, Pageable pageable) {
         // 해당 id에 일치한 농장 가져오기
         Farm farm = farmRepository.findById(id).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         // 파라미터id와 일치한 농장의 notice 목록 가져와서 => dto로 변환
-        List<FarmNotice> noticeList = farmNoticeRepository.findByFarm(farm);
-        List<NoticeListResponse> listDtos = new ArrayList<>();
+        Page<FarmNotice> noticeList = farmNoticeRepository.findByFarm(farm, pageable);
 
-        for (FarmNotice notice:noticeList) {
-
+        return noticeList.map(notice -> {
             List<FarmNoticeImage> noticeImages = farmNoticeImageRepository.findByFarmNotice(notice);
             NoticeListResponse dto = NoticeListResponse.from(notice, noticeImages);
-
-            listDtos.add(dto);
-        }
-        return listDtos;
+            return NoticeListResponse.from(notice, noticeImages);
+        });
     }
 
     /**

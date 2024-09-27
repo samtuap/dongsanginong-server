@@ -3,6 +3,11 @@ package org.samtuap.inong.domain.farmNotice.api;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.farmNotice.dto.*;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +23,10 @@ public class FarmNoticeController {
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
      */
     @GetMapping("/{farm_id}/notice/list")
-    public List<NoticeListResponse> noticeList(@PathVariable("farm_id") Long id) {
+    public ResponseEntity<Page<NoticeListResponse>> noticeList(@PathVariable("farm_id") Long id,
+                                                               @PageableDefault(size = 15)Pageable pageable) {
 
-        return farmNoticeService.noticeList(id);
+        return new ResponseEntity<>(farmNoticeService.noticeList(id, pageable), HttpStatus.OK);
     }
 
     /**
