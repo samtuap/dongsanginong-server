@@ -112,4 +112,5 @@ public class SellerController {
     public JwtToken issueSellerToken(@RequestParam(value = "id") Long id){
         return jwtService.issueToken(id, SellerRole.SELLER.toString());
     }
+
 }

@@ -15,9 +15,13 @@ import org.samtuap.inong.domain.order.dto.SalesTableGetRequest;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,34 +45,34 @@ public class OrderBackOfficeService {
         return salesData;
     }
 
-    public List<SalesElementGetResponse> getSalesList(SalesTableGetRequest request, Long sellerId) {
+    public Page<SalesElementGetResponse> getSalesList(Pageable pageable, SalesTableGetRequest request, Long sellerId) {
         FarmDetailGetResponse farmInfo = productFeign.getFarmInfoWithSeller(sellerId);
-        List<Receipt> receipts = null;
+        Page<Receipt> receipts = null;
         if(!request.onlyFirstSubscription()) {
-            receipts = receiptRepository.findAllByOrderFarmId(farmInfo.id(), request.startTime(), request.endTime());
+            receipts = receiptRepository.findAllByOrderFarmId(pageable, farmInfo.id(), request.startTime(), request.endTime());
         } else {
-            receipts = receiptRepository.findAllByOrderFarmIdFirstOnly(farmInfo.id(), request.startTime(), request.endTime());
+            receipts = receiptRepository.findAllByOrderFarmIdFirstOnly(pageable, farmInfo.id(), request.startTime(), request.endTime());
         }
 
         List<Long> packageIds = receipts.stream().map(r -> r.getOrder().getPackageId()).toList();
         List<Long> memberIds = receipts.stream().map(r -> r.getOrder().getMemberId()).toList();
 
-        List<PackageProductResponse> packageProductList = productFeign.getPackageProductList(packageIds);
-        List<MemberDetailResponse> memberList = memberFeign.getMemberByIds(memberIds);
+        List<PackageProductResponse> packageProductList = productFeign.getPackageProductListContainDeleted(packageIds);
+        List<MemberDetailResponse> memberList = memberFeign.getMemberByIdsContainDeleted(memberIds);
 
 
-        receipts.stream().map(r -> {
+        return receipts.map(r -> {
             PackageProductResponse packageProduct = packageProductList.stream()
                     .filter(p -> p.id().equals(r.getOrder().getPackageId()))
                     .findFirst()
-                    .orElseThrow(() -> new BaseCustomException(OrderExceptionType.INVALID_PACKAGE_PRODUCT));
+                    .orElseThrow(() -> new BaseCustomException(INVALID_PACKAGE_ID));
 
             MemberDetailResponse memberDetail = memberList.stream()
-                    .filter(p -> p.id().equals(r.getOrder().getPackageId()))
+                    .filter(m -> m.id().equals(r.getOrder().getMemberId()))
                     .findFirst()
-                    .orElseThrow(() -> new BaseCustomException(OrderExceptionType.INVALID_PACKAGE_PRODUCT));
+                    .orElseThrow(() -> new BaseCustomException(INVALID_MEMBER_ID));
 
-            return SalesElementGetResponse.fromEntity(receipt, packageProduct, memberDetail);
-        }).toList();
+            return SalesElementGetResponse.fromEntity(r, packageProduct, memberDetail);
+        });
     }
 }

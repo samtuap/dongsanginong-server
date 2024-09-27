@@ -1,12 +1,14 @@
 package org.samtuap.inong.domain.farmNotice.api;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.farmNotice.dto.*;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/farm")
 @RequiredArgsConstructor
@@ -79,8 +81,8 @@ public class FarmNoticeController {
     /**
      * 공지 생성 (판매자가 공지 등록)
      */
-    @PostMapping("/{farm_id}/notice/create")
-    public void createNotice(@PathVariable("farm_id") Long farmId,
+    @PostMapping("/{farmId}/notice/create")
+    public void createNotice(@PathVariable("farmId") Long farmId,
                              @RequestHeader("sellerId") Long sellerId,
                              @RequestBody NoticeCreateRequest dto) {
         farmNoticeService.createNotice(farmId, sellerId, dto);

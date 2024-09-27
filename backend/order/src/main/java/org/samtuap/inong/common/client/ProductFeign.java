@@ -27,5 +27,8 @@ public interface ProductFeign {
     FarmSellerResponse getSellerIdByFarm(@PathVariable("farmId") Long farmId);
 
 
+    // TODO: 아직 구현 안됨. 추후 구현 예정. 삭제가 된 상품까지 다 들고 오기
+    @PostMapping(value = "/product/info/contain-deleted")
+    List<PackageProductResponse> getPackageProductListContainDeleted(@RequestBody List<Long> ids);
 
 }

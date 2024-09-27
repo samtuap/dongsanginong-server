@@ -92,9 +92,16 @@ public class MemberController {
     }
 
     // feign 요청 용
-    @PostMapping("/")
+    @PostMapping("/info-list")
     public List<MemberDetailResponse> findMemberList(@RequestBody List<Long> memberIds) {
         return memberService.findMemberList(memberIds);
+    }
+
+
+    // feign 요청 용
+    @PostMapping("/info-list-contain-deleted")
+    public List<MemberDetailResponse> findMemberListContainDeleted(@RequestBody List<Long> memberIds) {
+        return memberService.findAllByIdContainDeleted(memberIds);
     }
 
     @GetMapping("/healthcheck")

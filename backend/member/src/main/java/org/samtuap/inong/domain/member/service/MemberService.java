@@ -105,6 +105,11 @@ public class MemberService {
                 .toList();
     }
 
+    public List<MemberDetailResponse> findAllByIdContainDeleted(List<Long> ids) {
+        return memberRepository.findAllByIdContainDeleted(ids).stream()
+                .map(MemberDetailResponse::from)
+                .toList();
+    }
     /**
      * feignClient 요청용
      */

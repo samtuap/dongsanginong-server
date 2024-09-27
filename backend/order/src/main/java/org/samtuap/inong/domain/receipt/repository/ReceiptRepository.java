@@ -5,6 +5,8 @@ import org.samtuap.inong.common.exceptionType.OrderExceptionType;
 import org.samtuap.inong.domain.order.dto.SalesDataGetResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,21 +26,23 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
 
     @Query("SELECT new org.samtuap.inong.domain.order.dto.SalesDataGetResponse(COUNT(*), SUM(r.totalPrice)) " +
             "FROM Receipt r " +
-            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime")
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.canceledAt IS NOT NULL")
     SalesDataGetResponse findSalesData(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT new org.samtuap.inong.domain.order.dto.SalesDataGetResponse(COUNT(*), SUM(r.totalPrice)) " +
             "FROM Receipt r " +
-            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true")
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true AND r.order.canceledAt IS NOT NULL")
     SalesDataGetResponse findSalesDataFirstOnly(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT r " +
             "FROM Receipt r " +
-            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime")
-    List<Receipt> findAllByOrderFarmId(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.canceledAt IS NOT NULL " +
+            "ORDER BY r.createdAt DESC")
+    Page<Receipt> findAllByOrderFarmId(Pageable pageable, @Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT r " +
             "FROM Receipt r " +
-            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true")
-    List<Receipt> findAllByOrderFarmIdFirstOnly(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true AND r.order.canceledAt IS NOT NULL " +
+            "ORDER BY r.createdAt DESC")
+    Page<Receipt> findAllByOrderFarmIdFirstOnly(Pageable pageable, @Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 }

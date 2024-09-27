@@ -22,4 +22,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m WHERE m.id IN :ids")
     List<Member> findByAllByIds(@Param("ids") List<Long> ids);
+
+    @Query(value = "SELECT m.* FROM member AS m WHERE m.id IN :ids", nativeQuery = true)
+    List<Member> findAllByIdContainDeleted(List<Long> ids);
 }
