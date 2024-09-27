@@ -15,10 +15,11 @@ public record SalesElementGetResponse(Long orderId,
                                       LocalDateTime paidAt,
                                       Long packageId,
                                       String packageName,
+                                      Long paidAmount,
+                                      Long discountAmount,
+                                      Long beforeAmount,
                                       Long customerId,
-                                      String customerName,
-                                      Integer count,
-                                      Long amount) {
+                                      String customerName) {
     public static SalesElementGetResponse fromEntity(Receipt receipt, PackageProductResponse packageProduct, MemberDetailResponse memberDetail) {
         return SalesElementGetResponse.builder()
                 .orderId(receipt.getOrder().getId())
@@ -27,7 +28,9 @@ public record SalesElementGetResponse(Long orderId,
                 .packageName(packageProduct.packageName())
                 .customerId(memberDetail.id())
                 .customerName(memberDetail.name())
-                .count(1) // TODO: 수정 필요
-                .amount(1L).build();
+                .paidAmount(receipt.getTotalPrice())
+                .discountAmount(receipt.getDiscountPrice())
+                .beforeAmount(receipt.getBeforePrice())
+                .build();
     }
 }
