@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.review.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
+import org.samtuap.inong.domain.review.dto.ReviewDetailResponse;
 import org.samtuap.inong.domain.review.dto.ReviewListResponse;
 import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
 import org.samtuap.inong.domain.review.service.ReviewService;
@@ -62,4 +63,12 @@ public class ReviewController {
         List<ReviewListResponse> reviews = reviewService.getReviewsByPackageProductId(packageProductId);
         return ResponseEntity.status(HttpStatus.OK).body(reviews);
     }
+
+
+    @GetMapping("/detail/{reviewId}")
+    public ResponseEntity<ReviewDetailResponse> getReviewDetail(@PathVariable Long reviewId) {
+        ReviewDetailResponse reviewDetail = reviewService.getReviewDetail(reviewId);
+        return ResponseEntity.status(HttpStatus.OK).body(reviewDetail);
+    }
+
 }

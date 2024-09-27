@@ -61,7 +61,7 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
-#    path: /swagger-ui.html
+    #    path: /swagger-ui.html
     config-url: /v3/api-docs/swagger-config
     urls:
       - url: /member-service/v3/api-docs

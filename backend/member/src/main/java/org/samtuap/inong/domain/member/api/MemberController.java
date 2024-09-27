@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.member.api;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.member.dto.*;
 import org.samtuap.inong.domain.member.entity.MemberRole;
 import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+@Slf4j
 @RequestMapping("/member")
 @RestController
 @RequiredArgsConstructor
@@ -83,13 +85,11 @@ public class MemberController {
         return new ResponseEntity<>(updateInfo, HttpStatus.OK);
     }
 
-
     @GetMapping("/favorite/farm")
     public ResponseEntity<List<MemberFavoriteFarmResponse>> getFavoriteFarm(@RequestHeader("myId") Long memberId){
         List<MemberFavoriteFarmResponse> favoriteFarmResponse = memberService.getFavoriteFarm(memberId);
         return new ResponseEntity<>(favoriteFarmResponse, HttpStatus.OK);
     }
-
 
     // feign 요청 용
     @PostMapping("/")
@@ -97,6 +97,8 @@ public class MemberController {
         return memberService.findMemberList(memberIds);
     }
 
-
-
+    @GetMapping("/healthcheck")
+    public String healthcheck() {
+        return "ok!";
+    }
 }
