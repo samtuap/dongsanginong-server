@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.samtuap.inong.domain.live.dto.ActiveLiveListGetResponse;
 
-
 import java.util.List;
 
 @RequestMapping("/live")
@@ -22,7 +21,6 @@ import java.util.List;
 public class LiveController {
 
     private final LiveService liveService;
-
 
     @GetMapping("/active")
     public ResponseEntity<List<ActiveLiveListGetResponse>> getActiveLiveList() {
