@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.entity.FarmCategory;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.samtuap.inong.common.exceptionType.FarmExceptionType.FARM_CATEGORY_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
@@ -127,7 +130,8 @@ public class FarmService {
         farm = farmRepository.save(farm);
 
         for (Long categoryId : request.categories()) {
-            FarmCategory farmCategory = farmCategoryRepository.findByIdOrThrow(categoryId);
+            FarmCategory farmCategory = farmCategoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new BaseCustomException(FARM_CATEGORY_NOT_FOUND));
             FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
                     .farm(farm)
                     .category(farmCategory)
