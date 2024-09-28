@@ -19,7 +19,7 @@ public class FarmNoticeController {
     /**
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
      */
-    @GetMapping("/{farm_id}/notice/list")
+    @GetMapping("/allowMapping/{farm_id}/notice/list")
     public List<NoticeListResponse> noticeList(@PathVariable("farm_id") Long id) {
 
         return farmNoticeService.noticeList(id);
@@ -28,7 +28,7 @@ public class FarmNoticeController {
     /**
      * 공지 디테일 조회 => 제목, 내용, 사진(슬라이더) + 댓글
      */
-    @GetMapping("/{farm_id}/notice/{notice_id}")
+    @GetMapping("/allowMapping/{farm_id}/notice/{notice_id}")
     public NoticeDetailResponse noticeDetail(@PathVariable("farm_id") Long farmId,
                                              @PathVariable("notice_id") Long noticeId) {
 
@@ -50,7 +50,7 @@ public class FarmNoticeController {
     /**
      * 공지에 달린 댓글 조회
      */
-    @GetMapping("/{farm_id}/notice/{notice_id}/comment")
+    @GetMapping("/allowMapping/{farm_id}/notice/{notice_id}/comment")
     public List<CommentListResponse> commentList(@PathVariable("farm_id") Long farmId,
                                                  @PathVariable("notice_id") Long noticeId) {
 
