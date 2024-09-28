@@ -46,7 +46,7 @@ public class FarmController {
         return farmService.getFarmFavoriteList(farmFavoriteIds);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/allowMapping/{id}")
     public FarmDetailGetResponse findMember(@PathVariable("id") Long farmId) {
         return farmService.getFarmDetail(farmId);
     }

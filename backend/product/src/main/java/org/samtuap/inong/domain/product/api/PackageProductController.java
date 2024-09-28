@@ -29,7 +29,7 @@ public class PackageProductController {
         throw new BaseCustomException(PRODUCT_NOT_FOUND);
     }
 
-    @GetMapping("/top10")
+    @GetMapping("/allowMapping/top10")
     public List<TopPackageGetResponse> getTopPackages() {
         return packageProductService.getTopPackages();
     }
