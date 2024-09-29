@@ -51,8 +51,9 @@ public class FarmNoticeService {
 
         return noticeList.map(notice -> {
             List<FarmNoticeImage> noticeImages = farmNoticeImageRepository.findByFarmNotice(notice);
-            NoticeListResponse dto = NoticeListResponse.from(notice, noticeImages);
-            return NoticeListResponse.from(notice, noticeImages);
+            // 댓글 수 반환
+            Page<NoticeComment> commentList = noticeCommentRepository.findByFarmNotice(notice, pageable);
+            return NoticeListResponse.from(notice, noticeImages, commentList.getTotalElements());
         });
     }
 
