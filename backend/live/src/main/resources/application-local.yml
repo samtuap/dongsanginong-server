@@ -32,6 +32,13 @@ spring:
     consumer:
       group-id: live-group
       auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
 
 eureka:
   client:
@@ -46,3 +53,9 @@ logging:
 openvidu:
   url: ${OPENVIDU_URL}
   secret: ${OPENVIDU_SECRET}
+
+jwt:
+  secret_key: ${JWT_SECRET_KEY}
+  token:
+    access_expiration_time: ${JWT_TOKEN_ACCESS_EXPIRATION_TIME}
+    refresh_expiration_time: ${JWT_TOKEN_REFRESH_EXPIRATION_TIME}

@@ -42,12 +42,17 @@ spring:
           filters:
             - StripPrefix=1
           uri: lb://order-service
-        - id: live-service
+        - id: live-service-http
           predicates:
             - Path=/live-service/**
           filters:
             - StripPrefix=1
           uri: lb://live-service
+        - id: live-service-ws
+          predicates:
+            - Path=/ws/**
+          uri: ws://live-service
+
 
 eureka:
   client:
