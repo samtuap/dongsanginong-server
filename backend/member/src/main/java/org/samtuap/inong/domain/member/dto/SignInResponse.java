@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.member.dto;
 
 import lombok.Builder;
 import org.samtuap.inong.domain.member.entity.Member;
+import org.samtuap.inong.domain.member.entity.MemberRole;
 import org.samtuap.inong.domain.member.entity.SocialType;
 import org.samtuap.inong.domain.member.jwt.domain.JwtToken;
 
@@ -11,6 +12,7 @@ public record SignInResponse(Long memberId,
                              String email,
                              String socialId,
                              SocialType socialType,
+                             String role,
                              String accessToken,
                              String refreshToken){
     public static SignInResponse fromEntity(Member member, JwtToken jwtToken){
@@ -20,6 +22,7 @@ public record SignInResponse(Long memberId,
                 .email(member.getEmail())
                 .socialType(member.getSocialType())
                 .socialId(member.getSocialId())
+                .role(MemberRole.MEMBER.toString())
                 .accessToken(jwtToken.accessToken())
                 .refreshToken(jwtToken.refreshToken())
                 .build();
