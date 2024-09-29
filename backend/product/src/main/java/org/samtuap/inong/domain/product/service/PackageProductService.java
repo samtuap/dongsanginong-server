@@ -117,8 +117,15 @@ public class PackageProductService {
         packageProductSearchService.updateProduct(updateProduct);
     }
 
+    // Feign 요청 용
     public List<PackageProductResponse> getProductInfoList(List<Long> ids) {
         List<PackageProduct> packageProducts = packageProductRepository.findAllById(ids);
+        return packageProducts.stream()
+                .map(p -> PackageProductResponse.fromEntity(p, new ArrayList<>())).toList();
+    }
+
+    public List<PackageProductResponse> getProductInfoListContainDeleted(List<Long> ids) {
+        List<PackageProduct> packageProducts = packageProductRepository.findAllByIdContainDeleted(ids);
         return packageProducts.stream()
                 .map(p -> PackageProductResponse.fromEntity(p, new ArrayList<>())).toList();
     }

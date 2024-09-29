@@ -1,11 +1,16 @@
 package org.samtuap.inong.domain.farmNotice.api;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.farmNotice.dto.*;
 import org.samtuap.inong.domain.farmNotice.service.FarmNoticeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/farm")
@@ -18,9 +23,9 @@ public class FarmNoticeController {
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
      */
     @GetMapping("/{farm_id}/notice/list")
-    public List<NoticeListResponse> noticeList(@PathVariable("farm_id") Long id) {
-
-        return farmNoticeService.noticeList(id);
+    public ResponseEntity<Page<NoticeListResponse>> noticeList(@PathVariable("farm_id") Long id,
+                                                               @PageableDefault(size = 15)Pageable pageable) {
+        return new ResponseEntity<>(farmNoticeService.noticeList(id, pageable), HttpStatus.OK);
     }
 
     /**
@@ -29,7 +34,6 @@ public class FarmNoticeController {
     @GetMapping("/{farm_id}/notice/{notice_id}")
     public NoticeDetailResponse noticeDetail(@PathVariable("farm_id") Long farmId,
                                              @PathVariable("notice_id") Long noticeId) {
-
         return farmNoticeService.noticeDetail(farmId, noticeId);
     }
 
@@ -41,7 +45,6 @@ public class FarmNoticeController {
                               @PathVariable("notice_id") Long noticeId,
                               @RequestHeader("myId") String memberId,
                               @RequestBody CommentCreateRequest dto) {
-
         farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
     }
 
@@ -49,10 +52,10 @@ public class FarmNoticeController {
      * 공지에 달린 댓글 조회
      */
     @GetMapping("/{farm_id}/notice/{notice_id}/comment")
-    public List<CommentListResponse> commentList(@PathVariable("farm_id") Long farmId,
-                                                 @PathVariable("notice_id") Long noticeId) {
-
-        return farmNoticeService.commentList(farmId, noticeId);
+    public ResponseEntity<Page<CommentListResponse>> commentList(@PathVariable("farm_id") Long farmId,
+                                                                 @PathVariable("notice_id") Long noticeId,
+                                                                 @PageableDefault(size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return new ResponseEntity<>(farmNoticeService.commentList(farmId, noticeId, pageable), HttpStatus.OK);
     }
 
     /**
@@ -79,32 +82,29 @@ public class FarmNoticeController {
     /**
      * 공지 생성 (판매자가 공지 등록)
      */
-    @PostMapping("/{farm_id}/notice/create")
-    public void createNotice(@PathVariable("farm_id") Long farmId,
-                             @RequestHeader("sellerId") Long sellerId,
+    @PostMapping("/notice/create")
+    public void createNotice(@RequestHeader("sellerId") Long sellerId,
                              @RequestBody NoticeCreateRequest dto) {
-        farmNoticeService.createNotice(farmId, sellerId, dto);
+        farmNoticeService.createNotice(sellerId, dto);
     }
 
     /**
      * 공지 수정 (판매자가 공지 수정)
      */
-    @PutMapping("/{farm_id}/notice/{notice_id}/update")
-    public void updateNotice(@PathVariable("farm_id") Long farmId,
-                             @PathVariable("notice_id") Long noticeId,
+    @PutMapping("/notice/{notice_id}/update")
+    public void updateNotice(@PathVariable("notice_id") Long noticeId,
                              @RequestHeader("sellerId") Long sellerId,
                              @RequestBody NoticeUpdateRequest dto) {
-        farmNoticeService.updateNotice(farmId, noticeId, sellerId, dto);
+        farmNoticeService.updateNotice(noticeId, sellerId, dto);
     }
 
     /**
      * 공지 삭제 (판매자가 공지 삭제)
      */
-    @DeleteMapping("/{farm_id}/notice/{notice_id}/delete")
-    public void deleteNotice(@PathVariable("farm_id") Long farmId,
-                             @PathVariable("notice_id") Long noticeId,
+    @DeleteMapping("/notice/{notice_id}/delete")
+    public void deleteNotice(@PathVariable("notice_id") Long noticeId,
                              @RequestHeader("sellerId") Long sellerId) {
-        farmNoticeService.deleteNotice(farmId, noticeId, sellerId);
+        farmNoticeService.deleteNotice(noticeId, sellerId);
     }
 
 }

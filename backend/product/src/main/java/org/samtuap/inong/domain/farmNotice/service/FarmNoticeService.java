@@ -13,6 +13,8 @@ import org.samtuap.inong.domain.farmNotice.entity.NoticeComment;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeImageRepository;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeRepository;
 import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,32 +40,27 @@ public class FarmNoticeService {
     /**
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
      */
-    public List<NoticeListResponse> noticeList(Long id) {
-
+    public Page<NoticeListResponse> noticeList(Long id, Pageable pageable) {
         // 해당 id에 일치한 농장 가져오기
         Farm farm = farmRepository.findById(id).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
 
         // 파라미터id와 일치한 농장의 notice 목록 가져와서 => dto로 변환
-        List<FarmNotice> noticeList = farmNoticeRepository.findByFarm(farm);
-        List<NoticeListResponse> listDtos = new ArrayList<>();
+        Page<FarmNotice> noticeList = farmNoticeRepository.findByFarm(farm, pageable);
 
-        for (FarmNotice notice:noticeList) {
-
+        return noticeList.map(notice -> {
             List<FarmNoticeImage> noticeImages = farmNoticeImageRepository.findByFarmNotice(notice);
-            NoticeListResponse dto = NoticeListResponse.from(notice, noticeImages);
-
-            listDtos.add(dto);
-        }
-        return listDtos;
+            // 댓글 수 반환
+            Page<NoticeComment> commentList = noticeCommentRepository.findByFarmNotice(notice, pageable);
+            return NoticeListResponse.from(notice, noticeImages, commentList.getTotalElements());
+        });
     }
 
     /**
      * 공지 디테일 조회 => 제목, 내용, 사진(슬라이더) + 댓글
      */
     public NoticeDetailResponse noticeDetail(Long farmId, Long noticeId) {
-
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
@@ -87,7 +84,6 @@ public class FarmNoticeService {
      */
     @Transactional
     public void commentCreate(Long farmId, Long noticeId, String memberId, CommentCreateRequest dto) {
-
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
@@ -106,8 +102,7 @@ public class FarmNoticeService {
     /**
      * 공지에 달린 댓글 조회
      */
-    public List<CommentListResponse> commentList(Long farmId, Long noticeId) {
-
+    public Page<CommentListResponse> commentList(Long farmId, Long noticeId, Pageable pageable) {
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
@@ -120,22 +115,11 @@ public class FarmNoticeService {
         }
 
         // 해당 농장의 모든 댓글 가져오기
-        List<NoticeComment> noticeCommentList = noticeCommentRepository.findByFarmNotice(farmNotice);
-        List<CommentListResponse> dtoList = new ArrayList<>();
-
-        for (NoticeComment comment: noticeCommentList) { // 모든 댓글 돌면서 dto 변환 > dtoList에 넣기
-            // feignClient로 요청해서 member 찾아옴
-            log.info("요청전 member id 확인: {}", comment.getMemberId());
+        Page<NoticeComment> noticeCommentList = noticeCommentRepository.findByFarmNotice(farmNotice, pageable);
+        return noticeCommentList.map(comment -> {
             MemberDetailResponse member = memberFeign.getMemberById(comment.getMemberId());
-            log.info("member : {}", member);
-            log.info("member name : {}", member.name());
-            // 요청받은 이름으로 entity > dto 변환
-            CommentListResponse dto = CommentListResponse.from(comment, member.name());
-
-            dtoList.add(dto);
-        }
-        return dtoList;
-
+            return CommentListResponse.from(comment, member.name());
+        });
     }
 
     /**
@@ -177,15 +161,10 @@ public class FarmNoticeService {
      * 공지 생성 (판매자가 공지 등록)
      */
     @Transactional
-    public void createNotice(Long farmId, Long sellerId, NoticeCreateRequest dto) {
-        Farm farm = farmRepository.findById(farmId).orElseThrow(
+    public void createNotice(Long sellerId, NoticeCreateRequest dto) {
+        Farm farm = farmRepository.findBySellerId(sellerId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
-
-        // sellerId 검사
-        if (!farm.getSellerId().equals(sellerId)) {
-            throw new BaseCustomException(UNAUTHORIZED_ACTION);
-        }
 
         FarmNotice farmNotice = NoticeCreateRequest.toEntity(dto, farm);
         farmNoticeRepository.save(farmNotice);
@@ -196,6 +175,7 @@ public class FarmNoticeService {
         // Kafka를 통한 알림 전송
         issueNotificationToFollowers(farm, dto);
     }
+
 
     private void issueNotificationToFollowers(Farm farm, NoticeCreateRequest dto) {
         FollowersGetResponse followers = memberFeign.getFollowers(farm.getId());
@@ -213,15 +193,10 @@ public class FarmNoticeService {
      * 공지 수정 (판매자가 공지 수정)
      */
     @Transactional
-    public void updateNotice(Long farmId, Long noticeId, Long sellerId, NoticeUpdateRequest dto) {
-        Farm farm = farmRepository.findById(farmId).orElseThrow(
+    public void updateNotice(Long noticeId, Long sellerId, NoticeUpdateRequest dto) {
+        Farm farm = farmRepository.findBySellerId(sellerId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
-
-        // sellerId 검사
-        if (!farm.getSellerId().equals(sellerId)) {
-            throw new BaseCustomException(UNAUTHORIZED_ACTION);
-        }
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         if (farmNotice == null) {
@@ -263,15 +238,10 @@ public class FarmNoticeService {
      * 공지 삭제 (판매자가 공지 삭제)
      */
     @Transactional
-    public void deleteNotice(Long farmId, Long noticeId, Long sellerId) {
-        Farm farm = farmRepository.findById(farmId).orElseThrow(
+    public void deleteNotice(Long noticeId, Long sellerId) {
+        Farm farm = farmRepository.findBySellerId(sellerId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
         );
-
-        // sellerId 검사
-        if (!farm.getSellerId().equals(sellerId)) {
-            throw new BaseCustomException(UNAUTHORIZED_ACTION);
-        }
 
         FarmNotice farmNotice = farmNoticeRepository.findByIdAndFarm(noticeId, farm);
         if (farmNotice == null) {

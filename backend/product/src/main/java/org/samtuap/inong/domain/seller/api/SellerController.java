@@ -7,6 +7,10 @@ import org.samtuap.inong.domain.product.dto.PackageProductUpdateRequest;
 import org.samtuap.inong.domain.product.dto.SellerPackageListGetResponse;
 import org.samtuap.inong.domain.product.service.PackageProductService;
 import org.samtuap.inong.domain.seller.dto.*;
+import org.samtuap.inong.domain.seller.entity.SellerRole;
+import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
+import org.samtuap.inong.domain.seller.jwt.service.JwtService;
+import org.samtuap.inong.domain.seller.securities.JwtProvider;
 import org.samtuap.inong.domain.seller.service.MailService;
 import org.samtuap.inong.domain.seller.service.SellerService;
 import org.springframework.data.domain.Page;
@@ -24,6 +28,7 @@ public class SellerController {
     private final SellerService sellerService;
     private final MailService mailService;
     private final PackageProductService packageProductService;
+    private final JwtService jwtService;
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signup(@Valid @RequestBody SellerSignUpRequest dto) {
@@ -101,4 +106,11 @@ public class SellerController {
         sellerService.updateFarmInfo(sellerId, infoUpdateRequest);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    // [임시 토큰 발급 API] TODO: 삭제 필요
+    @GetMapping("/issue-seller-token")
+    public JwtToken issueSellerToken(@RequestParam(value = "id") Long id){
+        return jwtService.issueToken(id, SellerRole.SELLER.toString());
+    }
+
 }
