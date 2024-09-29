@@ -42,7 +42,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 //        메시지를 구독하는 요청 url => 즉 메시지 받을 때
         registry.enableSimpleBroker("/topic")
                 .setHeartbeatValue(new long[] {10000, 20000})
-                .setTaskScheduler(this.messageBrokerTaskScheduler);;
+                .setTaskScheduler(this.messageBrokerTaskScheduler);
     }
 
     @Override

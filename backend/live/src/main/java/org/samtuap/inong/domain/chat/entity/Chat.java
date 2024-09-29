@@ -11,8 +11,6 @@ import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
 import org.samtuap.inong.domain.live.entity.Live;
 
-import java.time.LocalDateTime;
-
 
 @Entity
 @Builder
