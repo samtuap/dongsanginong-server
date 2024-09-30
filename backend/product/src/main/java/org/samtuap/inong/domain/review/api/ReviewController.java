@@ -58,14 +58,14 @@ public class ReviewController {
     }
 
 
-    @GetMapping("/allowMapping/{packageProductId}/list")
+    @GetMapping("/no-auth/{packageProductId}/list")
     public ResponseEntity<List<ReviewListResponse>> ReviewList(@PathVariable Long packageProductId) {
         List<ReviewListResponse> reviews = reviewService.getReviewsByPackageProductId(packageProductId);
         return ResponseEntity.status(HttpStatus.OK).body(reviews);
     }
 
 
-    @GetMapping("/allowMapping/detail/{reviewId}")
+    @GetMapping("/no-auth/detail/{reviewId}")
     public ResponseEntity<ReviewDetailResponse> getReviewDetail(@PathVariable Long reviewId) {
         ReviewDetailResponse reviewDetail = reviewService.getReviewDetail(reviewId);
         return ResponseEntity.status(HttpStatus.OK).body(reviewDetail);

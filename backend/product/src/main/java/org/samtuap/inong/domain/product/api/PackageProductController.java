@@ -29,7 +29,7 @@ public class PackageProductController {
         throw new BaseCustomException(PRODUCT_NOT_FOUND);
     }
 
-    @GetMapping("/allowMapping/top10")
+    @GetMapping("/no-auth/top10")
     public List<TopPackageGetResponse> getTopPackages() {
         return packageProductService.getTopPackages();
     }
@@ -44,6 +44,12 @@ public class PackageProductController {
     public ResponseEntity<PackageProductCreateResponse> createProduct(@RequestBody PackageProductCreateRequest request) {
         PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(request);
         return ResponseEntity.ok(packageProductCreateResponse);
+    }
+
+    //    Detail 메서드 (Feign이랑 url이 다름)
+    @GetMapping("/no-auth/detail/{id}")
+    public PackageProductResponse getPackageProductDetail(@PathVariable("id") Long packageProductId) {
+        return packageProductService.getProductInfo(packageProductId);
     }
 
     // Feign 요청용 메서드
