@@ -13,7 +13,6 @@ import org.samtuap.inong.domain.live.dto.FarmResponse;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,16 +37,21 @@ public class LiveService {
         }
         return list;
     }
-  
-      public List<ActiveLiveListGetResponse> getActiveLiveList() {
+
+    public List<ActiveLiveListGetResponse> getActiveLiveList() {
 
         List<Live> activeLiveList = liveRepository.findActiveLives();
+        List<ActiveLiveListGetResponse> responseList = new ArrayList<>();
 
-        return activeLiveList.stream()
-                .map(live -> {
-                    FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
-                    String farmName = farmResponse.farmName();
-                    return ActiveLiveListGetResponse.fromEntity(live, farmName);
-                }).collect(Collectors.toList());
+        for (Live live : activeLiveList) {
+            FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
+            String farmName = farmResponse.farmName();
+
+            ActiveLiveListGetResponse response = ActiveLiveListGetResponse.fromEntity(live, farmName);
+            responseList.add(response);
+        }
+
+        return responseList;
     }
+
 }
