@@ -51,6 +51,8 @@ spring:
         - id: live-service-ws
           predicates:
             - Path=/ws/**
+          filters:
+            - StripPrefix=1
           uri: ws://live-service
 
 
