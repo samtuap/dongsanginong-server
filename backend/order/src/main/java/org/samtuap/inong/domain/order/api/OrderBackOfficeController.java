@@ -23,8 +23,7 @@ public class OrderBackOfficeController {
     private final OrderBackOfficeService orderBackOfficeService;
 
     @PostMapping("/sales-data")
-    public ResponseEntity<SalesDataGetResponse> getSalesNumberData(@PageableDefault(size = 20) Pageable pageable,
-                                                                   @RequestBody SalesTableGetRequest request,
+    public ResponseEntity<SalesDataGetResponse> getSalesNumberData(@RequestBody SalesTableGetRequest request,
                                                                    @RequestHeader("sellerId") Long sellerId) {
         SalesDataGetResponse salesData = orderBackOfficeService.getSalesData(request, sellerId);
         return new ResponseEntity<>(salesData, HttpStatus.OK);
@@ -32,10 +31,9 @@ public class OrderBackOfficeController {
 
 
     @PostMapping("/sales-list")
-    public ResponseEntity<Page<SalesElementGetResponse>> getSalesList(@PageableDefault(size = 20) Pageable pageable,
-                                                                      @RequestBody SalesTableGetRequest request,
+    public ResponseEntity<List<SalesElementGetResponse>> getSalesList(@RequestBody SalesTableGetRequest request,
                                                                       @RequestHeader("sellerId") Long sellerId) {
-        Page<SalesElementGetResponse> salesList = orderBackOfficeService.getSalesList(pageable, request, sellerId);
+        List<SalesElementGetResponse> salesList = orderBackOfficeService.getSalesList(request, sellerId);
         return new ResponseEntity<>(salesList, HttpStatus.OK);
     }
 }

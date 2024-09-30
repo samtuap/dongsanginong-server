@@ -36,13 +36,14 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
 
     @Query("SELECT r " +
             "FROM Receipt r " +
-            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.canceledAt IS NULL " +
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true AND r.order.canceledAt IS NULL " +
             "ORDER BY r.createdAt DESC")
-    Page<Receipt> findAllByOrderFarmId(Pageable pageable, @Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    List<Receipt> findAllByOrderFarmIdFirstOnly(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT r " +
             "FROM Receipt r " +
-            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.isFirst = true AND r.order.canceledAt IS NULL " +
+            "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.canceledAt IS NULL " +
             "ORDER BY r.createdAt DESC")
-    Page<Receipt> findAllByOrderFarmIdFirstOnly(Pageable pageable, @Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    List<Receipt> findAllByOrderFarmId(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    
 }

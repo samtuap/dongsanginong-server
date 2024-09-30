@@ -45,13 +45,13 @@ public class OrderBackOfficeService {
         return salesData;
     }
 
-    public Page<SalesElementGetResponse> getSalesList(Pageable pageable, SalesTableGetRequest request, Long sellerId) {
+    public List<SalesElementGetResponse> getSalesList(SalesTableGetRequest request, Long sellerId) {
         FarmDetailGetResponse farmInfo = productFeign.getFarmInfoWithSeller(sellerId);
-        Page<Receipt> receipts = null;
+        List<Receipt> receipts = null;
         if(!request.onlyFirstSubscription()) {
-            receipts = receiptRepository.findAllByOrderFarmId(pageable, farmInfo.id(), request.startTime(), request.endTime());
+            receipts = receiptRepository.findAllByOrderFarmId(farmInfo.id(), request.startTime(), request.endTime());
         } else {
-            receipts = receiptRepository.findAllByOrderFarmIdFirstOnly(pageable, farmInfo.id(), request.startTime(), request.endTime());
+            receipts = receiptRepository.findAllByOrderFarmIdFirstOnly(farmInfo.id(), request.startTime(), request.endTime());
         }
 
         List<Long> packageIds = receipts.stream().map(r -> r.getOrder().getPackageId()).toList();
@@ -61,7 +61,7 @@ public class OrderBackOfficeService {
         List<MemberDetailResponse> memberList = memberFeign.getMemberByIdsContainDeleted(memberIds);
 
 
-        return receipts.map(r -> {
+        return receipts.stream().map(r -> {
             PackageProductResponse packageProduct = packageProductList.stream()
                     .filter(p -> p.id().equals(r.getOrder().getPackageId()))
                     .findFirst()
@@ -73,6 +73,6 @@ public class OrderBackOfficeService {
                     .orElseThrow(() -> new BaseCustomException(INVALID_MEMBER_ID));
 
             return SalesElementGetResponse.fromEntity(r, packageProduct, memberDetail);
-        });
+        }).toList();
     }
 }
