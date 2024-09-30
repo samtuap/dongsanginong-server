@@ -29,7 +29,7 @@ public class DeliveryController {
     @GetMapping("/upcoming/list")
     public ResponseEntity<Page<DeliveryUpComingListResponse>> upcomingDelivery(
             @RequestHeader("sellerId") Long sellerId,
-            @PageableDefault(size = 10, sort = "deliveryDueDate", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 5, sort = "deliveryDueDate", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<DeliveryUpComingListResponse> list = deliveryService.upcomingDelivery(sellerId, pageable);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
@@ -51,7 +51,7 @@ public class DeliveryController {
     @GetMapping("/completed/list")
     public ResponseEntity<Page<DeliveryCompletedListResponse>> completedDelivery(
             @RequestHeader("sellerId") Long sellerId,
-            @PageableDefault(size = 10, sort = {"deliveryStatus", "deliveryAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 5, sort = {"deliveryStatus", "deliveryAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         Page<DeliveryCompletedListResponse> list = deliveryService.completedDelivery(sellerId, pageable);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
