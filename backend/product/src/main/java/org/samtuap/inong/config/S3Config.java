@@ -29,9 +29,6 @@ public class S3Config {
 
     @Bean
     public AmazonS3 amazonS3() {
-        log.info("accesskey: {}", accessKey);
-        log.info("secret key: {}", secretKey);
-        log.info("region: {}", region);
         AmazonS3 s3Builder = AmazonS3ClientBuilder.standard()
                 .withRegion(region)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentialsProvider()))

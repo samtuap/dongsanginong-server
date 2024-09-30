@@ -11,10 +11,11 @@ public record NoticeListResponse(
         Long id,
         String title,
         String content,
-        List<String> noticeImages
+        List<String> noticeImages,
+        Long commentCnt // 해동 공지사항의 댓글 수
 ) {
 
-    public static NoticeListResponse from(FarmNotice notice, List<FarmNoticeImage> noticeImages) {
+    public static NoticeListResponse from(FarmNotice notice, List<FarmNoticeImage> noticeImages, Long commentCnt) {
 
         List<String> imageUrls = noticeImages.stream()
                 .map(FarmNoticeImage::getImageUrl)
@@ -25,6 +26,7 @@ public record NoticeListResponse(
                 .title(notice.getTitle())
                 .content(notice.getContents())
                 .noticeImages(imageUrls)
+                .commentCnt(commentCnt)
                 .build();
     }
 }
