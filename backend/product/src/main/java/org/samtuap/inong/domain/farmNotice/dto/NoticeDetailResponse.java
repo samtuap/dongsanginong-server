@@ -11,10 +11,11 @@ public record NoticeDetailResponse(
         Long id,
         String title,
         String content,
-        List<String> noticeImages
+        List<String> noticeImages,
+        int commentCnt
 ) {
 
-    public static NoticeDetailResponse from(FarmNotice notice, List<FarmNoticeImage> noticeImages) {
+    public static NoticeDetailResponse from(FarmNotice notice, List<FarmNoticeImage> noticeImages, int commentCnt) {
 
         List<String> imageUrls = noticeImages.stream()
                 .map(FarmNoticeImage::getImageUrl)
@@ -25,6 +26,7 @@ public record NoticeDetailResponse(
                 .title(notice.getTitle())
                 .content(notice.getContents())
                 .noticeImages(imageUrls)
+                .commentCnt(commentCnt)
                 .build();
     }
 }

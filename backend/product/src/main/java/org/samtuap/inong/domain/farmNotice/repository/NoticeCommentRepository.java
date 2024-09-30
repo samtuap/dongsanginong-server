@@ -12,7 +12,8 @@ import java.util.List;
 @Repository
 public interface NoticeCommentRepository extends JpaRepository<NoticeComment, Long> {
 
-    Page<NoticeComment> findByFarmNotice(FarmNotice farmNotice, Pageable pageable);
+    Page<NoticeComment> findByFarmNotice(FarmNotice farmNotice, Pageable pageable); // page 반환용
+    List<NoticeComment> findByFarmNotice(FarmNotice farmNotice); // list 반환용
 
     void deleteByFarmNotice(FarmNotice farmNotice);
 

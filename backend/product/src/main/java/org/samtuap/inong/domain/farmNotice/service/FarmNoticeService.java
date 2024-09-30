@@ -74,9 +74,9 @@ public class FarmNoticeService {
 
         // 이미지repo에서 이미지 찾아오기
         List<FarmNoticeImage> noticeImages = farmNoticeImageRepository.findByFarmNotice(farmNotice);
-        NoticeDetailResponse dto = NoticeDetailResponse.from(farmNotice, noticeImages);
-
-        return dto;
+        // 댓글 수 반환
+        List<NoticeComment> commentList = noticeCommentRepository.findByFarmNotice(farmNotice);
+        return NoticeDetailResponse.from(farmNotice, noticeImages, commentList.size());
     }
 
     /**
