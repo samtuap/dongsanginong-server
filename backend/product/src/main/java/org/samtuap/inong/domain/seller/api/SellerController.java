@@ -77,7 +77,7 @@ public class SellerController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{sellerId}/packages")
+    @GetMapping("/no-auth/{sellerId}/packages")
     public ResponseEntity<Page<SellerPackageListGetResponse>> getSellerPackages(
             @PathVariable Long sellerId,
             @RequestParam(defaultValue = "0") int page,

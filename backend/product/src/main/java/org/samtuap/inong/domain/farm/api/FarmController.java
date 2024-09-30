@@ -19,21 +19,21 @@ import java.util.List;
 public class FarmController {
     private final FarmService farmService;
 
-    @GetMapping("/list")
+    @GetMapping("/no-auth/list")
     public ResponseEntity<Page<FarmListGetResponse>> getFarmList(
             @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable);
         return new ResponseEntity<>(farmList, HttpStatus.OK);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/no-auth/search")
     public ResponseEntity<Page<FarmListGetResponse>> searchFarm(@RequestParam String farmName,
                                                                 @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<FarmListGetResponse> farmList = farmService.farmSearch(farmName, pageable);
         return new ResponseEntity<>(farmList, HttpStatus.OK);
     }
 
-    @GetMapping("/detail/{farmId}")
+    @GetMapping("/no-auth/detail/{farmId}")
     public ResponseEntity<FarmDetailGetResponse> getFarmDetail(@PathVariable Long farmId) {
         FarmDetailGetResponse farmDetail = farmService.getFarmDetail(farmId);
         return new ResponseEntity<>(farmDetail, HttpStatus.OK);
@@ -46,6 +46,9 @@ public class FarmController {
         return farmService.getFarmFavoriteList(farmFavoriteIds);
     }
 
+    /**
+     * feign 요청용
+     */
     @GetMapping("/{id}")
     public FarmDetailGetResponse findMember(@PathVariable("id") Long farmId) {
         return farmService.getFarmDetail(farmId);
