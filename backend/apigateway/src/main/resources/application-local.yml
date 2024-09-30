@@ -23,6 +23,7 @@ spring:
               - POST
               - DELETE
               - OPTIONS
+              - PATCH
       routes:
         - id: product-service
           predicates:
