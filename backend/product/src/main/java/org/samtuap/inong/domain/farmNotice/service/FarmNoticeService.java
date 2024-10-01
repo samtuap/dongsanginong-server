@@ -118,7 +118,7 @@ public class FarmNoticeService {
         Page<NoticeComment> noticeCommentList = noticeCommentRepository.findByFarmNotice(farmNotice, pageable);
         return noticeCommentList.map(comment -> {
             MemberDetailResponse member = memberFeign.getMemberById(comment.getMemberId());
-            return CommentListResponse.from(comment, member.name());
+            return CommentListResponse.from(comment, member.name(), member.id());
         });
     }
 

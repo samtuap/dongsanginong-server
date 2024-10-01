@@ -8,14 +8,16 @@ public record CommentListResponse(
     Long id,
     String name,
     String contents,
-    String createdAt
+    String createdAt,
+    Long memberId
 ) {
-    public static CommentListResponse from(NoticeComment comment, String name) {
+    public static CommentListResponse from(NoticeComment comment, String name, Long memberId) {
         return CommentListResponse.builder()
                 .id(comment.getId())
                 .name(name)
                 .contents(comment.getContents())
                 .createdAt(String.valueOf(comment.getCreatedAt()))
+                .memberId(memberId)
                 .build();
     }
 }
