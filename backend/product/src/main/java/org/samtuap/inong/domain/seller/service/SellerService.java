@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.samtuap.inong.common.exceptionType.SellerExceptionType.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -95,18 +96,29 @@ public class SellerService {
     }
 
     @Transactional
-    public void withDraw(Long sellerId) {
+    public void withDraw(Long sellerId, String password) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
 
-        // 패키지 중 삭제되지 않은 항목이 있는지 확인
-        boolean hasActivePackages = packageProductRepository.existsByFarmIdAndDeletedAtIsNull(farm.getId());
-        if (hasActivePackages) {
-            throw new BaseCustomException(PACKAGES_EXIST);
+        boolean isValidPassword = BCrypt.checkpw(password, seller.getPassword());
+        if (!isValidPassword) {
+            throw new BaseCustomException(INVALID_PASSWORD);
+        }
+
+        Optional<Farm> farmOptional = farmRepository.findBySellerId(seller.getId());
+
+        if (farmOptional.isPresent()) {
+            Farm farm = farmOptional.get();
+
+            boolean hasActivePackages = packageProductRepository.existsByFarmIdAndDeletedAtIsNull(farm.getId());
+            if (hasActivePackages) {
+                throw new BaseCustomException(PACKAGES_EXIST);
+            }
+
+            // 농장 삭제 진행
+            farmRepository.delete(farm);
         }
 
         // 삭제되지 않은 패키지가 없으면 농장과 판매자 삭제 진행
-        farmRepository.delete(farm);
         sellerRepository.deleteById(seller.getId());
         jwtService.deleteRefreshToken(seller.getId());
     }

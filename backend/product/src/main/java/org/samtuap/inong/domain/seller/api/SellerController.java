@@ -10,7 +10,6 @@ import org.samtuap.inong.domain.seller.dto.*;
 import org.samtuap.inong.domain.seller.entity.SellerRole;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
-import org.samtuap.inong.domain.seller.securities.JwtProvider;
 import org.samtuap.inong.domain.seller.service.MailService;
 import org.samtuap.inong.domain.seller.service.SellerService;
 import org.springframework.data.domain.Page;
@@ -60,8 +59,9 @@ public class SellerController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<?> withDraw(@RequestBody Long sellerId) {
-        sellerService.withDraw(sellerId);
+    public ResponseEntity<?> withDraw(@RequestHeader("sellerId") Long sellerId,
+                                      @RequestBody String password) {
+        sellerService.withDraw(sellerId, password);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
