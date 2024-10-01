@@ -48,13 +48,13 @@ public class MemberController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<?> withDraw(@RequestBody Long memberId){
+    public ResponseEntity<?> withDraw(@RequestHeader("myId") Long memberId){
         memberService.withdraw(memberId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/member-info")
-    public ResponseEntity<MemberInfoResponse> getMemberInfo(@RequestBody Long memberId){
+    public ResponseEntity<MemberInfoResponse> getMemberInfo(@RequestHeader("myId") Long memberId){
         MemberInfoResponse memberInfo =  memberService.getMemberInfo(memberId);
         return new ResponseEntity<>(memberInfo, HttpStatus.OK);
     }
