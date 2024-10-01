@@ -60,8 +60,9 @@ public class SellerController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<?> withDraw(@RequestBody Long sellerId) {
-        sellerService.withDraw(sellerId);
+    public ResponseEntity<?> withDraw(@RequestHeader("sellerId") Long sellerId,
+                                      @RequestBody String password) {
+        sellerService.withDraw(sellerId, password);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
