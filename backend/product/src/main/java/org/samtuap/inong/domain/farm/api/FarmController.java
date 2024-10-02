@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.farm.api;
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.service.FarmService;
+import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -87,5 +88,11 @@ public class FarmController {
                                          @RequestHeader("sellerId") Long sellerId) {
         FarmCreateResponse response = farmService.createFarm(request, sellerId);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<FarmCategoryResponse>> getAllCategories() {
+        List<FarmCategoryResponse> categories = farmService.getAllFarmCategories();
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 }

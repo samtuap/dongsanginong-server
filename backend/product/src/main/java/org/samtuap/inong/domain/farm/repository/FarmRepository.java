@@ -34,4 +34,5 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
     String getFarmNameById(@Param("farmId") Long farmId);
 
 
+    boolean existsBySellerId(Long sellerId);
 }
