@@ -161,4 +161,8 @@ public class FarmService {
         }
         return categoryResponses;
     }
+
+    public boolean checkFarmExistsBySellerId(Long sellerId) {
+        return farmRepository.existsBySellerId(sellerId);
+    }
 }

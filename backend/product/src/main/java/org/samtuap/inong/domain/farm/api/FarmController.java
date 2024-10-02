@@ -95,4 +95,10 @@ public class FarmController {
         List<FarmCategoryResponse> categories = farmService.getAllFarmCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
+
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> checkFarmExists(@RequestHeader("sellerId") Long sellerId) {
+        boolean exists = farmService.checkFarmExistsBySellerId(sellerId);
+        return ResponseEntity.ok(exists);
+    }
 }
