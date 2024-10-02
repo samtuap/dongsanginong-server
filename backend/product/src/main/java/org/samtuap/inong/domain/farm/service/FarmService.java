@@ -15,6 +15,7 @@ import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.search.document.FarmDocument;
 import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.samtuap.inong.common.exceptionType.FarmExceptionType.FARM_ALREADY_EXISTS;
 import static org.samtuap.inong.common.exceptionType.FarmExceptionType.FARM_CATEGORY_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -126,6 +128,11 @@ public class FarmService {
 
     @Transactional
     public FarmCreateResponse createFarm(FarmCreateRequest request, Long sellerId) {
+
+        if (farmRepository.existsBySellerId(sellerId)) {
+            throw new BaseCustomException(FARM_ALREADY_EXISTS);
+        }
+
         Farm farm = FarmCreateRequest.toEntity(request, sellerId);
         farm = farmRepository.save(farm);
 
@@ -144,5 +151,18 @@ public class FarmService {
         farmSearchService.indexFarmDocument(farmDocument);
 
         return FarmCreateResponse.fromEntity(farm);
+    }
+
+    public List<FarmCategoryResponse> getAllFarmCategories() {
+        List<FarmCategory> categories = farmCategoryRepository.findAll();
+        List<FarmCategoryResponse> categoryResponses = new ArrayList<>();
+        for (FarmCategory category : categories) {
+            categoryResponses.add(FarmCategoryResponse.fromEntity(category));
+        }
+        return categoryResponses;
+    }
+
+    public boolean checkFarmExistsBySellerId(Long sellerId) {
+        return farmRepository.existsBySellerId(sellerId);
     }
 }
