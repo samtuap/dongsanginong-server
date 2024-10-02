@@ -80,7 +80,7 @@ public class MemberController {
     }
 
     @PatchMapping("/update-info")
-    public ResponseEntity<MemberUpdateInfoRequest> updateMemberInfo(@RequestBody MemberUpdateInfoRequest updateInfo, @RequestParam("id") Long memberId){
+    public ResponseEntity<MemberUpdateInfoRequest> updateMemberInfo(@RequestBody MemberUpdateInfoRequest updateInfo, @RequestHeader("myId") Long memberId){
         memberService.updateMemberInfo(updateInfo, memberId);
         return new ResponseEntity<>(updateInfo, HttpStatus.OK);
     }
