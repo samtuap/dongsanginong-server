@@ -136,25 +136,6 @@ public class SellerService {
     }
 
     @Transactional
-    public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
-        Seller seller = sellerRepository.findByIdOrThrow(sellerId);
-        Farm farm = farmRepository.findBySellerIdOrThrow(seller.getId());
-        farm.updateInfo(infoUpdateRequest);
-        farmCategoryRelationRepository.deleteAllByFarm(farm);
-        for (FarmCategory category : infoUpdateRequest.category()) {
-            FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
-                    .farm(farm)
-                    .category(category)
-                    .build();
-            farmCategoryRelationRepository.save(newRelation);
-        }
-
-        // elasticsearch : open search에 수정
-        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
-        farmSearchService.updateFarm(farmDocument);
-    }
-
-    @Transactional
     public void updatePassword(Long sellerId, SellerPasswordUpdateRequest passwordUpdate) {
         Seller seller = sellerRepository.findByIdOrThrow(sellerId);
         if (!BCrypt.checkpw(passwordUpdate.oldPassword(), seller.getPassword())) {
