@@ -11,7 +11,6 @@ public record PackageProductCreateRequest(
         String packageName,
         Integer deliveryCycle,
         Long price,
-        Long farmId,
         List<String> imageUrls,
         String productDescription
 ) {

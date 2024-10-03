@@ -55,9 +55,9 @@ public class PackageProductService {
     }
 
     @Transactional
-    public PackageProductCreateResponse createPackageProduct(PackageProductCreateRequest request) {
+    public PackageProductCreateResponse createPackageProduct(Long sellerId, PackageProductCreateRequest request) {
         // 농장 조회 후 사용
-        Farm farm = farmRepository.findById(request.farmId())
+        Farm farm = farmRepository.findBySellerId(sellerId)
                 .orElseThrow(() -> new BaseCustomException(FARM_NOT_FOUND));
 
         // 상품 엔티티 생성 및 저장
