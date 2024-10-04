@@ -140,4 +140,16 @@ public class PackageProductService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public List<PackageProductForSaleListResponse> getForSalePackageProduct(Long farmId) {
+        List<PackageProduct> packageProducts = packageProductRepository.findAllByFarmId(farmId);
+        return packageProducts.stream()
+                .map(p -> {
+                    String imageUrl = packageProductImageRepository.findFirstByPackageProduct(p).getImageUrl();
+                    Farm farm = farmRepository.findByIdOrThrow(p.getFarm().getId());
+                    return PackageProductForSaleListResponse.fromEntity(p, imageUrl, farm);
+                })
+                .collect(Collectors.toList());
+    }
 }
