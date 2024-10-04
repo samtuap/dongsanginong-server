@@ -22,6 +22,8 @@ import org.samtuap.inong.domain.receipt.entity.PaymentStatus;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -266,15 +268,16 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public List<OrderPaymentListResponse> getOrderPaymentList(Long memberId) {
-        return orderRepository.findAllByMemberId(memberId).stream()
-                .map(ordering -> {
-                    PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
-                    Receipt receipt = receiptRepository.findByOrderOrThrow(ordering);
-                    return OrderPaymentListResponse.from(ordering, product, receipt);
-                })
-                .collect(Collectors.toList());
+    public Page<OrderPaymentListResponse> getOrderPaymentList(Pageable pageable, Long memberId) {
+        Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);
+
+        return ordersPage.map(ordering -> {
+            PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
+            Receipt receipt = receiptRepository.findByOrderOrThrow(ordering);
+            return OrderPaymentListResponse.from(ordering, product, receipt);
+        });
     }
+
 
     //== Kafka로 주문/결제 취소 ==//
     @Transactional

@@ -1,11 +1,14 @@
 package org.samtuap.inong.domain.order.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.samtuap.inong.domain.order.dto.OrderDeliveryListResponse;
 import org.samtuap.inong.domain.order.dto.OrderPaymentListResponse;
 import org.samtuap.inong.domain.order.dto.PaymentRequest;
 import org.samtuap.inong.domain.order.dto.PaymentResponse;
 import org.samtuap.inong.domain.order.service.OrderService;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +42,8 @@ public class OrderController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<OrderPaymentListResponse>> getOrderPaymentList(@RequestHeader("myId") Long memberId){
-        List<OrderPaymentListResponse> myOrderPaymentList = orderService.getOrderPaymentList(memberId);
+    public ResponseEntity<Page<OrderPaymentListResponse>> getOrderPaymentList(@PageableDefault(size = 8) Pageable pageable, @RequestHeader("myId") Long memberId){
+        Page<OrderPaymentListResponse> myOrderPaymentList = orderService.getOrderPaymentList(pageable, memberId);
         return new ResponseEntity<>(myOrderPaymentList, HttpStatus.OK);
     }
 
