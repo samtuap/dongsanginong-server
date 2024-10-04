@@ -101,12 +101,6 @@ public class SellerController {
         packageProductService.updatePackageProduct(sellerId, packageId, request);
     }
 
-    @PostMapping("/myfarm/info/update")
-    public ResponseEntity<?> updateFarmInfo(@RequestHeader("sellerId") Long sellerId, @RequestBody SellerFarmInfoUpdateRequest infoUpdateRequest){
-        sellerService.updateFarmInfo(sellerId, infoUpdateRequest);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     // [임시 토큰 발급 API] TODO: 삭제 필요
     @GetMapping("/issue-seller-token")
     public JwtToken issueSellerToken(@RequestParam(value = "id") Long id){
