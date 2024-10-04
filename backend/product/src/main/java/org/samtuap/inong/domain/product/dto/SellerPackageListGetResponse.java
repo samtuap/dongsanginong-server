@@ -9,7 +9,8 @@ import org.springframework.data.domain.Page;
 public record SellerPackageListGetResponse(
         @NotNull Long id,
         @NotNull String packageName,
-        @NotNull Long price
+        @NotNull Long price,
+        @NotNull String productCode
 ) {
     // PackageProduct 엔티티를 기반으로 DTO를 생성하는 메서드
     public static SellerPackageListGetResponse fromEntity(PackageProduct packageProduct) {
@@ -17,6 +18,7 @@ public record SellerPackageListGetResponse(
                 .id(packageProduct.getId())
                 .packageName(packageProduct.getPackageName())
                 .price(packageProduct.getPrice())
+                .productCode(packageProduct.getProductCode())
                 .build();
     }
 

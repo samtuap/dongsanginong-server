@@ -16,7 +16,6 @@ import org.samtuap.inong.search.service.PackageProductSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,9 +54,9 @@ public class PackageProductService {
     }
 
     @Transactional
-    public PackageProductCreateResponse createPackageProduct(PackageProductCreateRequest request) {
+    public PackageProductCreateResponse createPackageProduct(Long sellerId, PackageProductCreateRequest request) {
         // 농장 조회 후 사용
-        Farm farm = farmRepository.findById(request.farmId())
+        Farm farm = farmRepository.findBySellerId(sellerId)
                 .orElseThrow(() -> new BaseCustomException(FARM_NOT_FOUND));
 
         // 상품 엔티티 생성 및 저장

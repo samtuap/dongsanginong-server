@@ -41,8 +41,9 @@ public class PackageProductController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<PackageProductCreateResponse> createProduct(@RequestBody PackageProductCreateRequest request) {
-        PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(request);
+    public ResponseEntity<PackageProductCreateResponse> createProduct(@RequestHeader Long sellerId,
+                                                                      @RequestBody PackageProductCreateRequest request) {
+        PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(sellerId, request);
         return ResponseEntity.ok(packageProductCreateResponse);
     }
 

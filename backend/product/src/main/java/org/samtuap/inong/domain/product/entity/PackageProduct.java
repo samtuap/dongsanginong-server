@@ -38,6 +38,8 @@ public class PackageProduct extends BaseEntity {
 
     private String productDescription;
 
+    private String productCode;
+
     public void updatePackageName(String packageName) {
         this.packageName = packageName;
     }
