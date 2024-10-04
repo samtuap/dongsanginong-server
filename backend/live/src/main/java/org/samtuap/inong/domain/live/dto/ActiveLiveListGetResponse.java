@@ -1,7 +1,9 @@
 package org.samtuap.inong.domain.live.dto;
 
+import lombok.Builder;
 import org.samtuap.inong.domain.live.entity.Live;
 
+@Builder
 public record ActiveLiveListGetResponse(
         Long liveId,
         String farmName,
@@ -10,12 +12,12 @@ public record ActiveLiveListGetResponse(
 ) {
 
     public static ActiveLiveListGetResponse fromEntity(Live live, String farmName) {
-        return new ActiveLiveListGetResponse(
-                live.getId(),
-                farmName,
-                live.getTitle(),
-                live.getLiveImage()
-        );
+        return ActiveLiveListGetResponse.builder()
+                .liveId(live.getId())
+                .farmName(farmName)
+                .title(live.getTitle())
+                .liveImage(live.getLiveImage())
+                .build();
     }
 }
 
