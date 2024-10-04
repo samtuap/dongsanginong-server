@@ -5,6 +5,7 @@ import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 
 import java.util.List;
+import java.util.UUID;
 
 @Builder
 public record PackageProductCreateRequest(
@@ -22,6 +23,7 @@ public record PackageProductCreateRequest(
                 .price(request.price)
                 .productDescription(request.productDescription)
                 .farm(farm)
+                .productCode("P-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .build();
     }
 }
