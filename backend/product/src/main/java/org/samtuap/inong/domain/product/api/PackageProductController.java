@@ -70,4 +70,9 @@ public class PackageProductController {
     List<PackageProductResponse> getPackageProductListContainDeleted(@RequestBody List<Long> ids) {
         return packageProductService.getProductInfoListContainDeleted(ids);
     }
+
+    @GetMapping("/no-auth/for-sale/{id}")
+    public List<PackageProductForSaleListResponse> getForSalePackageProduct(@PathVariable("id") Long farmId) {
+        return packageProductService.getForSalePackageProduct(farmId);
+    }
 }
