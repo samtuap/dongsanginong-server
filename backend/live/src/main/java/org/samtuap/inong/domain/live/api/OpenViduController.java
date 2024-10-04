@@ -70,15 +70,15 @@ public class OpenViduController {
     }
 
     /**
-     * (4) sessionId 반환
+     * (4) dto 반환 (sessionId와 title을 얻기 위한)
      */
     @GetMapping("/api/sessions/{id}/sessionId")
     public ResponseEntity<?> getSessionIdByLiveId(@PathVariable("id") Long id) {
         try {
             log.info("sessionId 반환 시도 : {} liveId 잘 넘어옴", id);
-            String sessionId = liveService.getSessionIdByLiveId(id);
-            log.info("그걸로 sessoinId 받아올게 : {}", sessionId);
-            return new ResponseEntity<>(sessionId, HttpStatus.OK);
+            LiveSessionResponse dto = liveService.getSessionIdByLiveId(id);
+            log.info("그걸로 dto 받아올게 : {}", dto);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

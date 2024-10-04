@@ -86,13 +86,13 @@ public class LiveService {
         return LiveSessionResponse.fromEntity(request, live, session);
     }
 
-    public String getSessionIdByLiveId(Long id) {
+    public LiveSessionResponse getSessionIdByLiveId(Long id) {
         Live live = liveRepository.findByIdOrThrow(id);
         if (live.getSessionId() == null) {
             throw new BaseCustomException(SESSION_NOT_FOUND);
         }
         log.info("{}로 session id 받자 : {}", id, live.getSessionId());
-        return live.getSessionId();  // 라이브의 세션 ID 반환
+        return LiveSessionResponse.liveFromEntity(live);  // 라이브의 세션 ID 반환
     }
 
     /**
