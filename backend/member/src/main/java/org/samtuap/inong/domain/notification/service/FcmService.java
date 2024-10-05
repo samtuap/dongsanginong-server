@@ -15,10 +15,13 @@ import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.samtuap.inong.domain.notification.dto.FcmTokenSaveRequest;
 import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
+import org.samtuap.inong.domain.notification.dto.NotificationBody;
 import org.samtuap.inong.domain.notification.dto.NotificationIssueRequest;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.FCM_SEND_FAIL;
 import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.INVALID_FCM_REQUEST;
@@ -45,16 +48,30 @@ public class FcmService {
     private void issueMessage(Long memberId, String title, String content) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         String token = member.getFcmToken();
+        LocalDateTime issuedAt = LocalDateTime.now();
 
         if(token == null || token.isEmpty()) {
             return;
+        }
+
+        NotificationBody notification = NotificationBody.builder()
+                .content(content)
+                .issuedAt(issuedAt.toString())
+                .build();
+
+        ObjectMapper om = new ObjectMapper();
+        String notificationBody;
+        try {
+            notificationBody = om.writeValueAsString(notification);
+        } catch (JsonProcessingException e) {
+            throw new BaseCustomException(INVALID_FCM_REQUEST);
         }
 
         Message message = Message.builder()
                 .setWebpushConfig(WebpushConfig.builder()
                         .setNotification(WebpushNotification.builder()
                                 .setTitle(title)
-                                .setBody(content)
+                                .setBody(notificationBody)
                                 .build())
                         .build())
                 .setToken(token)
