@@ -2,8 +2,12 @@ package org.samtuap.inong.domain.live.api;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.samtuap.inong.domain.live.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.live.service.LiveService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +27,9 @@ public class LiveController {
     private final LiveService liveService;
 
     @GetMapping("/active")
-    public ResponseEntity<List<ActiveLiveListGetResponse>> getActiveLiveList() {
-        List<ActiveLiveListGetResponse> response = liveService.getActiveLiveList();
+    public ResponseEntity<Page<ActiveLiveListGetResponse>> getActiveLiveList(
+            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<ActiveLiveListGetResponse> response = liveService.getActiveLiveList(pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
