@@ -51,6 +51,8 @@ public class LiveService {
             responseList.add(response);
         }
 
+        // TODO: 알림 전송
+
         return responseList;
     }
 
