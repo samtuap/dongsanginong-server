@@ -14,15 +14,18 @@ public record OrderDeliveryListResponse(Long orderId,
                                         String deliveryAt,
                                         String deliveryStatus) {
 
-    public static OrderDeliveryListResponse fromEntity(Ordering ordering, PackageProductResponse product, Delivery delivery){
+    public static OrderDeliveryListResponse fromEntity(Ordering ordering, PackageProductResponse product, Delivery delivery) {
         return OrderDeliveryListResponse.builder()
                 .orderId(ordering.getId())
                 .packageId(ordering.getPackageId())
                 .packageName(product.packageName())
                 .farmId(ordering.getFarmId())
                 .farmName(product.farmName())
-                .deliveryAt(delivery.getDeliveryAt().toString())
-                .deliveryStatus(delivery.getDeliveryStatus().toString())
+                .deliveryAt(delivery != null && delivery.getDeliveryAt() != null ?
+                        delivery.getDeliveryAt().toString() : null) // null 체크
+                .deliveryStatus(delivery != null && delivery.getDeliveryStatus() != null ?
+                        delivery.getDeliveryStatus().toString() : null) // null 체크
                 .build();
     }
+
 }
