@@ -4,6 +4,7 @@ import lombok.Builder;
 import org.samtuap.inong.domain.review.entity.Review;
 import org.samtuap.inong.domain.review.entity.ReviewImage;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -12,7 +13,8 @@ public record ReviewListResponse(
         String title,
         Integer rating,
         String contents,
-        List<String> imageUrls
+        List<String> imageUrls,
+        LocalDateTime updateAt
 ) {
     public static ReviewListResponse fromEntity(Review review, List<ReviewImage> reviewImages) {
 
@@ -26,6 +28,7 @@ public record ReviewListResponse(
                 .rating(review.getRating())
                 .contents(review.getContents())
                 .imageUrls(imageUrls)
+                .updateAt(review.getUpdatedAt())
                 .build();
     }
 }
