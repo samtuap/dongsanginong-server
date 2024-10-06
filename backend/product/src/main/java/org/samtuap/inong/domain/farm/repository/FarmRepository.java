@@ -35,4 +35,7 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
 
 
     boolean existsBySellerId(Long sellerId);
+
+    // 검색 성능 테스트
+    List<Farm> findByFarmNameContainingOrFarmIntroContaining(String farmName, String farmIntro);
 }
