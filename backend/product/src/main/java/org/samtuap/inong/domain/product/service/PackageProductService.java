@@ -39,9 +39,10 @@ public class PackageProductService {
 
     public List<TopPackageGetResponse> getTopPackages() {
         List<Long> topPackages = orderFeign.getTopPackages();
-        if(topPackages.size() < 10) {
-            packageProductRepository.findNPackageProducts(10 - topPackages.size());
-        }
+        // TODO: 수정 필요
+//        if(topPackages.size() < 10) {
+//            packageProductRepository.findTopByNPackageProducts(10 - topPackages.size());
+//        }
         List<PackageProduct> products = packageProductRepository.findAllByIds(topPackages);
 
         return products.stream()

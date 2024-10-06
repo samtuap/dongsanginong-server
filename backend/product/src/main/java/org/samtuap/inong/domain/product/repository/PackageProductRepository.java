@@ -32,5 +32,5 @@ public interface PackageProductRepository extends JpaRepository<PackageProduct, 
     List<PackageProduct> findAllByFarmId(Long farmId);
 
     @Query("SELECT f FROM Farm f ORDER BY f.id DESC LIMIT :n")
-    List<PackageProductImage> findNPackageProducts(@Param("n") Integer n);
+    List<PackageProductImage> findNPackageProducts(@Param("n") Long n);
 }
