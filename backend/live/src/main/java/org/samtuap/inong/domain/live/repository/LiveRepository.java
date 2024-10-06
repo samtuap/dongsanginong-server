@@ -2,6 +2,8 @@ package org.samtuap.inong.domain.live.repository;
 
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.live.entity.Live;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,7 +16,7 @@ import static org.samtuap.inong.common.exceptionType.LiveExceptionType.SESSION_N
 public interface LiveRepository extends JpaRepository<Live, Long> {
 
     @Query("SELECT live FROM Live live WHERE live.endAt IS NULL")
-    List<Live> findActiveLives();
+    Page<Live> findActiveLives(Pageable pageable);
 
     List<Live> findByFarmIdInAndEndAtIsNull(List<Long> farmIdList);
 

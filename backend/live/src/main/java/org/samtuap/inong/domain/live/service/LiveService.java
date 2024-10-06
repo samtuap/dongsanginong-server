@@ -6,6 +6,8 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.live.dto.*;
 import org.samtuap.inong.domain.live.entity.Live;
 import org.samtuap.inong.domain.live.repository.LiveRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.samtuap.inong.common.client.FarmFeign;
@@ -45,20 +47,26 @@ public class LiveService {
         return list;
     }
 
-    public List<ActiveLiveListGetResponse> getActiveLiveList() {
+    public Page<ActiveLiveListGetResponse> getActiveLiveList(Pageable pageable) {
 
-        List<Live> activeLiveList = liveRepository.findActiveLives();
-        List<ActiveLiveListGetResponse> responseList = new ArrayList<>();
+        Page<Live> activeLiveList = liveRepository.findActiveLives(pageable);
+//        List<ActiveLiveListGetResponse> responseList = new ArrayList<>();
 
-        for (Live live : activeLiveList) {
+        return activeLiveList.map(live -> {
             FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
             String farmName = farmResponse.farmName();
+            return ActiveLiveListGetResponse.fromEntity(live, farmName);
+        });
 
-            ActiveLiveListGetResponse response = ActiveLiveListGetResponse.fromEntity(live, farmName);
-            responseList.add(response);
-        }
-
-        return responseList;
+//        for (Live live : activeLiveList) {
+//            FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
+//            String farmName = farmResponse.farmName();
+//
+//            ActiveLiveListGetResponse response = ActiveLiveListGetResponse.fromEntity(live, farmName);
+//            responseList.add(response);
+//        }
+//
+//        return responseList;
     }
 
     /**
