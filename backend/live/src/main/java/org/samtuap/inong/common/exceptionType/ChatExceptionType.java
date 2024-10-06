@@ -8,7 +8,8 @@ public enum ChatExceptionType implements ExceptionType {
 
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 id의 회원이 존재하지 않습니다."),
     AUTHORIZATION_HEADER_MISSING(HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없거나 유효하지 않습니다."),
-    INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다.");
+    INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
+    FARM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당의 아이디 농장이이 존재하지 않습니다.");
 
 
     private final HttpStatus status;
