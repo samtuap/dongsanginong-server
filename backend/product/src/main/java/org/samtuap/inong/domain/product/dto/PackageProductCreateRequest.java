@@ -13,7 +13,8 @@ public record PackageProductCreateRequest(
         Integer deliveryCycle,
         Long price,
         List<String> imageUrls,
-        String productDescription
+        String productDescription,
+        String origin
 ) {
 
     public static PackageProduct toEntity(Farm farm, PackageProductCreateRequest request) {
@@ -24,6 +25,7 @@ public record PackageProductCreateRequest(
                 .productDescription(request.productDescription)
                 .farm(farm)
                 .productCode("P-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                .origin(request.origin)
                 .build();
     }
 }
