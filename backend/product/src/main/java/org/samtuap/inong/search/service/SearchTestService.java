@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * rdbms와 open search 성능 비교
+ */
 @Service
 @RequiredArgsConstructor
 public class SearchTestService {

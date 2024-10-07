@@ -30,6 +30,13 @@ public class FarmSearchController {
         return new ResponseEntity<>(farms, HttpStatus.OK);
     }
 
+    // 삭제
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable String id) {
+        farmSearchService.deleteFarm(id);
+        return new ResponseEntity<>("삭제 완료", HttpStatus.OK);
+    }
+
     // 수정
     @PutMapping("/update")
     public ResponseEntity<String> updateFarm(@RequestBody FarmDocument farmDocument) {

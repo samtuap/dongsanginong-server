@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * rdbms와 open search 성능 비교
+ */
 @RestController
 @RequestMapping("/search-test")
 @RequiredArgsConstructor

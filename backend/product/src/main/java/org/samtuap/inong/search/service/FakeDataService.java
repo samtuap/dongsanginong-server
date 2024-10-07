@@ -14,6 +14,9 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * rdbms와 opensesarch의 성능 비교를 위한 가짜 데이터 추가하는 코드
+ */
 @Service
 @RequiredArgsConstructor
 public class FakeDataService {
