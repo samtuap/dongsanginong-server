@@ -18,6 +18,6 @@ public class KafkaMessageListener {
     @KafkaListener(topics = KafkaConstants.KAFKA_TOPIC, groupId = "chat")
     public void listen(@Payload ChatMessageRequest message) {
         log.info("Received message from Kafka: {}", message);
-        simpMessagingTemplate.convertAndSend("/topic/live/" + message.liveId(), message);
+        simpMessagingTemplate.convertAndSend("/topic/live/" + message.sessionId(), message);
     }
 }

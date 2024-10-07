@@ -16,9 +16,9 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @MessageMapping("/chat/{liveId}/sendMessage")
-    public void sendMessage(@DestinationVariable ("liveId") String liveId,
+    @MessageMapping("/chat/{sessionId}/sendMessage")
+    public void sendMessage(@DestinationVariable ("sessionId") String sessionId,
                             @Payload ChatMessageRequest messageRequest) {
-        chatService.processAndSendMessage(liveId, messageRequest);
+        chatService.processAndSendMessage(sessionId, messageRequest);
     }
 }

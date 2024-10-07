@@ -28,14 +28,14 @@ public class SocketController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         // liveId를 WebSocket 연결 시 클라이언트가 전송하는 헤더에서 가져오기
-        String liveId = headerAccessor.getFirstNativeHeader("sessionId");
-        if (liveId != null) {
-            liveParticipantsMap.merge(liveId, 1, Integer::sum); // 해당 liveId의 참여자 수 증가
-            LOGGER.info("새로운 WebSocket 연결: liveId = {}, 현재 참여자 수 = {}", liveId, liveParticipantsMap.get(liveId));
+        String sessionId = headerAccessor.getFirstNativeHeader("sessionId");
+        if (sessionId != null) {
+            liveParticipantsMap.merge(sessionId, 1, Integer::sum); // 해당 liveId의 참여자 수 증가
+            LOGGER.info("새로운 WebSocket 연결: sessionId = {}, 현재 참여자 수 = {}", sessionId, liveParticipantsMap.get(sessionId));
 
             // 실시간 참여자 수를 해당 채팅방으로 전송
-            messagingTemplate.convertAndSend("/topic/live/" + liveId + "/participants", liveParticipantsMap.get(liveId));
-            LOGGER.info("참여자 수 전송: liveId = {}, 현재 참여자 수 = {}", liveId, liveParticipantsMap.get(liveId));
+            messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", liveParticipantsMap.get(sessionId));
+            LOGGER.info("참여자 수 전송: sessionId = {}, 현재 참여자 수 = {}", sessionId, liveParticipantsMap.get(sessionId));
         }
     }
 
@@ -45,22 +45,22 @@ public class SocketController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         // liveId를 WebSocket 연결 해제 시 클라이언트가 전송하는 헤더에서 가져오기
-        String liveId = headerAccessor.getFirstNativeHeader("sessionId");
-        LOGGER.info("서버 측 연결된 liveId: {}", liveId);
-        if (liveId != null && liveParticipantsMap.containsKey(liveId)) {
-            liveParticipantsMap.merge(liveId, -1, Integer::sum); // 해당 liveId의 참여자 수 감소
+        String sessionId = headerAccessor.getFirstNativeHeader("sessionId");
+        LOGGER.info("서버 측 연결된 sessionId: {}", sessionId);
+        if (sessionId != null && liveParticipantsMap.containsKey(sessionId)) {
+            liveParticipantsMap.merge(sessionId, -1, Integer::sum); // 해당 liveId의 참여자 수 감소
 
             // 참여자 수가 음수가 되지 않도록 처리
-            int currentParticipants = liveParticipantsMap.get(liveId);
+            int currentParticipants = liveParticipantsMap.get(sessionId);
             if (currentParticipants < 0) {
-                liveParticipantsMap.put(liveId, 0);
+                liveParticipantsMap.put(sessionId, 0);
                 currentParticipants = 0;
             }
 
-            LOGGER.info("WebSocket 연결 해제: liveId = {}, 현재 참여자 수 = {}", liveId, currentParticipants);
+            LOGGER.info("WebSocket 연결 해제: sessionId = {}, 현재 참여자 수 = {}", sessionId, currentParticipants);
 
             // 실시간 참여자 수를 해당 채팅방으로 전송
-            messagingTemplate.convertAndSend("/topic/live/" + liveId + "/participants", currentParticipants);
+            messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", currentParticipants);
         }
     }
 
