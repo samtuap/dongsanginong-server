@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.live.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.domain.chat.websocket.SocketController;
 import org.samtuap.inong.domain.live.dto.*;
 import org.samtuap.inong.domain.live.entity.Live;
 import org.samtuap.inong.domain.live.repository.LiveRepository;
@@ -30,6 +31,7 @@ public class LiveService {
     private final LiveRepository liveRepository;
     private final FarmFeign farmFeign;
     private final OpenVidu openVidu;
+    private final SocketController socketController;
 
     /**
      * feign 요청용
@@ -41,7 +43,8 @@ public class LiveService {
         List<FavoritesLiveListResponse> list = new ArrayList<>();
 
         for (Live live: liveList) {
-            FavoritesLiveListResponse dto = FavoritesLiveListResponse.from(live);
+            int participantCount = socketController.getParticipantCount(live.getSessionId());
+            FavoritesLiveListResponse dto = FavoritesLiveListResponse.from(live, participantCount);
             list.add(dto);
         }
         return list;
@@ -50,23 +53,13 @@ public class LiveService {
     public Page<ActiveLiveListGetResponse> getActiveLiveList(Pageable pageable) {
 
         Page<Live> activeLiveList = liveRepository.findActiveLives(pageable);
-//        List<ActiveLiveListGetResponse> responseList = new ArrayList<>();
 
         return activeLiveList.map(live -> {
             FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
             String farmName = farmResponse.farmName();
-            return ActiveLiveListGetResponse.fromEntity(live, farmName);
+            int participantCount = socketController.getParticipantCount(live.getSessionId());
+            return ActiveLiveListGetResponse.fromEntity(live, farmName, participantCount);
         });
-
-//        for (Live live : activeLiveList) {
-//            FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
-//            String farmName = farmResponse.farmName();
-//
-//            ActiveLiveListGetResponse response = ActiveLiveListGetResponse.fromEntity(live, farmName);
-//            responseList.add(response);
-//        }
-//
-//        return responseList;
     }
 
     /**
@@ -79,6 +72,7 @@ public class LiveService {
 
         Live live = Live.builder()
                         .farmId(farm.id())
+                        .ownerId(sellerId)
                         .title(request.title())
                         .liveImage(request.liveImage())
                         .build();

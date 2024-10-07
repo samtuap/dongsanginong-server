@@ -8,14 +8,16 @@ public record FavoritesLiveListResponse(
         Long id,
         Long farmId,
         String title,
-        String liveImage
+        String liveImage,
+        int participantCount
 ) {
-    public static FavoritesLiveListResponse from(Live live) {
+    public static FavoritesLiveListResponse from(Live live, int participantCount) {
         return FavoritesLiveListResponse.builder()
                 .id(live.getId())
                 .farmId(live.getFarmId())
                 .title(live.getTitle())
                 .liveImage(live.getLiveImage())
+                .participantCount(participantCount)
                 .build();
     }
 }

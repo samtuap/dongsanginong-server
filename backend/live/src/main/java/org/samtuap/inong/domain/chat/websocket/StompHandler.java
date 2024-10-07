@@ -38,6 +38,11 @@ public class StompHandler implements ChannelInterceptor {
                 Claims claims = jwtProvider.parseToken(token);
                 String memberId = claims.getSubject();
                 accessor.getSessionAttributes().put("memberId", memberId);
+
+                String sellerId = accessor.getFirstNativeHeader("sellerId");
+                if (sellerId != null) {
+                    accessor.getSessionAttributes().put("sellerId", sellerId);
+                }
             } catch (ExpiredJwtException | MalformedJwtException e) {
                 throw new BaseCustomException(INVALID_JWT_TOKEN);
             }
