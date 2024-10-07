@@ -24,7 +24,7 @@ public class ChatService {
     private final FarmFeign farmFeign;
     private final LiveRepository liveRepository;
 
-    public void processAndSendMessage(String liveId, ChatMessageRequest messageRequest) {
+    public void processAndSendMessage(String sessionId, ChatMessageRequest messageRequest) {
         Long memberId = messageRequest.memberId();
         Long sellerId = messageRequest.sellerId();
 
@@ -34,13 +34,13 @@ public class ChatService {
 
         // 개설자인지 여부 확인
         try {
-            Live live = liveRepository.findBySessionId(liveId)
-                    .orElseThrow(() -> new IllegalArgumentException("Live not found for id: " + liveId));
+            Live live = liveRepository.findBySessionId(sessionId)
+                    .orElseThrow(() -> new IllegalArgumentException("Live not found for id: " + sessionId));
             if (live.getOwnerId().equals(sellerId)) {
                 isOwner = true;
             }
         } catch (Exception e) {
-            log.error("Error fetching live info for liveId: {}", liveId, e);
+            log.error("Error fetching live info for sessionId: {}", sessionId, e);
         }
 
         log.info("Sending message with name: {}, isOwner: {}", senderName, isOwner);
@@ -81,7 +81,7 @@ public class ChatService {
         ChatMessageRequest updatedRequest = ChatMessageRequest.builder()
                 .memberId(memberId)
                 .sellerId(sellerId)
-                .liveId(liveId)
+                .sessionId(sessionId)
                 .name(senderName)  // 이름 설정 (멤버 이름 또는 농장 이름)
                 .content(messageRequest.content())
                 .type(messageRequest.type())
