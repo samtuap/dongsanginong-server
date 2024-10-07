@@ -11,8 +11,9 @@ public record SellerSignInResponse(Long sellerId,
                                    String email,
                                    String accessToken,
                                    String refreshToken,
-                                   String role){
-    public static SellerSignInResponse fromEntity(Seller seller, JwtToken jwtToken) {
+                                   String role,
+                                   Long farmId){
+    public static SellerSignInResponse fromEntity(Seller seller, JwtToken jwtToken, Long farmId) {
         return SellerSignInResponse.builder()
                 .sellerId(seller.getId())
                 .name(seller.getName())
@@ -20,6 +21,7 @@ public record SellerSignInResponse(Long sellerId,
                 .accessToken(jwtToken.accessToken())
                 .refreshToken(jwtToken.refreshToken())
                 .role(SellerRole.SELLER.toString())
+                .farmId(farmId)
                 .build();
     }
 }

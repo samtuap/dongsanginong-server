@@ -76,7 +76,9 @@ public class SellerService {
     public SellerSignInResponse signIn(SellerSignInRequest dto) {
         Seller seller = validateSellerCredentials(dto);
         JwtToken jwtToken = jwtService.issueToken(seller.getId(), SellerRole.SELLER.toString());
-        return SellerSignInResponse.fromEntity(seller, jwtToken);
+        Optional<Farm> farmOptional = farmRepository.findBySellerId(seller.getId());
+        Long farm = farmOptional.map(Farm::getId).orElse(null);
+        return SellerSignInResponse.fromEntity(seller, jwtToken, farm);
     }
 
     @Transactional
