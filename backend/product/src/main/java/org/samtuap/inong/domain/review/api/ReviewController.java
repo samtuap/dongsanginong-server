@@ -1,10 +1,7 @@
 package org.samtuap.inong.domain.review.api;
 
 import lombok.RequiredArgsConstructor;
-import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
-import org.samtuap.inong.domain.review.dto.ReviewDetailResponse;
-import org.samtuap.inong.domain.review.dto.ReviewListResponse;
-import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
+import org.samtuap.inong.domain.review.dto.*;
 import org.samtuap.inong.domain.review.service.ReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,5 +67,12 @@ public class ReviewController {
         ReviewDetailResponse reviewDetail = reviewService.getReviewDetail(reviewId);
         return ResponseEntity.status(HttpStatus.OK).body(reviewDetail);
     }
+
+    @GetMapping("/no-auth/farm/{farmId}/list")
+    public ResponseEntity<List<FarmReviewListResponse>> getReviewsByFarmId(@PathVariable Long farmId) {
+        List<FarmReviewListResponse> reviews = reviewService.getReviewsByFarmId(farmId);
+        return ResponseEntity.status(HttpStatus.OK).body(reviews);
+    }
+
 
 }

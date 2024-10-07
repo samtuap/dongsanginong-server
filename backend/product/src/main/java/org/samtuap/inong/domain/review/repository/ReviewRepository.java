@@ -1,5 +1,6 @@
 package org.samtuap.inong.domain.review.repository;
 
+import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.review.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,5 +15,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByIdAndMemberId(Long id, Long memberId);
 
     List<Review> findAllByPackageProductId(Long packageProductId);
+
+    List<Review> findAllByPackageProductIn(List<PackageProduct> packageProducts);
 
 }

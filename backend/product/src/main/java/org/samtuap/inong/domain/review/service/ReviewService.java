@@ -5,10 +5,8 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
-import org.samtuap.inong.domain.review.dto.ReviewCreateRequest;
-import org.samtuap.inong.domain.review.dto.ReviewDetailResponse;
-import org.samtuap.inong.domain.review.dto.ReviewListResponse;
-import org.samtuap.inong.domain.review.dto.ReviewUpdateRequest;
+import org.samtuap.inong.domain.review.dto.*;
+import org.samtuap.inong.domain.review.dto.FarmReviewListResponse;
 import org.samtuap.inong.domain.review.entity.Review;
 import org.samtuap.inong.domain.review.entity.ReviewImage;
 import org.samtuap.inong.domain.review.repository.ReviewImageRepository;
@@ -121,5 +119,21 @@ public class ReviewService {
         return ReviewDetailResponse.fromEntity(review, images);
     }
 
+    @Transactional(readOnly = true)
+    public List<FarmReviewListResponse> getReviewsByFarmId(Long farmId) {
+        // farmId에 해당하는 패키지 목록을 가져옵니다.
+        List<PackageProduct> packageProducts = packageProductRepository.findAllByFarmId(farmId);
+
+        // 패키지 목록에 해당하는 모든 리뷰를 가져옵니다.
+        List<Review> reviews = reviewRepository.findAllByPackageProductIn(packageProducts);
+
+        return reviews.stream()
+                .map(review -> {
+                    List<ReviewImage> images = reviewImageRepository.findAllByReviewId(review.getId());
+                    String packageName = review.getPackageProduct().getPackageName(); // 상품 이름 가져오기
+                    return FarmReviewListResponse.fromEntity(review, images, packageName); // 상품 이름 추가
+                })
+                .collect(Collectors.toList());
+    }
 
 }
