@@ -103,6 +103,19 @@ public class FarmSearchService {
         return farms;
     }
 
+    // 삭제
+    public void deleteFarm(String id) {
+        try {
+            DeleteRequest deleteRequest = DeleteRequest.of(builder ->
+                    builder.index(INDEX_NAME)
+                            .id(id));
+            DeleteResponse response = openSearchClient.delete(deleteRequest);
+            log.info("삭제 응답 : {}", response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     // 수정
     public void updateFarm(FarmDocument farmDocument) {
         try {
