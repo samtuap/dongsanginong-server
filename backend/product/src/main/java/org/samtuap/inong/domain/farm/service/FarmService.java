@@ -17,7 +17,6 @@ import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
-import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.search.document.FarmDocument;
 import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.data.domain.Page;
