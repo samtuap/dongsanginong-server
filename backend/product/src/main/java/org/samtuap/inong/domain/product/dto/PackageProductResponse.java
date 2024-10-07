@@ -17,7 +17,8 @@ public record PackageProductResponse(Long id,
                                      Long farmId,
                                      String farmName,
                                      String productDescription,
-                                     List<String> imageUrls) {
+                                     List<String> imageUrls,
+                                     String origin) {
     public static PackageProductResponse fromEntity(PackageProduct packageProduct, List<PackageProductImage> packageProductImage){
         List<String> imageUrls = packageProductImage.stream()
                 .map(PackageProductImage::getImageUrl)
@@ -32,6 +33,7 @@ public record PackageProductResponse(Long id,
                 .farmName(packageProduct.getFarm().getFarmName())
                 .productDescription(packageProduct.getProductDescription())
                 .imageUrls(imageUrls)
+                .origin(packageProduct.getOrigin())
                 .build();
     }
 }

@@ -13,7 +13,8 @@ public record PackageProductUpdateRequest(
         Long price,
         List<String> deleteImageUrls,
         List<String> newImageUrls,
-        String productDescription) {
+        String productDescription,
+        String origin) {
 
     public void updatePackageProduct(PackageProduct packageProduct, PackageProductImageService imageService) {
             packageProduct.updatePackageName(this.packageName);
@@ -28,5 +29,6 @@ public record PackageProductUpdateRequest(
         }
 
         packageProduct.updateProductDescription(this.productDescription);
+        packageProduct.updateOrigin(this.origin);
     }
 }

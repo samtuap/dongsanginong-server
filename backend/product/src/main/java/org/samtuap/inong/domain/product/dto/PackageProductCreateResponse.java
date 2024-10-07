@@ -16,7 +16,8 @@ public record PackageProductCreateResponse(
         List<String> imageUrls,
         LocalDateTime createdAt,
         String productDescription,
-        String productCode
+        String productCode,
+        String origin
 ) {
 
     public static PackageProductCreateResponse fromEntity(PackageProduct packageProduct, List<String> imageUrls) {
@@ -30,6 +31,7 @@ public record PackageProductCreateResponse(
                 .createdAt(packageProduct.getCreatedAt())
                 .productDescription(packageProduct.getProductDescription())
                 .productCode(packageProduct.getProductCode())
+                .origin(packageProduct.getOrigin())
                 .build();
     }
 }
