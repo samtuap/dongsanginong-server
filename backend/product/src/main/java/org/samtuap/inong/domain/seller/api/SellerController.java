@@ -77,34 +77,28 @@ public class SellerController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/no-auth/{sellerId}/packages")
+    @GetMapping("/packages")
     public ResponseEntity<Page<SellerPackageListGetResponse>> getSellerPackages(
-            @PathVariable Long sellerId,
+            @RequestHeader("sellerId") Long sellerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<SellerPackageListGetResponse> response = packageProductService.getSellerPackages(sellerId, page, size);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{sellerId}/packages/{packageId}/delete")
+    @DeleteMapping("/packages/{packageId}/delete")
     public void deletePackage(
-            @PathVariable Long sellerId,
+            @RequestHeader("sellerId") Long sellerId,
             @PathVariable Long packageId) {
         packageProductService.deletePackage(sellerId, packageId);
     }
 
-    @PutMapping("/{sellerId}/packages/{packageId}/update")
+    @PutMapping("/packages/{packageId}/update")
     public void updatePackageProduct(
-            @PathVariable Long sellerId,
+            @RequestHeader("sellerId") Long sellerId,
             @PathVariable Long packageId,
             @RequestBody PackageProductUpdateRequest request) {
         packageProductService.updatePackageProduct(sellerId, packageId, request);
-    }
-
-    @PostMapping("/myfarm/info/update")
-    public ResponseEntity<?> updateFarmInfo(@RequestHeader("sellerId") Long sellerId, @RequestBody SellerFarmInfoUpdateRequest infoUpdateRequest){
-        sellerService.updateFarmInfo(sellerId, infoUpdateRequest);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     // [임시 토큰 발급 API] TODO: 삭제 필요

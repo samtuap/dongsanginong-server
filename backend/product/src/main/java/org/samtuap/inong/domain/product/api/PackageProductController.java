@@ -41,8 +41,9 @@ public class PackageProductController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<PackageProductCreateResponse> createProduct(@RequestBody PackageProductCreateRequest request) {
-        PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(request);
+    public ResponseEntity<PackageProductCreateResponse> createProduct(@RequestHeader Long sellerId,
+                                                                      @RequestBody PackageProductCreateRequest request) {
+        PackageProductCreateResponse packageProductCreateResponse = packageProductService.createPackageProduct(sellerId, request);
         return ResponseEntity.ok(packageProductCreateResponse);
     }
 
@@ -68,5 +69,10 @@ public class PackageProductController {
     @PostMapping("/info/contain-deleted")
     List<PackageProductResponse> getPackageProductListContainDeleted(@RequestBody List<Long> ids) {
         return packageProductService.getProductInfoListContainDeleted(ids);
+    }
+
+    @GetMapping("/no-auth/for-sale/{id}")
+    public List<PackageProductForSaleListResponse> getForSalePackageProduct(@PathVariable("id") Long farmId) {
+        return packageProductService.getForSalePackageProduct(farmId);
     }
 }

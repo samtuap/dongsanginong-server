@@ -16,6 +16,8 @@ import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
+import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
+import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.search.document.FarmDocument;
 import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.data.domain.Page;
@@ -151,6 +153,24 @@ public class FarmService {
         farmSearchService.indexFarmDocument(farmDocument);
 
         return FarmCreateResponse.fromEntity(farm);
+    }
+
+    @Transactional
+    public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
+        Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
+        farm.updateInfo(infoUpdateRequest);
+        farmCategoryRelationRepository.deleteAllByFarm(farm);
+        for (FarmCategory category : infoUpdateRequest.category()) {
+            FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
+                    .farm(farm)
+                    .category(category)
+                    .build();
+            farmCategoryRelationRepository.save(newRelation);
+        }
+
+        // elasticsearch : open search에 수정
+        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
+        farmSearchService.updateFarm(farmDocument);
     }
 
     public List<FarmCategoryResponse> getAllFarmCategories() {

@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.coupon.api;
 
 import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.coupon.dto.CouponCreateRequest;
+import org.samtuap.inong.domain.coupon.dto.MemberCouponListResponse;
 import org.samtuap.inong.domain.coupon.dto.MemberCouponRelationResponse;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.service.CouponService;
@@ -45,10 +46,10 @@ public class CouponController {
 
 
     @GetMapping("/downloaded-coupons")
-    public ResponseEntity<List<MemberCouponRelationResponse>> getDownloadedCouponsByMember(
+    public ResponseEntity<List<MemberCouponListResponse>> getDownloadedCouponsByMember(
             @RequestHeader("myId") String memberId) {
 
-        List<MemberCouponRelationResponse> response = couponService.getDownloadedCouponsByMember(memberId);
+        List<MemberCouponListResponse> response = couponService.getDownloadedCouponsByMember(memberId);
         return ResponseEntity.ok(response);
     }
 

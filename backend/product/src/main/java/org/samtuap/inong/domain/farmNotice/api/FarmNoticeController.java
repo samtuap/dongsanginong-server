@@ -24,7 +24,7 @@ public class FarmNoticeController {
      */
     @GetMapping("/no-auth/{farm_id}/notice/list")
     public ResponseEntity<Page<NoticeListResponse>> noticeList(@PathVariable("farm_id") Long id,
-                                                               @PageableDefault(size = 15)Pageable pageable) {
+                                                               @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC)Pageable pageable) {
         return new ResponseEntity<>(farmNoticeService.noticeList(id, pageable), HttpStatus.OK);
     }
 

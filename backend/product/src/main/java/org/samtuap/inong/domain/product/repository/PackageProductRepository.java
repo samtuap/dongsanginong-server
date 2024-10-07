@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.product.repository;
 
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
+import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,9 @@ public interface PackageProductRepository extends JpaRepository<PackageProduct, 
 
     @Query(value = "SELECT p.* FROM package_product AS p WHERE p.id IN :ids", nativeQuery = true)
     List<PackageProduct> findAllByIdContainDeleted(List<Long> ids);
+
+    List<PackageProduct> findAllByFarmId(Long farmId);
+
+    @Query("SELECT f FROM Farm f ORDER BY f.id DESC LIMIT :n")
+    List<PackageProductImage> findNPackageProducts(@Param("n") Long n);
 }
