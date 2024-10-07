@@ -8,14 +8,16 @@ import org.samtuap.inong.domain.product.entity.PackageProduct;
 public record TopPackageGetResponse(@NotNull Long id,
                                     @NotNull String packageName,
                                     @NotNull Long farmId,
-                                    @NotNull String farmName) {
+                                    @NotNull String farmName,
+                                    String imageUrl) {
 
-    public static TopPackageGetResponse fromEntity(PackageProduct packageProduct) {
+    public static TopPackageGetResponse fromEntity(PackageProduct packageProduct, String thumbnailUrl) {
         return TopPackageGetResponse.builder()
                 .id(packageProduct.getId())
                 .packageName(packageProduct.getPackageName())
                 .farmId(packageProduct.getFarm().getId())
                 .farmName(packageProduct.getFarm().getFarmName())
+                .imageUrl(thumbnailUrl)
                 .build();
     }
 
