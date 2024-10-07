@@ -39,10 +39,20 @@ public class PackageProductService {
 
     public List<TopPackageGetResponse> getTopPackages() {
         List<Long> topPackages = orderFeign.getTopPackages();
+        // TODO: 수정 필요
+//        if(topPackages.size() < 10) {
+//            packageProductRepository.findTopByNPackageProducts(10 - topPackages.size());
+//        }
         List<PackageProduct> products = packageProductRepository.findAllByIds(topPackages);
 
         return products.stream()
-                .map(TopPackageGetResponse::fromEntity)
+                .map(product -> {
+                    PackageProductImage firstByPackageProduct = packageProductImageRepository.findFirstByPackageProduct(product);
+                    if(firstByPackageProduct == null) {
+                        throw new BaseCustomException(PRODUCT_IMAGE_NOT_FOUND);
+                    }
+                    return TopPackageGetResponse.fromEntity(product, firstByPackageProduct.getImageUrl());
+                })
                 .sorted(Comparator.comparingInt(product -> topPackages.indexOf(product.id())))
                 .collect(Collectors.toList());
     }
