@@ -16,7 +16,6 @@ import org.samtuap.inong.search.service.PackageProductSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +39,20 @@ public class PackageProductService {
 
     public List<TopPackageGetResponse> getTopPackages() {
         List<Long> topPackages = orderFeign.getTopPackages();
+        // TODO: 수정 필요
+//        if(topPackages.size() < 10) {
+//            packageProductRepository.findTopByNPackageProducts(10 - topPackages.size());
+//        }
         List<PackageProduct> products = packageProductRepository.findAllByIds(topPackages);
 
         return products.stream()
-                .map(TopPackageGetResponse::fromEntity)
+                .map(product -> {
+                    PackageProductImage firstByPackageProduct = packageProductImageRepository.findFirstByPackageProduct(product);
+                    if(firstByPackageProduct == null) {
+                        throw new BaseCustomException(PRODUCT_IMAGE_NOT_FOUND);
+                    }
+                    return TopPackageGetResponse.fromEntity(product, firstByPackageProduct.getImageUrl());
+                })
                 .sorted(Comparator.comparingInt(product -> topPackages.indexOf(product.id())))
                 .collect(Collectors.toList());
     }
@@ -55,9 +64,9 @@ public class PackageProductService {
     }
 
     @Transactional
-    public PackageProductCreateResponse createPackageProduct(PackageProductCreateRequest request) {
+    public PackageProductCreateResponse createPackageProduct(Long sellerId, PackageProductCreateRequest request) {
         // 농장 조회 후 사용
-        Farm farm = farmRepository.findById(request.farmId())
+        Farm farm = farmRepository.findBySellerId(sellerId)
                 .orElseThrow(() -> new BaseCustomException(FARM_NOT_FOUND));
 
         // 상품 엔티티 생성 및 저장
@@ -138,6 +147,18 @@ public class PackageProductService {
                     String imageUrl = packageProductImageRepository.findFirstByPackageProduct(packageProduct).getImageUrl();
                     Farm farm = farmRepository.findByIdOrThrow(packageProduct.getFarm().getId());
                     return PackageProductSubsResponse.fromEntity(packageProduct, imageUrl, farm);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<PackageProductForSaleListResponse> getForSalePackageProduct(Long farmId) {
+        List<PackageProduct> packageProducts = packageProductRepository.findAllByFarmId(farmId);
+        return packageProducts.stream()
+                .map(p -> {
+                    String imageUrl = packageProductImageRepository.findFirstByPackageProduct(p).getImageUrl();
+                    Farm farm = farmRepository.findByIdOrThrow(p.getFarm().getId());
+                    return PackageProductForSaleListResponse.fromEntity(p, imageUrl, farm);
                 })
                 .collect(Collectors.toList());
     }
