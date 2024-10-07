@@ -53,7 +53,6 @@ public class LiveService {
     public Page<ActiveLiveListGetResponse> getActiveLiveList(Pageable pageable) {
 
         Page<Live> activeLiveList = liveRepository.findActiveLives(pageable);
-//        List<ActiveLiveListGetResponse> responseList = new ArrayList<>();
 
         return activeLiveList.map(live -> {
             FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
@@ -61,16 +60,6 @@ public class LiveService {
             int participantCount = socketController.getParticipantCount(live.getSessionId());
             return ActiveLiveListGetResponse.fromEntity(live, farmName, participantCount);
         });
-
-//        for (Live live : activeLiveList) {
-//            FarmResponse farmResponse = farmFeign.getFarmById(live.getFarmId());
-//            String farmName = farmResponse.farmName();
-//
-//            ActiveLiveListGetResponse response = ActiveLiveListGetResponse.fromEntity(live, farmName);
-//            responseList.add(response);
-//        }
-//
-//        return responseList;
     }
 
     /**
@@ -80,10 +69,6 @@ public class LiveService {
     public LiveSessionResponse createLiveSession(Long sellerId, LiveSessionRequest request) throws Exception {
         // sellerId로 farmId 가져오기 => feign
         FarmDetailGetResponse farm = farmFeign.getFarmInfoWithSeller(sellerId);
-
-        if(!farm.sellerId().equals(sellerId)) {
-            throw new IllegalArgumentException("방송 개설 권한이 없습니다.");
-        }
 
         Live live = Live.builder()
                         .farmId(farm.id())
