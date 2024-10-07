@@ -17,10 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SocketController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
-
     private final SimpMessagingTemplate messagingTemplate;
 
-    // 각 liveId 별로 참여자를 관리하는 맵
+    // 각 liveId별로 참여자 수 관리
     private ConcurrentHashMap<String, Integer> liveParticipantsMap = new ConcurrentHashMap<>();
 
     // 새로운 사용자가 웹 소켓을 연결할 때 실행됨
@@ -28,17 +27,15 @@ public class SocketController {
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        // liveId를 WebSocket 연결 시 클라이언트가 전송하는 헤더에서 가져와야 함
-        String sessionId = headerAccessor.getFirstNativeHeader("sessionId");
-        if (sessionId != null) {
-            liveParticipantsMap.merge(sessionId, 1, Integer::sum); // 해당 liveId의 참여자 수 증가
-            LOGGER.info("새로운 WebSocket 연결: sessionId =" + sessionId  + ", 현재 참여자 수=" + liveParticipantsMap.get(sessionId));
+        // liveId를 WebSocket 연결 시 클라이언트가 전송하는 헤더에서 가져오기
+        String liveId = headerAccessor.getFirstNativeHeader("sessionId");
+        if (liveId != null) {
+            liveParticipantsMap.merge(liveId, 1, Integer::sum); // 해당 liveId의 참여자 수 증가
+            LOGGER.info("새로운 WebSocket 연결: liveId = {}, 현재 참여자 수 = {}", liveId, liveParticipantsMap.get(liveId));
 
-            LOGGER.info("참여자 수 전송 경로: /topic/live/" + sessionId + "/participants, 참여자 수: " + liveParticipantsMap.get(sessionId));
             // 실시간 참여자 수를 해당 채팅방으로 전송
-            messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", liveParticipantsMap.get(sessionId));
-            LOGGER.info("참여자 수 전송: liveId=" + sessionId + ", 현재 참여자 수=" + liveParticipantsMap.get(sessionId));
-
+            messagingTemplate.convertAndSend("/topic/live/" + liveId + "/participants", liveParticipantsMap.get(liveId));
+            LOGGER.info("참여자 수 전송: liveId = {}, 현재 참여자 수 = {}", liveId, liveParticipantsMap.get(liveId));
         }
     }
 
@@ -47,17 +44,27 @@ public class SocketController {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        // liveId를 WebSocket 연결 해제 시 클라이언트가 전송하는 헤더에서 가져와야 함
-        String sessionId = headerAccessor.getFirstNativeHeader("sessionId");
-        LOGGER.info("서버 측 연결된 sessionId: " + sessionId);
-        if (sessionId != null && liveParticipantsMap.containsKey(sessionId )) {
-            liveParticipantsMap.merge(sessionId, -1, Integer::sum); // 해당 liveId의 참여자 수 감소
-            LOGGER.info("WebSocket 연결 해제: sessionId=" + sessionId + ", 현재 참여자 수=" + liveParticipantsMap.get(sessionId));
+        // liveId를 WebSocket 연결 해제 시 클라이언트가 전송하는 헤더에서 가져오기
+        String liveId = headerAccessor.getFirstNativeHeader("sessionId");
+        LOGGER.info("서버 측 연결된 liveId: {}", liveId);
+        if (liveId != null && liveParticipantsMap.containsKey(liveId)) {
+            liveParticipantsMap.merge(liveId, -1, Integer::sum); // 해당 liveId의 참여자 수 감소
 
-            LOGGER.info("참여자 수 전송 경로: /topic/live/" + sessionId + "/participants, 참여자 수: " + liveParticipantsMap.get(sessionId));
+            // 참여자 수가 음수가 되지 않도록 처리
+            int currentParticipants = liveParticipantsMap.get(liveId);
+            if (currentParticipants < 0) {
+                liveParticipantsMap.put(liveId, 0);
+                currentParticipants = 0;
+            }
+
+            LOGGER.info("WebSocket 연결 해제: liveId = {}, 현재 참여자 수 = {}", liveId, currentParticipants);
+
             // 실시간 참여자 수를 해당 채팅방으로 전송
-            messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", liveParticipantsMap.get(sessionId));
-
+            messagingTemplate.convertAndSend("/topic/live/" + liveId + "/participants", currentParticipants);
         }
+    }
+
+    public int getParticipantCount(String sessionId) {
+        return liveParticipantsMap.getOrDefault(sessionId, 0);  // 세션에 해당하는 참여자 수 반환
     }
 }

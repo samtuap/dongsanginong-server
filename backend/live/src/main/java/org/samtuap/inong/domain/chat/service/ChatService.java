@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.FarmFeign;
 import org.samtuap.inong.common.client.MemberFeign;
+import org.samtuap.inong.domain.chat.dto.ChatKickRequest;
 import org.samtuap.inong.domain.chat.dto.ChatMessageRequest;
 import org.samtuap.inong.domain.chat.dto.MemberDetailResponse;
 import org.samtuap.inong.domain.chat.kafka.KafkaConstants;
 import org.samtuap.inong.domain.live.dto.FarmDetailGetResponse;
+import org.samtuap.inong.domain.live.entity.Live;
+import org.samtuap.inong.domain.live.repository.LiveRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +21,10 @@ import org.springframework.stereotype.Service;
 public class ChatService {
 
     private final KafkaTemplate<String, ChatMessageRequest> kafkaTemplate;
+    private final KafkaTemplate<String, ChatKickRequest> chatKickKafkaTemplate;
     private final MemberFeign memberFeign;
     private final FarmFeign farmFeign;
+    private final LiveRepository liveRepository;
 
     public void processAndSendMessage(String liveId, ChatMessageRequest messageRequest) {
         Long memberId = messageRequest.memberId();
@@ -27,9 +32,20 @@ public class ChatService {
 
         // 메시지 전송을 위한 기본 로직
         String senderName = messageRequest.name();
-        boolean isSeller = messageRequest.isSeller();  // 프론트엔드에서 받은 값을 그대로 사용
+        boolean isOwner = false;
 
-        log.info("Sending message with name: {}, isSeller: {}", senderName, isSeller);
+        // 개설자인지 여부 확인
+        try {
+            Live live = liveRepository.findBySessionId(liveId)
+                    .orElseThrow(() -> new IllegalArgumentException("Live not found for id: " + liveId));
+            if (live.getOwnerId().equals(sellerId)) {
+                isOwner = true;
+            }
+        } catch (Exception e) {
+            log.error("Error fetching live info for liveId: {}", liveId, e);
+        }
+
+        log.info("Sending message with name: {}, isOwner: {}", senderName, isOwner);
 
         // 멤버 ID가 있는 경우 멤버 이름 설정
         if (memberId != null) {
@@ -71,7 +87,7 @@ public class ChatService {
                 .name(senderName)  // 이름 설정 (멤버 이름 또는 농장 이름)
                 .content(messageRequest.content())
                 .type(messageRequest.type())
-                .isSeller(isSeller)  // 프론트엔드에서 받은 값을 그대로 사용
+                .isOwner(isOwner)  // 개설자 여부 설정
                 .build();
 
         log.info("Sending message to Kafka topic: {}, message: {}", KafkaConstants.KAFKA_TOPIC, updatedRequest);

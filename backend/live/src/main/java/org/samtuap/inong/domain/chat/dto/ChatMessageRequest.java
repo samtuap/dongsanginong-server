@@ -9,7 +9,7 @@ public record ChatMessageRequest(
         String liveId,
         String name,
         String content,
-        boolean isSeller,
+        boolean isOwner,
         MessageType type
 ) {
 }
