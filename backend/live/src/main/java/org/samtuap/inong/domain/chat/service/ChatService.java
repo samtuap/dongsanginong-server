@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.FarmFeign;
 import org.samtuap.inong.common.client.MemberFeign;
-import org.samtuap.inong.domain.chat.dto.ChatKickRequest;
 import org.samtuap.inong.domain.chat.dto.ChatMessageRequest;
 import org.samtuap.inong.domain.chat.dto.MemberDetailResponse;
 import org.samtuap.inong.domain.chat.kafka.KafkaConstants;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 public class ChatService {
 
     private final KafkaTemplate<String, ChatMessageRequest> kafkaTemplate;
-    private final KafkaTemplate<String, ChatKickRequest> chatKickKafkaTemplate;
     private final MemberFeign memberFeign;
     private final FarmFeign farmFeign;
     private final LiveRepository liveRepository;
