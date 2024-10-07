@@ -17,7 +17,6 @@ import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
 import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
-import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.search.document.FarmDocument;
 import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.data.domain.Page;
@@ -155,15 +154,26 @@ public class FarmService {
         return FarmCreateResponse.fromEntity(farm);
     }
 
+    public FarmInfoResponse getFarmInfo(Long sellerId) {
+        Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
+        List<FarmCategoryRelation> categoryRelations = farmCategoryRelationRepository.findAllByFarmId(farm.getId());
+        List<Long> categories = new ArrayList<>();
+        for (FarmCategoryRelation categoryRelation : categoryRelations) {
+            FarmCategory category = categoryRelation.getCategory();
+            categories.add(category.getId());
+        }
+        return FarmInfoResponse.fromEntity(farm, categories);
+    }
+
     @Transactional
     public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
         Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
         farm.updateInfo(infoUpdateRequest);
         farmCategoryRelationRepository.deleteAllByFarm(farm);
-        for (FarmCategory category : infoUpdateRequest.category()) {
+        for (Long categoryId : infoUpdateRequest.categoryId()) {
             FarmCategoryRelation newRelation = FarmCategoryRelation.builder()
                     .farm(farm)
-                    .category(category)
+                    .category(farmCategoryRepository.findByIdOrThrow(categoryId))
                     .build();
             farmCategoryRelationRepository.save(newRelation);
         }

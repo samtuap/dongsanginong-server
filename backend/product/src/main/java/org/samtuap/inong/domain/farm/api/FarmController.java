@@ -91,6 +91,12 @@ public class FarmController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping("/info")
+    public ResponseEntity<FarmInfoResponse> getFarmInfo(@RequestHeader("sellerId") Long sellerId){
+        FarmInfoResponse farmInfo = farmService.getFarmInfo(sellerId);
+        return new ResponseEntity<>(farmInfo, HttpStatus.OK);
+    }
+
     @PostMapping("/update")
     public ResponseEntity<?> updateFarmInfo(@RequestHeader("sellerId") Long sellerId, @RequestBody SellerFarmInfoUpdateRequest infoUpdateRequest){
         farmService.updateFarmInfo(sellerId, infoUpdateRequest);
