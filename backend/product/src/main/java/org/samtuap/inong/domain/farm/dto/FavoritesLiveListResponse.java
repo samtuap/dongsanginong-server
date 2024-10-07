@@ -5,6 +5,7 @@ public record FavoritesLiveListResponse(
         Long farmId,
         String farmName,
         String title,
-        String liveImage
+        String liveImage,
+        int participantCount
 ) {
 }

@@ -104,7 +104,8 @@ public class FarmService {
                             response.farmId(),
                             farmName,
                             response.title(),
-                            response.liveImage()
+                            response.liveImage(),
+                            response.participantCount()
                     );
                 })
                 .toList();
