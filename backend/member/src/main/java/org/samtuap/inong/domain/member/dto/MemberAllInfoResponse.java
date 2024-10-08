@@ -15,7 +15,6 @@ public record MemberAllInfoResponse(
         String zipcode,
         String socialType,
         String socialId,
-        String fcmToken,
         String billingKey) {
 
     public static MemberAllInfoResponse fromEntity(Member member) {
@@ -29,7 +28,6 @@ public record MemberAllInfoResponse(
                 .zipcode(member.getZipcode())
                 .socialType(member.getSocialType().name())
                 .socialId(member.getSocialId())
-                .fcmToken(member.getFcmToken())
                 .billingKey(member.getBillingKey())
                 .build();
     }
