@@ -1,10 +1,12 @@
 package org.samtuap.inong.domain.product.repository;
 
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +35,6 @@ public interface PackageProductRepository extends JpaRepository<PackageProduct, 
 
     @Query("SELECT f FROM Farm f ORDER BY f.id DESC LIMIT :n")
     List<PackageProductImage> findNPackageProducts(@Param("n") Long n);
+
+    Page<PackageProduct> findAll(Specification<PackageProduct> specification, Pageable pageable);
 }

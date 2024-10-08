@@ -1,5 +1,9 @@
 package org.samtuap.inong.domain.product.service;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.OrderFeign;
@@ -16,6 +20,7 @@ import org.samtuap.inong.search.service.PackageProductSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -169,5 +174,34 @@ public class PackageProductService {
                     return PackageProductForSaleListResponse.fromEntity(p, imageUrl, farm);
                 })
                 .collect(Collectors.toList());
+    }
+
+    public Page<AllPackageListResponse> searchProduct(Pageable pageable, String packageName) {
+        Specification<PackageProduct> specification = new Specification<PackageProduct>() {
+            @Override
+            public Predicate toPredicate(Root<PackageProduct> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+
+                if (!packageName.isEmpty()) {
+                    predicates.add(criteriaBuilder.like(root.get("packageName"), "%" + packageName + "%"));
+                }
+
+                Predicate[] predicateArr = new Predicate[predicates.size()];
+                for (int i = 0; i < predicateArr.length; i++) {
+                    predicateArr[i] = predicates.get(i);
+                }
+
+                Predicate predicate = criteriaBuilder.and(predicateArr);
+                return predicate;
+            }
+        };
+        Page<PackageProduct> products = packageProductRepository.findAll(specification, pageable);
+        Page<AllPackageListResponse> productList = products.map(packageProduct -> {
+            PackageProductImage packageProductImage = packageProductImageRepository.findFirstByPackageProduct(packageProduct);
+            String imageUrl = packageProductImage.getImageUrl();
+            Long orderCount = orderFeign.getAllOrders(packageProduct.getId());
+            return AllPackageListResponse.fromEntity(packageProduct, imageUrl, orderCount);
+        });
+        return productList;
     }
 }

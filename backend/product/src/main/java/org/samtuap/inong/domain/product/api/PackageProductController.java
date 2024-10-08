@@ -85,4 +85,8 @@ public class PackageProductController {
         return ResponseEntity.ok(packageProductService.getAllPackageList(pageable));
     }
 
+    @GetMapping("/no-auth/search")
+    public ResponseEntity<Page<AllPackageListResponse>> searchProduct(@PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @RequestParam("packageName") String packageName){
+        return ResponseEntity.ok(packageProductService.searchProduct(pageable, packageName));
+    }
 }
