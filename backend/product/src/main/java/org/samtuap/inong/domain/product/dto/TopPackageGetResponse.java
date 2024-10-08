@@ -10,9 +10,10 @@ public record TopPackageGetResponse(@NotNull Long id,
                                     @NotNull Long farmId,
                                     @NotNull String farmName,
                                     String imageUrl,
-                                    @NotNull Long price) {
+                                    @NotNull Long price,
+                                    Long orderCount) {
 
-    public static TopPackageGetResponse fromEntity(PackageProduct packageProduct, String thumbnailUrl) {
+    public static TopPackageGetResponse fromEntity(PackageProduct packageProduct, String thumbnailUrl, Long orderCount) {
         return TopPackageGetResponse.builder()
                 .id(packageProduct.getId())
                 .packageName(packageProduct.getPackageName())
@@ -20,6 +21,7 @@ public record TopPackageGetResponse(@NotNull Long id,
                 .farmName(packageProduct.getFarm().getFarmName())
                 .imageUrl(thumbnailUrl)
                 .price(packageProduct.getPrice())
+                .orderCount(orderCount)
                 .build();
     }
 

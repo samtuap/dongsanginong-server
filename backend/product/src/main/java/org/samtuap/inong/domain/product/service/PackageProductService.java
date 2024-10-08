@@ -47,10 +47,22 @@ public class PackageProductService {
                     if(firstByPackageProduct == null) {
                         throw new BaseCustomException(PRODUCT_IMAGE_NOT_FOUND);
                     }
-                    return TopPackageGetResponse.fromEntity(product, firstByPackageProduct.getImageUrl());
+                    Long counts = orderFeign.getAllOrders(product.getId());
+                    return TopPackageGetResponse.fromEntity(product, firstByPackageProduct.getImageUrl(), counts);
                 })
                 .sorted(Comparator.comparingInt(product -> topPackages.indexOf(product.id())))
                 .collect(Collectors.toList());
+    }
+
+    public Page<AllPackageListResponse> getAllPackageList(Pageable pageable) {
+        Page<PackageProduct> products = packageProductRepository.findAll(pageable);
+        Page<AllPackageListResponse> productList = products.map(packageProduct -> {
+            PackageProductImage packageProductImage = packageProductImageRepository.findFirstByPackageProduct(packageProduct);
+            String imageUrl = packageProductImage.getImageUrl();
+            Long orderCount = orderFeign.getAllOrders(packageProduct.getId());
+            return AllPackageListResponse.fromEntity(packageProduct, imageUrl, orderCount);
+        });
+        return productList;
     }
 
     public PackageProductResponse getProductInfo(Long packageProductId) {

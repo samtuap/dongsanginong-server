@@ -70,6 +70,11 @@ public class OrderService {
         return orderRepository.findTop10PackageIdWithMostOrders();
     }
 
+    // feign 요청용
+    public Long getAllOrders(Long packageId){
+        return orderRepository.countByPackageId(packageId);
+    }
+
     @Transactional
     public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
         PaymentResponse paymentResponse = makeOrder(memberId, reqDto, true);
