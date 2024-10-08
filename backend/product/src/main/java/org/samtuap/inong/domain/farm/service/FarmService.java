@@ -148,9 +148,9 @@ public class FarmService {
             farmCategoryRelationRepository.save(newRelation);
         }
 
-        // elasticsearch : open search에 인덱싱
-        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
-        farmSearchService.indexFarmDocument(farmDocument);
+        // elasticsearch✔️ : open search에 인덱싱
+//        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
+//        farmSearchService.indexFarmDocument(farmDocument);
 
         return FarmCreateResponse.fromEntity(farm);
     }
@@ -179,9 +179,9 @@ public class FarmService {
             farmCategoryRelationRepository.save(newRelation);
         }
 
-        // elasticsearch : open search에 수정
-        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
-        farmSearchService.updateFarm(farmDocument);
+        // elasticsearch✔️ : open search에 수정
+//        FarmDocument farmDocument = FarmDocument.convertToDocument(farm);
+//        farmSearchService.updateFarm(farmDocument);
     }
 
     public List<FarmCategoryResponse> getAllFarmCategories() {

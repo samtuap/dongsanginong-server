@@ -74,9 +74,9 @@ public class PackageProductService {
         // 이미지 저장 로직 호출
         packageProductImageService.saveImages(savedPackageProduct, imageUrls);
 
-        // elasticsearch : open search에 인덱싱
-        PackageProductDocument packageProductDocument = PackageProductDocument.convertToDocument(savedPackageProduct);
-        packageProductSearchService.indexProductDocument(packageProductDocument);
+        // elasticsearch✔️ : open search에 인덱싱
+//        PackageProductDocument packageProductDocument = PackageProductDocument.convertToDocument(savedPackageProduct);
+//        packageProductSearchService.indexProductDocument(packageProductDocument);
 
         // 저장된 엔티티를 DTO로 반환
         return PackageProductCreateResponse.fromEntity(savedPackageProduct, imageUrls);
@@ -97,8 +97,8 @@ public class PackageProductService {
         }
         packageProductRepository.delete(packageProduct);
 
-        // elasticsearch : 삭제
-        packageProductSearchService.deleteProduct(String.valueOf(packageId));
+        // elasticsearch✔️ : 삭제
+//        packageProductSearchService.deleteProduct(String.valueOf(packageId));
     }
 
     @Transactional
@@ -117,9 +117,9 @@ public class PackageProductService {
         // 수정된 상품 정보 저장
         packageProductRepository.save(packageProduct);
 
-        // elasticsearch : open search에 수정
-        PackageProductDocument updateProduct = PackageProductDocument.convertToDocument(packageProduct);
-        packageProductSearchService.updateProduct(updateProduct);
+        // elasticsearch✔️ : open search에 수정
+//        PackageProductDocument updateProduct = PackageProductDocument.convertToDocument(packageProduct);
+//        packageProductSearchService.updateProduct(updateProduct);
     }
 
     // Feign 요청 용

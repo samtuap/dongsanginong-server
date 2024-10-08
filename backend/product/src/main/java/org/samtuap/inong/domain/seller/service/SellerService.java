@@ -118,8 +118,8 @@ public class SellerService {
 
             // 농장 삭제 진행
             farmRepository.delete(farm);
-            // elasticsearch : 삭제
-            farmSearchService.deleteFarm(String.valueOf(farm.getId()));
+            // elasticsearch✔️ : 삭제
+//            farmSearchService.deleteFarm(String.valueOf(farm.getId()));
         }
 
         // 삭제되지 않은 패키지가 없으면 농장과 판매자 삭제 진행
