@@ -4,7 +4,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: local
+      on-profile: dev
     import: application-secret.properties
   application:
     name: order-service
