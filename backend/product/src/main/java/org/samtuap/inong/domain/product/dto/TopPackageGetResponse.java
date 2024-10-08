@@ -9,7 +9,8 @@ public record TopPackageGetResponse(@NotNull Long id,
                                     @NotNull String packageName,
                                     @NotNull Long farmId,
                                     @NotNull String farmName,
-                                    String imageUrl) {
+                                    String imageUrl,
+                                    @NotNull Long price) {
 
     public static TopPackageGetResponse fromEntity(PackageProduct packageProduct, String thumbnailUrl) {
         return TopPackageGetResponse.builder()
@@ -18,6 +19,7 @@ public record TopPackageGetResponse(@NotNull Long id,
                 .farmId(packageProduct.getFarm().getId())
                 .farmName(packageProduct.getFarm().getFarmName())
                 .imageUrl(thumbnailUrl)
+                .price(packageProduct.getPrice())
                 .build();
     }
 
