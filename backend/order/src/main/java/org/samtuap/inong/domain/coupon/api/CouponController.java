@@ -28,11 +28,11 @@ public class CouponController {
     }
 
 
-    @GetMapping("/{farm_id}/list")
-    public ResponseEntity<List<Coupon>> getCouponsByFarmId(
-            @PathVariable("farm_id") Long farmId) {
+    @GetMapping("/list")
+    public ResponseEntity<List<Coupon>> getCouponsBySellerId(
+            @RequestHeader("sellerId") Long sellerId) {
 
-        List<Coupon> coupons = couponService.getCouponsByFarmId(farmId);
+        List<Coupon> coupons = couponService.getCouponsBySellerId(sellerId);
         return ResponseEntity.ok(coupons);
     }
 
