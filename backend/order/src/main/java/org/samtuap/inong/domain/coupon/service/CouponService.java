@@ -29,18 +29,18 @@ public class CouponService {
 
         FarmDetailGetResponse farm = productFeign.getFarmInfoWithSeller(sellerId);
 
-//        // farmId로 조회한 sellerId와 요청에서 받은 sellerId 비교
-//        if (!farm.sellerId().equals(sellerId)) {
-//            throw new BaseCustomException(FARM_NOT_FOUND);
-//        }
-
         // Coupon 엔티티 생성
         Coupon coupon = request.toEntity(request, farm.id());
         couponRepository.save(coupon);
     }
 
     @Transactional
-    public List<Coupon> getCouponsByFarmId(Long farmId) {
+    public List<Coupon> getCouponsBySellerId(Long sellerId) {
+
+        FarmDetailGetResponse farm = productFeign.getFarmInfoWithSeller(sellerId);
+        Long farmId = farm.id();  // farmId 추출
+
+        // farmId로 쿠폰 목록을 조회
         return couponRepository.findAllByFarmId(farmId);
     }
 
