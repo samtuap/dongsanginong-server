@@ -51,8 +51,6 @@ public class Member extends BaseEntity {
     @NotNull
     private String socialId;
 
-    private String fcmToken;
-
     private String billingKey;
 
     public void updatePhone(String phone){
@@ -65,10 +63,6 @@ public class Member extends BaseEntity {
         this.zipcode = zipcode;
     }
 
-
-    public void updateFcmToken(String fcmToken) {
-        this.fcmToken = fcmToken;
-    }
 
     public void updateBillingKey(String billingKey) {
         this.billingKey = billingKey;
