@@ -9,17 +9,18 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:mariadb://localhost:3310/dongsanginong?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: root
-    password: 1234
+    url: jdbc:mariadb://${DEV_DATABASE_ENDPOINT}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ${DEV_DATABASE_MASTER_NAME}
+    password: ${DEV_DATABASE_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database: mysql
     database-platform: org.hibernate.dialect.MariaDBDialect
     generate-ddl: true
     defer-datasource-initialization: true
+    tomcat.initial-size: 3  # 적절한 수치로 조정
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+9
