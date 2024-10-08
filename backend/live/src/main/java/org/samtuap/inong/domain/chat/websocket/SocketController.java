@@ -30,6 +30,9 @@ public class SocketController {
         // liveId를 WebSocket 연결 시 클라이언트가 전송하는 헤더에서 가져오기
         String sessionId = headerAccessor.getFirstNativeHeader("sessionId");
         if (sessionId != null) {
+
+            headerAccessor.getSessionAttributes().put("sessionId", sessionId);
+
             liveParticipantsMap.merge(sessionId, 1, Integer::sum); // 해당 liveId의 참여자 수 증가
             LOGGER.info("새로운 WebSocket 연결: sessionId = {}, 현재 참여자 수 = {}", sessionId, liveParticipantsMap.get(sessionId));
 
@@ -45,7 +48,7 @@ public class SocketController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         // liveId를 WebSocket 연결 해제 시 클라이언트가 전송하는 헤더에서 가져오기
-        String sessionId = headerAccessor.getFirstNativeHeader("sessionId");
+        String sessionId = (String) headerAccessor.getSessionAttributes().get("sessionId");
         LOGGER.info("서버 측 연결된 sessionId: {}", sessionId);
         if (sessionId != null && liveParticipantsMap.containsKey(sessionId)) {
             liveParticipantsMap.merge(sessionId, -1, Integer::sum); // 해당 liveId의 참여자 수 감소
