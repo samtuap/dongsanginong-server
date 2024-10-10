@@ -10,8 +10,10 @@ import org.samtuap.inong.domain.favorites.repository.FavoritesRepository;
 import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -40,5 +42,24 @@ public class FavoritesService {
                 .map(Favorites::getFarmId)
                 .toList();
         return productFeign.getFavoritesFarmLiveList(farmFavoriteIds);
+    }
+
+    @Transactional
+    public void clickLike(Long memberId, Long farmId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+
+        Optional<Favorites> favoriteOpt = favoritesRepository.findByMemberAndFarmId(member, farmId);
+        if(favoriteOpt.isPresent()) {
+            favoritesRepository.delete(favoriteOpt.get());
+            // product 모듈에 feign 요청
+            productFeign.decreaseLike(farmId);
+        } else {
+            Favorites favorite = Favorites.builder()
+                    .member(member)
+                    .farmId(farmId)
+                    .build();
+            favoritesRepository.save(favorite);
+            productFeign.increaseLike(farmId);
+        }
     }
 }

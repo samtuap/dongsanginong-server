@@ -30,4 +30,11 @@ public class FavoritesController {
     public ResponseEntity<List<FavoritesLiveListResponse>> favoritesFarmLiveList(@RequestHeader("myId") Long memberId) {
         return new ResponseEntity<>(favoritesService.favoritesFarmLiveList(memberId), HttpStatus.OK);
     }
+
+    @PostMapping("/farm/{farmId}/like")
+    public ResponseEntity<Void> clickLike(@RequestHeader("myId") Long memberId,
+                                          @PathVariable("farmId") Long farmId) {
+        favoritesService.clickLike(memberId, farmId);
+        return ResponseEntity.ok(null);
+    }
 }

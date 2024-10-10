@@ -52,4 +52,8 @@ public class Farm extends BaseEntity {
         this.farmName = infoRequest.farmName();
         this.farmIntro = infoRequest.farmIntro();
     }
+
+    public void updateFavoriteCount(Long favoriteCount) {
+        this.favoriteCount = favoriteCount;
+    }
 }

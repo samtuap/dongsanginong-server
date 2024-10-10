@@ -21,7 +21,7 @@ import java.util.List;
 public class FarmController {
     private final FarmService farmService;
 
-    @GetMapping("/no-auth/list")
+    @GetMapping("/no-auth")
     public ResponseEntity<Page<FarmListGetResponse>> getFarmList(
             @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable);
@@ -113,5 +113,18 @@ public class FarmController {
     public ResponseEntity<Boolean> checkFarmExists(@RequestHeader("sellerId") Long sellerId) {
         boolean exists = farmService.checkFarmExistsBySellerId(sellerId);
         return ResponseEntity.ok(exists);
+    }
+
+
+    // feign 요청용
+    @PostMapping("/{farmId}/decrease-like")
+    void decreaseLike(@PathVariable("farmId") Long farmId) {
+        farmService.increaseLike(farmId);
+    }
+
+    // feign 요청용
+    @PostMapping("/{farmId}/increase-like")
+    void increaseLike(@PathVariable("farmId") Long farmId) {
+        farmService.decreaseLike(farmId);
     }
 }

@@ -196,4 +196,17 @@ public class FarmService {
     public boolean checkFarmExistsBySellerId(Long sellerId) {
         return farmRepository.existsBySellerId(sellerId);
     }
+
+    @Transactional
+    public void increaseLike(Long farmId) {
+        Farm farm = farmRepository.findByIdOrThrow(farmId);
+        farm.updateFavoriteCount(farm.getFavoriteCount() + 1);
+    }
+
+    @Transactional
+    public void decreaseLike(Long farmId) {
+        Farm farm = farmRepository.findByIdOrThrow(farmId);
+        farm.updateFavoriteCount(farm.getFavoriteCount() + 1);
+    }
+
 }
