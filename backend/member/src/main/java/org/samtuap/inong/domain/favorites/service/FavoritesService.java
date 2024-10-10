@@ -65,7 +65,6 @@ public class FavoritesService {
     }
 
     public FavoriteGetResponse getFavorite(Long memberId, Long farmId) {
-        log.info("line 68: {}", memberId);
         Optional<Favorites> favoriteOpt;
         if(memberId == null) {
             return null;

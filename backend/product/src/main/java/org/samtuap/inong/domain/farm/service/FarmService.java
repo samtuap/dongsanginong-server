@@ -57,8 +57,6 @@ public class FarmService {
                 favorite = memberFeign.getFavorite(myId, farm.getId());
             }
 
-            log.info("favorite: {}", favorite);
-
             if(favorite == null) {
                 return FarmListGetResponse.fromEntity(farm, false);
             } else {
@@ -96,7 +94,6 @@ public class FarmService {
         return farms.map(farm -> {
             FavoriteGetResponse favorite = memberFeign.getFavorite(myId, farm.getId());
 
-            log.info("line 97 myId: {}", myId);
             if(favorite == null) {
                 return FarmListGetResponse.fromEntity(farm, false);
             } else {

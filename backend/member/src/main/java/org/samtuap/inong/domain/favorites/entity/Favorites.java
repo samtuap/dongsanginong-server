@@ -15,8 +15,6 @@ import org.samtuap.inong.domain.member.entity.Member;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE favorites SET deleted_at = now() WHERE id = ?")
-@SQLRestriction("deleted_at is NULL")
 public class Favorites extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

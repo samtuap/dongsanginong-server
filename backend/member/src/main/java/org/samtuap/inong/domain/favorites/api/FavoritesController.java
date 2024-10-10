@@ -45,7 +45,6 @@ public class FavoritesController {
     @GetMapping("/farm/{farmId}")
     public FavoriteGetResponse getFavorite(@RequestParam(value = "memberId", required = false) Long memberId,
                                           @PathVariable("farmId") Long farmId) {
-        log.info("line 68: {}", memberId);
         return favoritesService.getFavorite(memberId, farmId);
     }
 }
