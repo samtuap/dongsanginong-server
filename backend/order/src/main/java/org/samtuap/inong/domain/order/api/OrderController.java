@@ -27,6 +27,12 @@ public class OrderController {
         return orderService.getTopPackages();
     }
 
+    // feign 요청용
+    @PostMapping("/counts")
+    public Long getAllOrders(@RequestBody Long packageId){
+        return orderService.getAllOrders(packageId);
+    }
+
     @PostMapping("/first")
     public ResponseEntity<PaymentResponse> kakaoPay(@RequestHeader("myId") Long memberId,
                                                     @RequestBody PaymentRequest reqDto) {

@@ -5,6 +5,10 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.product.dto.*;
 import org.samtuap.inong.domain.product.service.PackageProductService;
 import org.samtuap.inong.domain.product.dto.TopPackageGetResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
@@ -74,5 +78,15 @@ public class PackageProductController {
     @GetMapping("/no-auth/for-sale/{id}")
     public List<PackageProductForSaleListResponse> getForSalePackageProduct(@PathVariable("id") Long farmId) {
         return packageProductService.getForSalePackageProduct(farmId);
+    }
+
+    @GetMapping("/no-auth")
+    public ResponseEntity<Page<AllPackageListResponse>> getAllPackageList(@PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable){
+        return ResponseEntity.ok(packageProductService.getAllPackageList(pageable));
+    }
+
+    @GetMapping("/no-auth/search")
+    public ResponseEntity<Page<AllPackageListResponse>> searchProduct(@PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @RequestParam("packageName") String packageName){
+        return ResponseEntity.ok(packageProductService.searchProduct(pageable, packageName));
     }
 }
