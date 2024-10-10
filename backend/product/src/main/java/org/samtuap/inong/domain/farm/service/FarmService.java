@@ -47,8 +47,6 @@ public class FarmService {
 
     // 최신순, 스크랩순, 판매량 순
     public Page<FarmListGetResponse> getFarmList(Pageable pageable, Long myId) {
-        log.info("debug getFarmList myId: {}", myId);
-
         return farmRepository.findAll(pageable).map(farm -> {
             FavoriteGetResponse favorite;
             if(myId == null){
