@@ -44,11 +44,12 @@ public class JwtGlobalFilter implements GlobalFilter {
         String reqUri = request.getURI().getPath();
         boolean isAllowed = allowUrl.stream().anyMatch(uri -> antPathMatcher.match(uri, reqUri));
 
-        if (isAllowed) {
+        String bearerToken = request.getHeaders().getFirst("Authorization");
+
+        if (isAllowed && bearerToken == null) {
             return chain.filter(exchange);
         }
 
-        String bearerToken = request.getHeaders().getFirst("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             String accessToken = bearerToken.substring(7);
             try {

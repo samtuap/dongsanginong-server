@@ -21,22 +21,26 @@ import java.util.List;
 public class FarmController {
     private final FarmService farmService;
 
-    @GetMapping("/no-auth/list")
+    @GetMapping("/no-auth")
     public ResponseEntity<Page<FarmListGetResponse>> getFarmList(
-            @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable);
+            @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestHeader(value = "myId") Long myId
+            ) {
+        Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable, myId);
         return new ResponseEntity<>(farmList, HttpStatus.OK);
     }
 
     @GetMapping("/no-auth/search")
     public ResponseEntity<Page<FarmListGetResponse>> searchFarm(@RequestParam String farmName,
-                                                                @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<FarmListGetResponse> farmList = farmService.farmSearch(farmName, pageable);
+                                                                @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+                                                                @RequestHeader(value = "myId", required = false) Long myId) {
+        Page<FarmListGetResponse> farmList = farmService.farmSearch(farmName, pageable, myId);
         return new ResponseEntity<>(farmList, HttpStatus.OK);
     }
 
     @GetMapping("/no-auth/detail/{farmId}")
-    public ResponseEntity<FarmDetailGetResponse> getFarmDetail(@PathVariable Long farmId) {
+    public ResponseEntity<FarmDetailGetResponse> getFarmDetail(@PathVariable Long farmId,
+                                                               @RequestHeader(value = "myId", required = false) Long myId) {
         FarmDetailGetResponse farmDetail = farmService.getFarmDetail(farmId);
         return new ResponseEntity<>(farmDetail, HttpStatus.OK);
     }
@@ -113,5 +117,18 @@ public class FarmController {
     public ResponseEntity<Boolean> checkFarmExists(@RequestHeader("sellerId") Long sellerId) {
         boolean exists = farmService.checkFarmExistsBySellerId(sellerId);
         return ResponseEntity.ok(exists);
+    }
+
+
+    // feign 요청용
+    @PostMapping("/{farmId}/decrease-like")
+    void decreaseLike(@PathVariable("farmId") Long farmId) {
+        farmService.decreaseLike(farmId);
+    }
+
+    // feign 요청용
+    @PostMapping("/{farmId}/increase-like")
+    void increaseLike(@PathVariable("farmId") Long farmId) {
+        farmService.increaseLike(farmId);
     }
 }

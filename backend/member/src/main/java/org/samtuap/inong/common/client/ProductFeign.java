@@ -33,4 +33,10 @@ public interface ProductFeign {
 
     @GetMapping("/product/info")
     List<PackageProductResponse> getPackageProductList(@RequestBody PackageProductListGetRequest reqDto);
+
+    @PostMapping("/farm/{farmId}/decrease-like")
+    void decreaseLike(@PathVariable("farmId") Long farmId);
+
+    @PostMapping("/farm/{farmId}/increase-like")
+    void increaseLike(@PathVariable("farmId") Long farmId);
 }

@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.favorites.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.ProductFeign;
+import org.samtuap.inong.domain.favorites.dto.FavoriteGetResponse;
 import org.samtuap.inong.domain.favorites.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.favorites.dto.FollowersGetResponse;
 import org.samtuap.inong.domain.favorites.entity.Favorites;
@@ -10,8 +11,10 @@ import org.samtuap.inong.domain.favorites.repository.FavoritesRepository;
 import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -40,5 +43,46 @@ public class FavoritesService {
                 .map(Favorites::getFarmId)
                 .toList();
         return productFeign.getFavoritesFarmLiveList(farmFavoriteIds);
+    }
+
+    @Transactional
+    public void clickLike(Long memberId, Long farmId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+
+        Optional<Favorites> favoriteOpt = favoritesRepository.findByMemberAndFarmId(member, farmId);
+        if(favoriteOpt.isPresent()) {
+            favoritesRepository.delete(favoriteOpt.get());
+            // product 모듈에 feign 요청
+            productFeign.decreaseLike(farmId);
+        } else {
+            Favorites favorite = Favorites.builder()
+                    .member(member)
+                    .farmId(farmId)
+                    .build();
+            favoritesRepository.save(favorite);
+            productFeign.increaseLike(farmId);
+        }
+    }
+
+    public FavoriteGetResponse getFavorite(Long memberId, Long farmId) {
+        Optional<Favorites> favoriteOpt;
+        if(memberId == null) {
+            return null;
+        } else {
+            Member member = memberRepository.findByIdOrThrow(memberId);
+            favoriteOpt = favoritesRepository.findByMemberAndFarmId(member, farmId);
+        }
+
+
+        if(favoriteOpt.isEmpty()) {
+            return null;
+        } else {
+            Favorites favorites = favoriteOpt.get();
+            return FavoriteGetResponse.builder()
+                    .favoriteId(favorites.getId())
+                    .farmId(favorites.getFarmId())
+                    .memberId(favorites.getMember().getId())
+                    .build();
+        }
     }
 }
