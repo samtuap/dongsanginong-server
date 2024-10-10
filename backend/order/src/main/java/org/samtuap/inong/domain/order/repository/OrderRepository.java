@@ -21,8 +21,6 @@ public interface OrderRepository extends JpaRepository<Ordering, Long> {
             "ORDER BY COUNT(o.package_id) DESC LIMIT 10", nativeQuery = true)
     List<Long> findTop10PackageIdWithMostOrders();
 
-    @Query("SELECT COUNT(o) FROM Ordering o WHERE o.package.id = :packageId")
-
     Long countByPackageId(Long packageId);
 
     List<Ordering> findByFarmId(Long farm);
