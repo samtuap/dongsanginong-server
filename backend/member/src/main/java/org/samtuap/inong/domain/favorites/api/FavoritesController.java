@@ -1,6 +1,8 @@
 package org.samtuap.inong.domain.favorites.api;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.samtuap.inong.domain.favorites.dto.FavoriteGetResponse;
 import org.samtuap.inong.domain.favorites.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.favorites.dto.FollowersGetResponse;
 import org.samtuap.inong.domain.favorites.service.FavoritesService;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RequestMapping("/favorites")
 @RequiredArgsConstructor
 @RestController
@@ -31,10 +34,18 @@ public class FavoritesController {
         return new ResponseEntity<>(favoritesService.favoritesFarmLiveList(memberId), HttpStatus.OK);
     }
 
-    @PostMapping("/farm/{farmId}/like")
+    @PostMapping("/farm/{farmId}")
     public ResponseEntity<Void> clickLike(@RequestHeader("myId") Long memberId,
                                           @PathVariable("farmId") Long farmId) {
         favoritesService.clickLike(memberId, farmId);
         return ResponseEntity.ok(null);
+    }
+
+    // feign 용
+    @GetMapping("/farm/{farmId}")
+    public FavoriteGetResponse getFavorite(@RequestParam(value = "memberId", required = false) Long memberId,
+                                          @PathVariable("farmId") Long farmId) {
+        log.info("line 68: {}", memberId);
+        return favoritesService.getFavorite(memberId, farmId);
     }
 }

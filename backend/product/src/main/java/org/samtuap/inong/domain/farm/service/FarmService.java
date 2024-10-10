@@ -7,7 +7,9 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
+import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.common.response.FavoriteGetResponse;
 import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.entity.FarmCategory;
@@ -38,20 +40,38 @@ import static org.samtuap.inong.common.exceptionType.FarmExceptionType.FARM_CATE
 public class FarmService {
     private final FarmRepository farmRepository;
     private final LiveFeign liveFeign;
+    private final MemberFeign memberFeign;
     private final FarmCategoryRepository farmCategoryRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final FarmSearchService farmSearchService;
 
     // 최신순, 스크랩순, 판매량 순
-    public Page<FarmListGetResponse> getFarmList(Pageable pageable) {
-        return farmRepository.findAll(pageable).map(FarmListGetResponse::fromEntity);
+    public Page<FarmListGetResponse> getFarmList(Pageable pageable, Long myId) {
+        log.info("debug getFarmList myId: {}", myId);
+
+        return farmRepository.findAll(pageable).map(farm -> {
+            FavoriteGetResponse favorite;
+            if(myId == null){
+                favorite = null;
+            } else {
+                favorite = memberFeign.getFavorite(myId, farm.getId());
+            }
+
+            log.info("favorite: {}", favorite);
+
+            if(favorite == null) {
+                return FarmListGetResponse.fromEntity(farm, false);
+            } else {
+                return FarmListGetResponse.fromEntity(farm, true);
+            }
+        });
     }
 
     public FarmDetailGetResponse getFarmDetail(Long farmId) {
         return FarmDetailGetResponse.fromEntity(farmRepository.findByIdOrThrow(farmId));
     }
 
-    public Page<FarmListGetResponse> farmSearch(String farmName, Pageable pageable) {
+    public Page<FarmListGetResponse> farmSearch(String farmName, Pageable pageable, Long myId) {
         Specification<Farm> specification = new Specification<Farm>() {
             @Override
             public Predicate toPredicate(Root<Farm> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -73,7 +93,16 @@ public class FarmService {
         };
 
         Page<Farm> farms = farmRepository.findAll(specification, pageable);
-        return farms.map(FarmListGetResponse::fromEntity);
+        return farms.map(farm -> {
+            FavoriteGetResponse favorite = memberFeign.getFavorite(myId, farm.getId());
+
+            log.info("line 97 myId: {}", myId);
+            if(favorite == null) {
+                return FarmListGetResponse.fromEntity(farm, false);
+            } else {
+                return FarmListGetResponse.fromEntity(farm, true);
+            }
+        });
     }
 
 
@@ -206,7 +235,7 @@ public class FarmService {
     @Transactional
     public void decreaseLike(Long farmId) {
         Farm farm = farmRepository.findByIdOrThrow(farmId);
-        farm.updateFavoriteCount(farm.getFavoriteCount() + 1);
+        farm.updateFavoriteCount(farm.getFavoriteCount() - 1);
     }
 
 }

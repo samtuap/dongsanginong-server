@@ -3,6 +3,7 @@ package org.samtuap.inong.domain.favorites.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.ProductFeign;
+import org.samtuap.inong.domain.favorites.dto.FavoriteGetResponse;
 import org.samtuap.inong.domain.favorites.dto.FavoritesLiveListResponse;
 import org.samtuap.inong.domain.favorites.dto.FollowersGetResponse;
 import org.samtuap.inong.domain.favorites.entity.Favorites;
@@ -60,6 +61,29 @@ public class FavoritesService {
                     .build();
             favoritesRepository.save(favorite);
             productFeign.increaseLike(farmId);
+        }
+    }
+
+    public FavoriteGetResponse getFavorite(Long memberId, Long farmId) {
+        log.info("line 68: {}", memberId);
+        Optional<Favorites> favoriteOpt;
+        if(memberId == null) {
+            return null;
+        } else {
+            Member member = memberRepository.findByIdOrThrow(memberId);
+            favoriteOpt = favoritesRepository.findByMemberAndFarmId(member, farmId);
+        }
+
+
+        if(favoriteOpt.isEmpty()) {
+            return null;
+        } else {
+            Favorites favorites = favoriteOpt.get();
+            return FavoriteGetResponse.builder()
+                    .favoriteId(favorites.getId())
+                    .farmId(favorites.getFarmId())
+                    .memberId(favorites.getMember().getId())
+                    .build();
         }
     }
 }
