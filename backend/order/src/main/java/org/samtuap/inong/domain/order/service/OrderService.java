@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Or;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
@@ -260,18 +261,17 @@ public class OrderService {
         receiptRepository.save(receipt);
     }
 
-    public List<OrderDeliveryListResponse> getOrderDeliveryList(Long memberId) {
-        return orderRepository.findByMemberId(memberId).stream()
-                .map(ordering -> {
-                    PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
-                    Delivery delivery = deliveryRepository.findByOrdering(ordering);
-                    return delivery != null && delivery.getDeliveryAt() != null
-                            ? OrderDeliveryListResponse.fromEntity(ordering, product, delivery)
-                            : null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    public Page<OrderDeliveryListResponse> getOrderDeliveryList(Pageable pageable, Long memberId) {
+        Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);
+
+        return ordersPage.map(ordering -> {
+            PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
+            Delivery delivery = deliveryRepository.findByOrdering(ordering);
+            return OrderDeliveryListResponse.fromEntity(ordering, product, delivery);
+        });
     }
+
+
 
     public Page<OrderPaymentListResponse> getOrderPaymentList(Pageable pageable, Long memberId) {
         Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);

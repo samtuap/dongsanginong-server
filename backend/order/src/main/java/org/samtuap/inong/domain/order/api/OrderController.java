@@ -42,10 +42,11 @@ public class OrderController {
     }
 
     @GetMapping("/delivery/list")
-    public ResponseEntity<List<OrderDeliveryListResponse>> getOrderDeliveryList(@RequestHeader("myId") Long memberId){
-        List<OrderDeliveryListResponse> myOrderDeliveryList = orderService.getOrderDeliveryList(memberId);
+    public ResponseEntity<Page<OrderDeliveryListResponse>> getOrderDeliveryList(@PageableDefault(size = 8) Pageable pageable, @RequestHeader("myId") Long memberId) {
+        Page<OrderDeliveryListResponse> myOrderDeliveryList = orderService.getOrderDeliveryList(pageable, memberId);
         return new ResponseEntity<>(myOrderDeliveryList, HttpStatus.OK);
     }
+
 
     @GetMapping("/list")
     public ResponseEntity<Page<OrderPaymentListResponse>> getOrderPaymentList(@PageableDefault(size = 8) Pageable pageable, @RequestHeader("myId") Long memberId){
