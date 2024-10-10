@@ -6,6 +6,7 @@ import org.samtuap.inong.domain.live.entity.Live;
 @Builder
 public record ActiveLiveListGetResponse(
         Long liveId,
+        String sessionId,
         String farmName,
         String title,
         String liveImage,
@@ -15,6 +16,7 @@ public record ActiveLiveListGetResponse(
     public static ActiveLiveListGetResponse fromEntity(Live live, String farmName, int participantCount) {
         return ActiveLiveListGetResponse.builder()
                 .liveId(live.getId())
+                .sessionId(live.getSessionId())
                 .farmName(farmName)
                 .title(live.getTitle())
                 .liveImage(live.getLiveImage())
