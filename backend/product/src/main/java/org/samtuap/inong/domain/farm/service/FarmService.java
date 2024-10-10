@@ -100,6 +100,7 @@ public class FarmService {
                     String farmName = farmRepository.getFarmNameById(response.farmId());
                     return new FavoritesLiveListResponse(
                             response.id(),
+                            response.sessionId(),
                             response.farmId(),
                             farmName,
                             response.title(),
