@@ -46,6 +46,9 @@ public class JwtGlobalFilter implements GlobalFilter {
 
         String bearerToken = request.getHeaders().getFirst("Authorization");
 
+        System.out.println("line 48 >>>>>>>>>>" + reqUri);
+        System.out.println("line 49 >>>>>>>>>> " + bearerToken + " isAllowed: " + isAllowed);
+
         if (isAllowed && bearerToken == null) {
             return chain.filter(exchange);
         }
@@ -58,6 +61,7 @@ public class JwtGlobalFilter implements GlobalFilter {
                 String memberId = claims.getSubject();
                 String role = claims.get("role", String.class);
                 String idName;
+                System.out.println("line 61 >>>>>>>>>> " + role + "  >>>>>>>>>>> memberID:" + memberId);
                 if(role.equals("SELLER")){
                     idName = "sellerId";
                 }

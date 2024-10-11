@@ -24,7 +24,7 @@ public class FarmController {
     @GetMapping("/no-auth")
     public ResponseEntity<Page<FarmListGetResponse>> getFarmList(
             @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestHeader(value = "myId") Long myId
+            @RequestHeader(value = "myId", required = false) Long myId
             ) {
         Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable, myId);
         return new ResponseEntity<>(farmList, HttpStatus.OK);
