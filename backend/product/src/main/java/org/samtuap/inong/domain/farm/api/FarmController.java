@@ -5,6 +5,7 @@ import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.service.FarmService;
 import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,8 +25,17 @@ public class FarmController {
     @GetMapping("/no-auth")
     public ResponseEntity<Page<FarmListGetResponse>> getFarmList(
             @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestHeader(value = "myId") Long myId
+            @RequestHeader(value = "myId", required = false) Long myId
             ) {
+        Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable, myId);
+        return new ResponseEntity<>(farmList, HttpStatus.OK);
+    }
+
+    @GetMapping("/no-auth/no-cache")
+    public ResponseEntity<Page<FarmListGetResponse>> getFarmListNoCache(
+            @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestHeader(value = "myId") Long myId
+    ) {
         Page<FarmListGetResponse> farmList = farmService.getFarmList(pageable, myId);
         return new ResponseEntity<>(farmList, HttpStatus.OK);
     }

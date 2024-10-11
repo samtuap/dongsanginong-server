@@ -59,6 +59,9 @@ dependencies {
 	// opensearch 성능테스트
 	implementation 'net.datafaker:datafaker:1.8.0'
 
+	// cache
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+
 }
 
 tasks.named('test') {

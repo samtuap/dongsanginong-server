@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.common.page.CustomPage;
 import org.samtuap.inong.common.response.FavoriteGetResponse;
 import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.entity.Farm;
@@ -21,6 +22,7 @@ import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
 import org.samtuap.inong.search.document.FarmDocument;
 import org.samtuap.inong.search.service.FarmSearchService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -46,21 +48,17 @@ public class FarmService {
     private final FarmSearchService farmSearchService;
 
     // 최신순, 스크랩순, 판매량 순
-    public Page<FarmListGetResponse> getFarmList(Pageable pageable, Long myId) {
-        return farmRepository.findAll(pageable).map(farm -> {
-            FavoriteGetResponse favorite;
-            if(myId == null){
-                favorite = null;
-            } else {
-                favorite = memberFeign.getFavorite(myId, farm.getId());
-            }
+    @Cacheable(value = "FarmList", key = "#myId != null ? #myId : 'default'", cacheManager = "contentCacheManager")
+    public CustomPage<FarmListGetResponse> getFarmList(Pageable pageable, Long myId) {
+        Page<Farm> farmPage = farmRepository.findAll(pageable);
+        List<FarmListGetResponse> responses = farmPage.stream()
+                .map(farm -> {
+                    FavoriteGetResponse favorite = (myId == null) ? null : memberFeign.getFavorite(myId, farm.getId());
+                    return FarmListGetResponse.fromEntity(farm, favorite != null);
+                })
+                .collect(Collectors.toList());
 
-            if(favorite == null) {
-                return FarmListGetResponse.fromEntity(farm, false);
-            } else {
-                return FarmListGetResponse.fromEntity(farm, true);
-            }
-        });
+        return new CustomPage<>(responses, pageable, farmPage.getTotalElements());
     }
 
     public FarmDetailGetResponse getFarmDetail(Long farmId) {
