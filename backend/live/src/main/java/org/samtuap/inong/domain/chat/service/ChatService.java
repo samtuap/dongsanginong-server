@@ -128,17 +128,6 @@ public class ChatService {
         log.info("{} 강퇴됨: sessionId = {}, userId = {}", userType, sessionId, userId);
 
         messagingTemplate.convertAndSend("/topic/kick/" + userId, new KickMessage(userId, "강퇴되었습니다."));
-
-        String participantKey = "live:participants:" + sessionId;
-        redisTemplate.opsForValue().decrement(participantKey);
-        Object countObj = redisTemplate.opsForValue().get(participantKey);
-        Long currentParticipants = 0L;
-        if (countObj instanceof Number) {
-            currentParticipants = ((Number) countObj).longValue();
-        }
-        log.info("현재 참여자 수: sessionId = {}, 참가자 수 = {}", sessionId, currentParticipants);
-        messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", currentParticipants);
-
     }
 
     private boolean isOwner(String sessionId, Long sellerId) {
