@@ -25,7 +25,7 @@ public class MemberController {
 
     // 소셜 로그인
     @PostMapping("/sign-in")
-    public ResponseEntity<SignInResponse> signIn(@RequestHeader(value = "X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignInRequest signInRequest) {
+    public ResponseEntity<SignInResponse> signIn(@RequestHeader("X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignInRequest signInRequest) {
         String bearerToken = authorizationHeader.replace("Bearer ", "");
         SignInResponse signInResponse = memberService.signIn(bearerToken, signInRequest.socialType());
         return new ResponseEntity<>(signInResponse, HttpStatus.OK);
@@ -33,7 +33,7 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/sign-up")
-    public ResponseEntity<SignUpResponse> signUp(@RequestHeader(value = "X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignUpRequest signUpRequest) {
+    public ResponseEntity<SignUpResponse> signUp(@RequestHeader("Authorization") final String authorizationHeader, @RequestBody final SignUpRequest signUpRequest) {
         String socialAccessToken = authorizationHeader.replace("Bearer ", "");
         SignUpResponse signUpResponse = memberService.signUp(socialAccessToken, signUpRequest);
 
