@@ -122,20 +122,20 @@ public class ChatService {
         boolean isMember = isMember(userId);
         // 강퇴된 사용자 추가 (Redis Set 사용)
         String key = KICKED_USERS_KEY_PREFIX + sessionId;
+        redisTemplate.opsForSet().add(key, userId);
 
-        if (isMember) {
-            redisTemplate.opsForSet().add(key, userId);
-            log.info("멤버 강퇴됨: sessionId = {}, memberId = {}", sessionId, userId);
-            messagingTemplate.convertAndSend("/topic/kick/" + userId, new KickMessage(userId, "강퇴되었습니다."));
-        } else {
-            redisTemplate.opsForSet().add(key, userId);
-            log.info("판매자 강퇴됨: sessionId = {}, sellerId = {}", sessionId, userId);
-            messagingTemplate.convertAndSend("/topic/kick/" + userId, new KickMessage(userId, "강퇴되었습니다."));
-        }
+        String userType = isMember ? "멤버" : "판매자";
+        log.info("{} 강퇴됨: sessionId = {}, userId = {}", userType, sessionId, userId);
+
+        messagingTemplate.convertAndSend("/topic/kick/" + userId, new KickMessage(userId, "강퇴되었습니다."));
 
         String participantKey = "live:participants:" + sessionId;
         redisTemplate.opsForValue().decrement(participantKey);
-        Long currentParticipants = (Long) redisTemplate.opsForValue().get(participantKey);
+        Object countObj = redisTemplate.opsForValue().get(participantKey);
+        Long currentParticipants = 0L;
+        if (countObj instanceof Number) {
+            currentParticipants = ((Number) countObj).longValue();
+        }
         log.info("현재 참여자 수: sessionId = {}, 참가자 수 = {}", sessionId, currentParticipants);
         messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", currentParticipants);
 

@@ -122,11 +122,7 @@ public class SocketController {
 
     public int getParticipantCount(String sessionId) {
         String key = LIVE_PARTICIPANTS_KEY_PREFIX + sessionId;
-        Object count = redisTemplate.opsForValue().get(key);
-        if (count instanceof Number) {
-            return ((Number) count).intValue();
-        } else {
-            return 0;
-        }
+        Integer count = (Integer) redisTemplate.opsForValue().get(key);
+        return (count != null) ? count : 0;
     }
 }
