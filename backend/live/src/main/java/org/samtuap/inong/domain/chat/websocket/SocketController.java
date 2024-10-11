@@ -82,6 +82,8 @@ public class SocketController {
             currentParticipants = ((Number) countObj).intValue();
         }
 
+        headerAccessor.getSessionAttributes().put("sessionId", sessionId);
+
         log.info("새로운 WebSocket 연결: sessionId = {}, 현재 참여자 수 = {}", sessionId, currentParticipants);
 
         // 실시간 참여자 수를 해당 채팅방으로 전송
