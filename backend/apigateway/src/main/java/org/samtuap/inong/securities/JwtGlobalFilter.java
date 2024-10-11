@@ -2,6 +2,7 @@ package org.samtuap.inong.securities;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@Slf4j
 @Component
 public class JwtGlobalFilter implements GlobalFilter {
 
@@ -46,8 +48,7 @@ public class JwtGlobalFilter implements GlobalFilter {
 
         String bearerToken = request.getHeaders().getFirst("Authorization");
 
-        System.out.println("line 48 >>>>>>>>>>" + reqUri);
-        System.out.println("line 49 >>>>>>>>>> " + bearerToken + " isAllowed: " + isAllowed);
+        log.info("[JWT FLITER] >>>>>>>>>> reqUri: " + reqUri + " >>> bearerToken: " + bearerToken + " >>> isAllowed: " + isAllowed);
 
         if (isAllowed && bearerToken == null) {
             return chain.filter(exchange);
