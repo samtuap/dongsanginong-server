@@ -7,13 +7,12 @@ import org.samtuap.inong.domain.chat.service.ChatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,8 +22,9 @@ public class SocketController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatService chatService;
-    // 각 liveId별로 참여자 수 관리
-    private ConcurrentHashMap<String, Integer> liveParticipantsMap = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private static final String LIVE_PARTICIPANTS_KEY_PREFIX = "live:participants:";
 
     // 새로운 사용자가 웹 소켓을 연결할 때 실행됨
     @EventListener
@@ -63,18 +63,29 @@ public class SocketController {
             log.info("Seller connected: sellerId = {}", sellerId);
         }
 
-        if (memberId != null && chatService.isUserKicked(sessionId, memberId)) {
-            log.info("강퇴된 사용자 접속 시도 차단: sessionId = {}, memberId = {}", sessionId, memberId);
-            messagingTemplate.convertAndSend("/topic/kick", new KickMessage(memberId, "You are not allowed to reconnect."));
+        // 강퇴 여부 확인
+        if ((memberId != null && chatService.isUserKicked(sessionId, memberId)) ||
+                (sellerId != null && chatService.isUserKicked(sessionId, sellerId))) {
+            log.info("강퇴된 사용자 접속 시도 차단: sessionId = {}, memberId = {}, sellerId = {}", sessionId, memberId, sellerId);
+            messagingTemplate.convertAndSend("/topic/kick", new KickMessage(memberId != null ? memberId : sellerId, "You are not allowed to reconnect."));
             return;  // 연결 차단
         }
 
-        // 참여자 수 관리 (얘가 있어야 제대로 나옴)
-        headerAccessor.getSessionAttributes().put("sessionId", sessionId);
-        liveParticipantsMap.merge(sessionId, 1, Integer::sum);
-        log.info("새로운 WebSocket 연결: sessionId = {}, 현재 참여자 수 = {}", sessionId, liveParticipantsMap.get(sessionId));
+        // 참여자 수 관리 (Redis 사용)
+        String key = LIVE_PARTICIPANTS_KEY_PREFIX + sessionId;
+        redisTemplate.opsForValue().increment(key, 1);
 
-        messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", liveParticipantsMap.get(sessionId));
+        // 현재 참여자 수 가져오기
+        Object countObj = redisTemplate.opsForValue().get(key);
+        int currentParticipants = 0;
+        if (countObj instanceof Number) {
+            currentParticipants = ((Number) countObj).intValue();
+        }
+
+        log.info("새로운 WebSocket 연결: sessionId = {}, 현재 참여자 수 = {}", sessionId, currentParticipants);
+
+        // 실시간 참여자 수를 해당 채팅방으로 전송
+        messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/participants", currentParticipants);
     }
 
     // 사용자가 웹 소켓 연결을 끊으면 실행됨
@@ -85,13 +96,20 @@ public class SocketController {
         // liveId를 WebSocket 연결 해제 시 클라이언트가 전송하는 헤더에서 가져오기
         String sessionId = (String) headerAccessor.getSessionAttributes().get("sessionId");
         LOGGER.info("서버 측 연결된 sessionId: {}", sessionId);
-        if (sessionId != null && liveParticipantsMap.containsKey(sessionId)) {
-            liveParticipantsMap.merge(sessionId, -1, Integer::sum); // 해당 liveId의 참여자 수 감소
+        if (sessionId != null) {
+            String key = LIVE_PARTICIPANTS_KEY_PREFIX + sessionId;
+            redisTemplate.opsForValue().increment(key, -1);
+
+            // 현재 참여자 수 가져오기
+            Object countObj = redisTemplate.opsForValue().get(key);
+            int currentParticipants = 0;
+            if (countObj instanceof Number) {
+                currentParticipants = ((Number) countObj).intValue();
+            }
 
             // 참여자 수가 음수가 되지 않도록 처리
-            int currentParticipants = liveParticipantsMap.get(sessionId);
             if (currentParticipants < 0) {
-                liveParticipantsMap.put(sessionId, 0);
+                redisTemplate.opsForValue().set(key, 0);
                 currentParticipants = 0;
             }
 
@@ -103,6 +121,12 @@ public class SocketController {
     }
 
     public int getParticipantCount(String sessionId) {
-        return liveParticipantsMap.getOrDefault(sessionId, 0);  // 세션에 해당하는 참여자 수 반환
+        String key = LIVE_PARTICIPANTS_KEY_PREFIX + sessionId;
+        Object count = redisTemplate.opsForValue().get(key);
+        if (count instanceof Number) {
+            return ((Number) count).intValue();
+        } else {
+            return 0;
+        }
     }
 }
