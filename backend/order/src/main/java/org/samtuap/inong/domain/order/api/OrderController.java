@@ -28,8 +28,8 @@ public class OrderController {
     }
 
     // feign 요청용
-    @PostMapping("/counts")
-    public Long getAllOrders(@RequestBody Long packageId){
+    @GetMapping("/package/{packageId}/count")
+    public Long getAllOrders(@PathVariable(value = "packageId") Long packageId) {
         return orderService.getAllOrders(packageId);
     }
 
