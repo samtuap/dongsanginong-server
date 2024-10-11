@@ -11,7 +11,8 @@ public record CouponCreateRequest(
         @NotNull Integer discountPercentage,
         @NotNull LocalDate expirationDate,  // LocalDate로 날짜 받기
         @NotNull LocalTime expirationTime,  // LocalTime으로 시간 받기
-        @NotNull Long farmId
+        @NotNull Long farmId,
+        @NotNull Integer quantity
 ) {
     public static Coupon toEntity(CouponCreateRequest dto, Long farmId) {
         // LocalDate와 LocalTime을 LocalDateTime으로 합치기
@@ -19,6 +20,7 @@ public record CouponCreateRequest(
                 .couponName(dto.couponName)
                 .discountPercentage(dto.discountPercentage)
                 .expiration(dto.expirationDate.atTime(dto.expirationTime))  // LocalDateTime으로 변환
+                .quantity(dto.quantity)
                 .farmId(farmId)
                 .build();
     }

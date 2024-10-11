@@ -34,6 +34,9 @@ public class Coupon extends BaseEntity {
     private LocalDateTime expiration;
 
     @NotNull
+    private Integer quantity; // 수량이 -1일 경우 무제한 발급
+
+    @NotNull
     private Long farmId; // 농장 id
 
 }
