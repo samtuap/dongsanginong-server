@@ -12,14 +12,12 @@ import org.samtuap.inong.domain.chat.kafka.KafkaConstants;
 import org.samtuap.inong.domain.live.dto.FarmDetailGetResponse;
 import org.samtuap.inong.domain.live.entity.Live;
 import org.samtuap.inong.domain.live.repository.LiveRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
+import static org.samtuap.inong.common.exceptionType.ChatExceptionType.ID_IS_NULL;
 import static org.samtuap.inong.common.exceptionType.ChatExceptionType.IS_NOT_OWNER;
 import static org.samtuap.inong.common.exceptionType.LiveExceptionType.LIVE_NOT_FOUND;
 
@@ -32,8 +30,10 @@ public class ChatService {
     private final MemberFeign memberFeign;
     private final FarmFeign farmFeign;
     private final LiveRepository liveRepository;
-    private final ConcurrentHashMap<String, Set<Long>> kickedUsersMap = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, Object> redisTemplate;
     private final SimpMessagingTemplate messagingTemplate;
+
+    private static final String KICKED_USERS_KEY_PREFIX = "kicked:users:";
 
     public void processAndSendMessage(String sessionId, ChatMessageRequest messageRequest) {
         Long memberId = messageRequest.memberId();
@@ -44,8 +44,9 @@ public class ChatService {
         boolean isOwner = false;
 
         // 사용자가 강퇴된 상태인지 확인
-        if (isUserKicked(sessionId, memberId)) {
-            log.info("강퇴된 사용자 메시지 차단: sessionId = {}, memberId = {}", sessionId, memberId);
+        if ((memberId != null && isUserKicked(sessionId, memberId)) ||
+                (sellerId != null && isUserKicked(sessionId, sellerId))) {
+            log.info("강퇴된 사용자 메시지 차단: sessionId = {}, memberId = {}, sellerId = {}", sessionId, memberId, sellerId);
             return;
         }
 
@@ -108,18 +109,25 @@ public class ChatService {
         kafkaTemplate.send(KafkaConstants.KAFKA_TOPIC, updatedRequest);
     }
 
-    public void kickUser(String sessionId, Long memberId, Long sellerId) {
+    public void kickUser(String sessionId, Long userId, Long requestSellerId) {
         // 개설자인지 확인 (liveId로 소유자 확인 로직 추가 가능)
-        if (!isOwner(sessionId, sellerId)) {
+        if (!isOwner(sessionId, requestSellerId)) {
             throw new BaseCustomException(IS_NOT_OWNER);
         }
 
-        // 강퇴된 사용자 추가
-        kickedUsersMap.computeIfAbsent(sessionId, k -> new HashSet<>()).add(memberId);
-        log.info("사용자 강퇴됨: sessionId = {}, memberId = {}", sessionId, memberId);
+        if (userId == null) {
+            throw new BaseCustomException(ID_IS_NULL);
+        }
 
-        // 강퇴된 사용자에게 강퇴 메시지 전송
-        messagingTemplate.convertAndSend("/topic/kick/" + memberId, new KickMessage(memberId, "강퇴되었습니다."));
+        boolean isMember = isMember(userId);
+        // 강퇴된 사용자 추가 (Redis Set 사용)
+        String key = KICKED_USERS_KEY_PREFIX + sessionId;
+        redisTemplate.opsForSet().add(key, userId);
+
+        String userType = isMember ? "멤버" : "판매자";
+        log.info("{} 강퇴됨: sessionId = {}, userId = {}", userType, sessionId, userId);
+
+        messagingTemplate.convertAndSend("/topic/kick/" + userId, new KickMessage(userId, "강퇴되었습니다."));
     }
 
     private boolean isOwner(String sessionId, Long sellerId) {
@@ -136,7 +144,19 @@ public class ChatService {
     }
 
     // 강퇴된 사용자의 접속을 차단하기 위한 메서드
-    public boolean isUserKicked(String sessionId, Long memberId) {
-        return kickedUsersMap.containsKey(sessionId) && kickedUsersMap.get(sessionId).contains(memberId);
+    public boolean isUserKicked(String sessionId, Long userId) {
+        String key = KICKED_USERS_KEY_PREFIX + sessionId;
+        Boolean isMemberKicked = redisTemplate.opsForSet().isMember(key, userId);
+        return Boolean.TRUE.equals(isMemberKicked);
+    }
+
+    private boolean isMember(Long userId) {
+        // userId로 멤버 검증 로직 구현
+        try {
+            memberFeign.getMemberById(userId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

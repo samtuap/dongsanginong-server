@@ -9,6 +9,7 @@ import org.samtuap.inong.domain.live.entity.Live;
 import org.samtuap.inong.domain.live.repository.LiveRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.samtuap.inong.common.client.FarmFeign;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.samtuap.inong.common.exceptionType.LiveExceptionType.SESSION_NOT_FOUND;
 
@@ -32,6 +34,7 @@ public class LiveService {
     private final FarmFeign farmFeign;
     private final OpenVidu openVidu;
     private final SocketController socketController;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * feign 요청용
@@ -105,6 +108,8 @@ public class LiveService {
         // 방송이 종료되었을 때, 해당 세션의 종료 시간을 기록 (endAt)
         Live live = liveRepository.findBySessionIdOrThrow(sessionId);
         live.updateEndAt(LocalDateTime.now());
+        redisTemplate.expire("live:participants:" + sessionId, 1, TimeUnit.HOURS);
+        redisTemplate.expire("kicked:users:" + sessionId, 1, TimeUnit.HOURS);
         liveRepository.save(live);
     }
 }
