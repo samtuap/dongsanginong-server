@@ -88,7 +88,7 @@ public class LiveService {
         live.updateSessionId(session.getSessionId()); // sessionId를 라이브 시작하고 받아서 저장
         liveRepository.save(live);
 
-        return LiveSessionResponse.fromEntity(request, live, session);
+        return LiveSessionResponse.fromEntity(request, live, farm, session);
     }
 
     public LiveSessionResponse getSessionIdByLiveId(Long id) {
@@ -96,8 +96,9 @@ public class LiveService {
         if (live.getSessionId() == null) {
             throw new BaseCustomException(SESSION_NOT_FOUND);
         }
+        FarmResponse farm = farmFeign.getFarmById(live.getFarmId());
         log.info("{}로 session id 받자 : {}", id, live.getSessionId());
-        return LiveSessionResponse.liveFromEntity(live);  // 라이브의 세션 ID 반환
+        return LiveSessionResponse.liveFromEntity(live, farm);  // 라이브의 세션 ID 반환
     }
 
     /**
