@@ -25,8 +25,8 @@ public class ChatController {
     }
 
     @PostMapping("/{sessionId}/kick/{userId}")
-    public ResponseEntity<String> kickUser(@PathVariable String sessionId,
-                                           @PathVariable Long userId,
+    public ResponseEntity<String> kickUser(@PathVariable("sessionId") String sessionId,
+                                           @PathVariable("userId") Long userId,
                                            @RequestHeader("sellerId") Long requestSellerId) {
         if (userId == null) {
             return ResponseEntity.badRequest().body("ID : null");
@@ -37,8 +37,8 @@ public class ChatController {
     }
 
     @GetMapping("/{sessionId}/isKicked/{memberId}")
-    public ResponseEntity<Boolean> isUserKicked(@PathVariable String sessionId,
-                                                @PathVariable Long memberId) {
+    public ResponseEntity<Boolean> isUserKicked(@PathVariable("sessionId") String sessionId,
+                                                @PathVariable("memberId") Long memberId) {
         boolean isKicked = chatService.isUserKicked(sessionId, memberId);
         return ResponseEntity.ok(isKicked);
     }

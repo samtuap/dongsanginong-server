@@ -10,7 +10,8 @@ public record ActiveLiveListGetResponse(
         String farmName,
         String title,
         String liveImage,
-        int participantCount
+        int participantCount,
+        String category
 ) {
 
     public static ActiveLiveListGetResponse fromEntity(Live live, String farmName, int participantCount) {
@@ -21,6 +22,7 @@ public record ActiveLiveListGetResponse(
                 .title(live.getTitle())
                 .liveImage(live.getLiveImage())
                 .participantCount(participantCount)
+                .category(live.getCategory())
                 .build();
     }
 }

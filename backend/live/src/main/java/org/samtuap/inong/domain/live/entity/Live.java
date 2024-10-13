@@ -37,6 +37,8 @@ public class Live extends BaseEntity {
 
     private Long ownerId;
 
+    private String category;
+
     public void updateEndAt(LocalDateTime endAt) {
         this.endAt = endAt;
     }
