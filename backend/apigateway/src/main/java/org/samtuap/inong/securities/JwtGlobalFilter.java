@@ -62,7 +62,7 @@ public class JwtGlobalFilter implements GlobalFilter {
                 String memberId = claims.getSubject();
                 String role = claims.get("role", String.class);
                 String idName;
-                System.out.println("line 61 >>>>>>>>>> " + role + "  >>>>>>>>>>> memberID:" + memberId);
+
                 if(role.equals("SELLER")){
                     idName = "sellerId";
                 }

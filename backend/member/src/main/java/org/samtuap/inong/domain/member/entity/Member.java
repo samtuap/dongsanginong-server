@@ -51,6 +51,8 @@ public class Member extends BaseEntity {
     @NotNull
     private String socialId;
 
+    private PaymentMethod paymentMethod;
+
     private String billingKey;
 
     public void updatePhone(String phone){
@@ -66,5 +68,10 @@ public class Member extends BaseEntity {
 
     public void updateBillingKey(String billingKey) {
         this.billingKey = billingKey;
+    }
+
+    public void updatePaymentMethod(PaymentMethod paymentMethod, String billingKey) {
+        updateBillingKey(billingKey);
+        this.paymentMethod = paymentMethod;
     }
 }

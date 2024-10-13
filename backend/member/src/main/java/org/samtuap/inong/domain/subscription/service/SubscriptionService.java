@@ -9,12 +9,10 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.SubscriptionExceptionType;
 import org.samtuap.inong.domain.member.dto.*;
 import org.samtuap.inong.domain.member.entity.Member;
+import org.samtuap.inong.domain.member.entity.PaymentMethod;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
 import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
-import org.samtuap.inong.domain.subscription.dto.KafkaOrderRollbackRequest;
-import org.samtuap.inong.domain.subscription.dto.KafkaSubscribeProductRequest;
-import org.samtuap.inong.domain.subscription.dto.PackageProductListGetRequest;
-import org.samtuap.inong.domain.subscription.dto.SubscriptionListGetResponse;
+import org.samtuap.inong.domain.subscription.dto.*;
 import org.samtuap.inong.domain.subscription.entity.Subscription;
 import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -40,9 +38,9 @@ public class SubscriptionService {
 
 
     @Transactional
-    public void registerBillingKey(Long memberId, String billingKey) {
+    public void registerBillingKey(Long memberId, BillingKeyRegisterRequest request) {
         Member member = memberRepository.findByIdOrThrow(memberId);
-        member.updateBillingKey(billingKey);
+        member.updatePaymentMethod(request.paymentMethod(), request.billingKey());
     }
 
 

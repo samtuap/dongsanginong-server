@@ -33,7 +33,7 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/sign-up")
-    public ResponseEntity<SignUpResponse> signUp(@RequestHeader("Authorization") final String authorizationHeader, @RequestBody final SignUpRequest signUpRequest) {
+    public ResponseEntity<SignUpResponse> signUp(@RequestHeader("X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignUpRequest signUpRequest) {
         String socialAccessToken = authorizationHeader.replace("Bearer ", "");
         SignUpResponse signUpResponse = memberService.signUp(socialAccessToken, signUpRequest);
 

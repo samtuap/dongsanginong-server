@@ -22,7 +22,7 @@ public class SubscriptionController {
     @PostMapping("/register-billing-key")
     public ResponseEntity<Void> registerBillingKey(@RequestHeader("myId") Long memberId,
                                                    @RequestBody @Valid BillingKeyRegisterRequest dto) {
-        subscriptionService.registerBillingKey(memberId, dto.billingKey());
+        subscriptionService.registerBillingKey(memberId, dto);
 
         return ResponseEntity.ok(null);
     }
