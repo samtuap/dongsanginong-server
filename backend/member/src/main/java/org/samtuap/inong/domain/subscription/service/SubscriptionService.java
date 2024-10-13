@@ -6,12 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
-import org.samtuap.inong.common.exceptionType.SubscriptionExceptionType;
 import org.samtuap.inong.domain.member.dto.*;
 import org.samtuap.inong.domain.member.entity.Member;
-import org.samtuap.inong.domain.member.entity.PaymentMethod;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
-import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
 import org.samtuap.inong.domain.subscription.dto.*;
 import org.samtuap.inong.domain.subscription.entity.Subscription;
 import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
@@ -23,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.FCM_SEND_FAIL;
-import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.INVALID_FCM_REQUEST;
 import static org.samtuap.inong.common.exceptionType.SubscriptionExceptionType.*;
 
 @Slf4j
@@ -38,9 +33,9 @@ public class SubscriptionService {
 
 
     @Transactional
-    public void registerBillingKey(Long memberId, BillingKeyRegisterRequest request) {
+    public void registerPaymentMethod(Long memberId, BillingKeyRegisterRequest request) {
         Member member = memberRepository.findByIdOrThrow(memberId);
-        member.updatePaymentMethod(request.paymentMethod(), request.billingKey());
+        member.updatePaymentMethod(request.paymentMethodType(), request.billingKey());
     }
 
 
@@ -136,5 +131,14 @@ public class SubscriptionService {
     private void sendRollbackOrderMessage(KafkaOrderRollbackRequest subscribeRequest) {
         KafkaOrderRollbackRequest rollbackMessage = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId());
         kafkaTemplate.send("order-rollback-topic", rollbackMessage);
+    }
+
+    public PaymentMethodGetResponse getPaymentMethod(Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        return PaymentMethodGetResponse.builder()
+                .paymentMethodValue(member.getPaymentMethod().getPaymentMethodValue())
+                .paymentMethodType(member.getPaymentMethod())
+                .billingKey(member.getBillingKey())
+                .build();
     }
 }

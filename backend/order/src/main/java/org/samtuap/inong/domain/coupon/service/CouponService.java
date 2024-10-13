@@ -70,7 +70,7 @@ public class CouponService {
 
     @Transactional(readOnly = true)
     public List<MemberCouponListResponse> getDownloadedCouponsByMember(String memberId) {
-        List<MemberCouponRelation> memberCouponRelations = memberCouponRelationRepository.findAllByMemberIdAndUseYn(Long.parseLong(memberId), "N");
+        List<MemberCouponRelation> memberCouponRelations = memberCouponRelationRepository.findAllByMemberIdAndUsedAt(Long.parseLong(memberId), null);
 
         // MemberCouponRelation 엔티티를 MemberCouponRelationResponse로 변환
         return memberCouponRelations.stream()

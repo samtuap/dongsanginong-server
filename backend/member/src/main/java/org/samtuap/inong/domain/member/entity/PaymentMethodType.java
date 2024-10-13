@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum PaymentMethod {
+public enum PaymentMethodType {
     KAKAOPAY("카카오페이");
 
-    private final String paymentType;
+    private final String paymentMethodValue;
 }
