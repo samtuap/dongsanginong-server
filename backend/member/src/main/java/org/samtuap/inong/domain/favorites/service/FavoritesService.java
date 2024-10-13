@@ -10,12 +10,12 @@ import org.samtuap.inong.domain.favorites.entity.Favorites;
 import org.samtuap.inong.domain.favorites.repository.FavoritesRepository;
 import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +24,7 @@ public class FavoritesService {
     private final FavoritesRepository favoritesRepository;
     private final MemberRepository memberRepository;
     private final ProductFeign productFeign;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public FollowersGetResponse getFollowers(Long farmId) {
         List<Long> followers = favoritesRepository.findByFarmId(farmId).stream()
@@ -54,6 +55,7 @@ public class FavoritesService {
             favoritesRepository.delete(favoriteOpt.get());
             // product 모듈에 feign 요청
             productFeign.decreaseLike(farmId);
+            kafkaTemplate.send("update-like", memberId);
         } else {
             Favorites favorite = Favorites.builder()
                     .member(member)
@@ -61,6 +63,7 @@ public class FavoritesService {
                     .build();
             favoritesRepository.save(favorite);
             productFeign.increaseLike(farmId);
+            kafkaTemplate.send("update-like", memberId);
         }
     }
 
