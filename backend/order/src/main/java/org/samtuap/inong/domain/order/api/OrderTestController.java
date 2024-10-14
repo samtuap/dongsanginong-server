@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class OrderTestController {
     private final OrderTestService orderTestService;
-    @PostMapping("/first")
+    @PostMapping
     public ResponseEntity<PaymentResponse> kakaoPay(@RequestHeader("myId") Long memberId,
                                                     @RequestBody PaymentRequest reqDto) {
         PaymentResponse paymentResponse = orderTestService.makeFirstOrder(memberId, reqDto);

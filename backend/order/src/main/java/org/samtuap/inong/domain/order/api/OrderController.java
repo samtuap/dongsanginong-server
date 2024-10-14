@@ -33,7 +33,7 @@ public class OrderController {
         return orderService.getAllOrders(packageId);
     }
 
-    @PostMapping("/first")
+    @PostMapping
     public ResponseEntity<PaymentResponse> kakaoPay(@RequestHeader("myId") Long memberId,
                                                     @RequestBody PaymentRequest reqDto) {
         PaymentResponse paymentResponse = orderService.makeFirstOrder(memberId, reqDto);
