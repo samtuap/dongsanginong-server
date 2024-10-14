@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
@@ -134,16 +135,14 @@ public class FarmNoticeService {
      * 유저 > 공지에 달린 본인의 댓글 수정
      */
     @Transactional
-    public void commentUpdate(Long commentId, String memberId, CommentUpdateRequest dto) {
-
+    public void commentUpdate(Long commentId, Long memberId, Long sellerId, CommentUpdateRequest dto) {
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
                 () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
-        if (!comment.getMemberId().equals(Long.parseLong(memberId))) {
+        if (!Objects.equals(comment.getMemberId(), memberId) && !Objects.equals(comment.getSellerId(), sellerId)) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
-
         // 댓글 업데이트
         dto.updateEntity(comment);
     }
@@ -151,13 +150,12 @@ public class FarmNoticeService {
     /**
      * 유저 > 공지에 달린 본인의 댓글 삭제
      */
-    public void commentDelete(Long commentId, String memberId) {
-
+    public void commentDelete(Long commentId, Long memberId, Long sellerId) {
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
                 () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
-        if (!comment.getMemberId().equals(Long.parseLong(memberId))) {
+        if (!Objects.equals(comment.getMemberId(), memberId) && !Objects.equals(comment.getSellerId(), sellerId)) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
 
