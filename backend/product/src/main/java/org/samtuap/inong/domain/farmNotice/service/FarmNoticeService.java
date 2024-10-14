@@ -13,6 +13,8 @@ import org.samtuap.inong.domain.farmNotice.entity.NoticeComment;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeImageRepository;
 import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeRepository;
 import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
+import org.samtuap.inong.domain.seller.entity.Seller;
+import org.samtuap.inong.domain.seller.repository.SellerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
@@ -36,6 +39,7 @@ public class FarmNoticeService {
     private final NoticeCommentRepository noticeCommentRepository;
     private final MemberFeign memberFeign;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final SellerRepository sellerRepository;
 
     /**
      * 공지 목록 조회 => 제목, 내용, 사진(슬라이더)
@@ -76,14 +80,14 @@ public class FarmNoticeService {
         List<FarmNoticeImage> noticeImages = farmNoticeImageRepository.findByFarmNotice(farmNotice);
         // 댓글 수 반환
         List<NoticeComment> commentList = noticeCommentRepository.findByFarmNotice(farmNotice);
-        return NoticeDetailResponse.from(farmNotice, noticeImages, commentList.size());
+        return NoticeDetailResponse.from(farmNotice, noticeImages, commentList.size(), farm.getSellerId());
     }
 
     /**
      * 유저가 공지글에 댓글 작성
      */
     @Transactional
-    public void commentCreate(Long farmId, Long noticeId, String memberId, CommentCreateRequest dto) {
+    public void commentCreate(Long farmId, Long noticeId, Long memberId, Long sellerId, CommentCreateRequest dto) {
         // 해당 id에 일치하는 농장 가져오기
         Farm farm = farmRepository.findById(farmId).orElseThrow(
                 () -> new BaseCustomException(FARM_NOT_FOUND)
@@ -95,7 +99,7 @@ public class FarmNoticeService {
             throw new BaseCustomException(NOTICE_NOT_FOUND);
         }
 
-        NoticeComment noticeComment = CommentCreateRequest.to(dto, farmNotice, Long.parseLong(memberId));
+        NoticeComment noticeComment = CommentCreateRequest.to(dto, farmNotice, memberId, sellerId);
         noticeCommentRepository.save(noticeComment);
     }
 
@@ -117,8 +121,13 @@ public class FarmNoticeService {
         // 해당 농장의 모든 댓글 가져오기
         Page<NoticeComment> noticeCommentList = noticeCommentRepository.findByFarmNotice(farmNotice, pageable);
         return noticeCommentList.map(comment -> {
-            MemberDetailResponse member = memberFeign.getMemberById(comment.getMemberId());
-            return CommentListResponse.from(comment, member.name(), member.id());
+            if (comment.getMemberId() != null) { // 작성자가 member이면 seller가 null
+                MemberDetailResponse member = memberFeign.getMemberById(comment.getMemberId());
+                return CommentListResponse.from(comment, member.name(), member.id(), null);
+            } else { // 작성자가 seller이면 member가 null
+                Seller seller = sellerRepository.findByIdOrThrow(comment.getSellerId());
+                return CommentListResponse.from(comment, seller.getName(), null, seller.getId());
+            }
         });
     }
 
@@ -126,16 +135,14 @@ public class FarmNoticeService {
      * 유저 > 공지에 달린 본인의 댓글 수정
      */
     @Transactional
-    public void commentUpdate(Long commentId, String memberId, CommentUpdateRequest dto) {
-
+    public void commentUpdate(Long commentId, Long memberId, Long sellerId, CommentUpdateRequest dto) {
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
                 () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
-        if (!comment.getMemberId().equals(Long.parseLong(memberId))) {
+        if (!Objects.equals(comment.getMemberId(), memberId) && !Objects.equals(comment.getSellerId(), sellerId)) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
-
         // 댓글 업데이트
         dto.updateEntity(comment);
     }
@@ -143,13 +150,12 @@ public class FarmNoticeService {
     /**
      * 유저 > 공지에 달린 본인의 댓글 삭제
      */
-    public void commentDelete(Long commentId, String memberId) {
-
+    public void commentDelete(Long commentId, Long memberId, Long sellerId) {
         NoticeComment comment = noticeCommentRepository.findById(commentId).orElseThrow(
                 () -> new BaseCustomException(COMMENT_NOT_FOUND)
         );
         // 댓글 작성자 확인
-        if (!comment.getMemberId().equals(Long.parseLong(memberId))) {
+        if (!Objects.equals(comment.getMemberId(), memberId) && !Objects.equals(comment.getSellerId(), sellerId)) {
             throw new BaseCustomException(UNAUTHORIZED_ACTION);
         }
 

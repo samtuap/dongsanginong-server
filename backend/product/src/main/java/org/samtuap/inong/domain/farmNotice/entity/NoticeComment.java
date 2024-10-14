@@ -30,8 +30,9 @@ public class NoticeComment extends BaseEntity {
     @Column(columnDefinition = "varchar(300)")
     private String contents;
 
-    @NotNull
-    private Long memberId; // 회원 id 컬럼
+    private Long memberId; // member id => seller가 작성할 수도 있으니 null 가능
+
+    private Long sellerId; // seller id => member가 작성할 수도 있으니 null 가능
 
     // 댓글 내용 수정
     public void updateContents(String newContents) {
