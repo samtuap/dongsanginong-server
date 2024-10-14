@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
@@ -35,12 +34,11 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
-import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
-import static org.samtuap.inong.domain.order.entity.CancelReason.*;
+import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.BEFORE_DELIVERY;
+import static org.samtuap.inong.domain.order.entity.CancelReason.SYSTEM_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -266,7 +264,7 @@ public class OrderService {
 
         return ordersPage.map(ordering -> {
             PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
-            Delivery delivery = deliveryRepository.findByOrdering(ordering);
+            List<Delivery> delivery = deliveryRepository.findAllByOrdering(ordering);
             return OrderDeliveryListResponse.fromEntity(ordering, product, delivery);
         });
     }
