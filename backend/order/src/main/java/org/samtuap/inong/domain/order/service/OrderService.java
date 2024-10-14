@@ -122,14 +122,13 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 5. 최초 결제하기
+        // 4. 최초 결제하기
         String paymentId = kakaoPay(memberInfo, packageProduct, paidAmount, order);
 
-        // 4. 영수증 만들기
+        // 5. 영수증 만들기
         makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
 
-        // 5. orderCount 증가
-
+        // TODO: 6. orderCount 증가
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
