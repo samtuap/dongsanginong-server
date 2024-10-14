@@ -80,7 +80,7 @@ public class FarmNoticeService {
         List<FarmNoticeImage> noticeImages = farmNoticeImageRepository.findByFarmNotice(farmNotice);
         // 댓글 수 반환
         List<NoticeComment> commentList = noticeCommentRepository.findByFarmNotice(farmNotice);
-        return NoticeDetailResponse.from(farmNotice, noticeImages, commentList.size());
+        return NoticeDetailResponse.from(farmNotice, noticeImages, commentList.size(), farm.getSellerId());
     }
 
     /**
