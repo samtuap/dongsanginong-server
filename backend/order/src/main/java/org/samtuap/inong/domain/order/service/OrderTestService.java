@@ -37,13 +37,13 @@ import java.util.*;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
-import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
-import static org.samtuap.inong.domain.order.entity.CancelReason.*;
+import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.BEFORE_DELIVERY;
+import static org.samtuap.inong.domain.order.entity.CancelReason.SYSTEM_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class OrderService {
+public class OrderTestService {
     private final OrderRepository orderRepository;
     private final MemberFeign memberFeign;
     private final ProductFeign productFeign;

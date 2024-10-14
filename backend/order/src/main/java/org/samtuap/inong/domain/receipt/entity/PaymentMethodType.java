@@ -7,9 +7,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public enum PaymentMethod {
-    KAKAOPAY("카카오페이");
+public enum PaymentMethodType {
+    KAKAOPAY("카카오페이", "https://dongsanginong-bucket.s3.ap-northeast-2.amazonaws.com/local/kakaopay.png");
 
     private String detail;
+    private String logoImageUrl;
 
 }
