@@ -43,9 +43,10 @@ public class FarmNoticeController {
     @PostMapping("/{farm_id}/notice/{notice_id}/comment/create")
     public void commentCreate(@PathVariable("farm_id") Long farmId,
                               @PathVariable("notice_id") Long noticeId,
-                              @RequestHeader("myId") String memberId,
+                              @RequestHeader(value = "myId", required = false) Long memberId,
+                              @RequestHeader(value = "sellerId", required = false) Long sellerId,
                               @RequestBody CommentCreateRequest dto) {
-        farmNoticeService.commentCreate(farmId, noticeId, memberId, dto);
+        farmNoticeService.commentCreate(farmId, noticeId, memberId, sellerId, dto);
     }
 
     /**

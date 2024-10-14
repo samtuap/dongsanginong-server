@@ -9,15 +9,17 @@ public record CommentListResponse(
     String name,
     String contents,
     String createdAt,
-    Long memberId
+    Long memberId,
+    Long sellerId
 ) {
-    public static CommentListResponse from(NoticeComment comment, String name, Long memberId) {
+    public static CommentListResponse from(NoticeComment comment, String name, Long memberId, Long sellerId) {
         return CommentListResponse.builder()
                 .id(comment.getId())
                 .name(name)
                 .contents(comment.getContents())
                 .createdAt(String.valueOf(comment.getCreatedAt()))
                 .memberId(memberId)
+                .sellerId(sellerId)
                 .build();
     }
 }
