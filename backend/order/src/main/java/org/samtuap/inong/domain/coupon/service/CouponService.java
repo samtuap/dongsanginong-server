@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.coupon.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.coupon.dto.*;
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CouponService {
@@ -69,8 +72,8 @@ public class CouponService {
 
 
     @Transactional(readOnly = true)
-    public List<MemberCouponListResponse> getDownloadedCouponsByMember(String memberId) {
-        List<MemberCouponRelation> memberCouponRelations = memberCouponRelationRepository.findAllByMemberIdAndUseYn(Long.parseLong(memberId), "N");
+    public List<MemberCouponListResponse> getDownloadedCouponsByMember(Long memberId) {
+        List<MemberCouponRelation> memberCouponRelations = memberCouponRelationRepository.findAllByMemberIdAndUsedAtIsNull(memberId);
 
         // MemberCouponRelation 엔티티를 MemberCouponRelationResponse로 변환
         return memberCouponRelations.stream()
@@ -79,4 +82,10 @@ public class CouponService {
     }
 
 
+    public AvailableCouponListGetResponse getAvailableCouponList(Long memberId, Long farmId) {
+        List<MemberCouponRelation> memberCouponRelations = memberCouponRelationRepository.findAllByMemberIdAndFarmIdAndUsedAtIsNull(memberId, farmId);
+        log.info("line 84 >>>> {}", memberCouponRelations);
+        List<AvailableCouponGetResponse> list = memberCouponRelations.stream().map(AvailableCouponGetResponse::fromEntity).toList();
+        return new AvailableCouponListGetResponse(list);
+    }
 }

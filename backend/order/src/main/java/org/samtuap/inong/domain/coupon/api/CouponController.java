@@ -1,6 +1,8 @@
 package org.samtuap.inong.domain.coupon.api;
 
+import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
+import org.samtuap.inong.domain.coupon.dto.AvailableCouponListGetResponse;
 import org.samtuap.inong.domain.coupon.dto.CouponCreateRequest;
 import org.samtuap.inong.domain.coupon.dto.MemberCouponListResponse;
 import org.samtuap.inong.domain.coupon.dto.MemberCouponRelationResponse;
@@ -14,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/coupons")
+@RequestMapping("/coupon")
 public class CouponController {
     private final CouponService couponService;
 
@@ -45,13 +47,18 @@ public class CouponController {
     }
 
 
-    @GetMapping("/downloaded-coupons")
+    @GetMapping("/downloaded-coupon")
     public ResponseEntity<List<MemberCouponListResponse>> getDownloadedCouponsByMember(
-            @RequestHeader("myId") String memberId) {
+            @RequestHeader("myId") Long memberId) {
 
         List<MemberCouponListResponse> response = couponService.getDownloadedCouponsByMember(memberId);
         return ResponseEntity.ok(response);
     }
 
-
+    @GetMapping("/farm/{farmId}")
+    public ResponseEntity<AvailableCouponListGetResponse> getAvailableCouponList(@RequestHeader("myId") Long memberId,
+                                                                                 @PathVariable("farmId") Long farmId) {
+        AvailableCouponListGetResponse response = couponService.getAvailableCouponList(memberId, farmId);
+        return ResponseEntity.ok(response);
+    }
 }

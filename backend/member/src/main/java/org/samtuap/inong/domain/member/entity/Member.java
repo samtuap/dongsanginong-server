@@ -51,6 +51,9 @@ public class Member extends BaseEntity {
     @NotNull
     private String socialId;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentMethodType paymentMethod;
+
     private String billingKey;
 
     public void updatePhone(String phone){
@@ -66,5 +69,10 @@ public class Member extends BaseEntity {
 
     public void updateBillingKey(String billingKey) {
         this.billingKey = billingKey;
+    }
+
+    public void updatePaymentMethod(PaymentMethodType paymentMethodType, String billingKey) {
+        updateBillingKey(billingKey);
+        this.paymentMethod = paymentMethodType;
     }
 }
