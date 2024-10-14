@@ -78,6 +78,7 @@ public class LiveService {
                         .ownerId(sellerId)
                         .title(request.title())
                         .liveImage(request.liveImage())
+                        .category(request.category())
                         .build();
         liveRepository.save(live); // live 시작 > 먼저 디비에 저장
 
