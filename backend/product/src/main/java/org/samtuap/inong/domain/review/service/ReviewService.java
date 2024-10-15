@@ -11,7 +11,6 @@ import org.samtuap.inong.domain.review.entity.Review;
 import org.samtuap.inong.domain.review.entity.ReviewImage;
 import org.samtuap.inong.domain.review.repository.ReviewImageRepository;
 import org.samtuap.inong.domain.review.repository.ReviewRepository;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
