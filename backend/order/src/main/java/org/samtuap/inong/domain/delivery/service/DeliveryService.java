@@ -8,6 +8,7 @@ import org.samtuap.inong.domain.delivery.dto.*;
 import org.samtuap.inong.domain.delivery.entity.Delivery;
 import org.samtuap.inong.domain.delivery.entity.DeliveryStatus;
 import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
+import org.samtuap.inong.domain.delivery.dto.DeliveryListResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
 import org.springframework.data.domain.Page;
@@ -81,6 +82,17 @@ public class DeliveryService {
             PackageProductResponse packageProduct = productFeign.getPackageProduct(delivery.getOrdering().getPackageId());
 
             return DeliveryCompletedListResponse.from(delivery, member.name(), packageProduct.packageName());
+        });
+    }
+
+    public Page<DeliveryListResponse> getOrderDeliveryList(Pageable pageable, Long memberId) {
+        List<Ordering> orderlist = orderRepository.findAllByMemberId(memberId);
+        List<DeliveryStatus> statuses = List.of(DeliveryStatus.IN_DELIVERY, DeliveryStatus.AFTER_DELIVERY);
+        Page<Delivery> deliveries = deliveryRepository.findByOrderingInAndDeliveryStatusIn(orderlist, statuses, pageable);
+
+        return deliveries.map(delivery -> {
+            PackageProductResponse product = productFeign.getPackageProduct(delivery.getOrdering().getPackageId());
+            return DeliveryListResponse.fromEntity(product, delivery);
         });
     }
 }

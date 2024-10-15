@@ -259,17 +259,6 @@ public class OrderService {
         receiptRepository.save(receipt);
     }
 
-    public Page<OrderDeliveryListResponse> getOrderDeliveryList(Pageable pageable, Long memberId) {
-        Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);
-
-        return ordersPage.map(ordering -> {
-            PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
-            List<Delivery> delivery = deliveryRepository.findAllByOrdering(ordering);
-            return OrderDeliveryListResponse.fromEntity(ordering, product, delivery);
-        });
-    }
-
-
 
     public Page<OrderPaymentListResponse> getOrderPaymentList(Pageable pageable, Long memberId) {
         Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);
