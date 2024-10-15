@@ -42,7 +42,8 @@ public class OrderController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<Page<OrderPaymentListResponse>> getOrderPaymentList(@PageableDefault(size = 8,sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable, @RequestHeader("myId") Long memberId){
+    public ResponseEntity<Page<OrderPaymentListResponse>> getOrderPaymentList(@PageableDefault(size = 8,sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable,
+                                                                              @RequestHeader("myId") Long memberId){
         Page<OrderPaymentListResponse> myOrderPaymentList = orderService.getOrderPaymentList(pageable, memberId);
         return new ResponseEntity<>(myOrderPaymentList, HttpStatus.OK);
     }
