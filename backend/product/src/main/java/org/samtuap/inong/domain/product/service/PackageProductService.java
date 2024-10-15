@@ -165,7 +165,6 @@ public class PackageProductService {
     }
 
     @Transactional
-    @Cacheable(value = "SalePackages", key = "#farmId", cacheManager = "contentCacheManager")
     public List<PackageProductForSaleListResponse> getForSalePackageProduct(Long farmId) {
         List<PackageProduct> packageProducts = packageProductRepository.findAllByFarmId(farmId);
         return packageProducts.stream()
