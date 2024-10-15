@@ -139,6 +139,7 @@ public class SubscriptionService {
                 .paymentMethodValue(member.getPaymentMethod().getPaymentMethodValue())
                 .paymentMethodType(member.getPaymentMethod())
                 .billingKey(member.getBillingKey())
+                .logoImageUrl(member.getPaymentMethod().getLogoImageUrl())
                 .build();
     }
 }

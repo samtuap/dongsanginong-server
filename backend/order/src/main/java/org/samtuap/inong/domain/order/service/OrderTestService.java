@@ -43,7 +43,7 @@ import static org.samtuap.inong.domain.order.entity.CancelReason.SYSTEM_ERROR;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class OrderService {
+public class OrderTestService {
     private final OrderRepository orderRepository;
     private final MemberFeign memberFeign;
     private final ProductFeign productFeign;
@@ -122,13 +122,14 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 4. 최초 결제하기
+        // 5. 최초 결제하기
         String paymentId = kakaoPay(memberInfo, packageProduct, paidAmount, order);
 
-        // 5. 영수증 만들기
+        // 4. 영수증 만들기
         makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
 
-        // TODO: 6. orderCount 증가
+        // 5. orderCount 증가
+
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -260,6 +261,17 @@ public class OrderService {
 
         receiptRepository.save(receipt);
     }
+
+    public Page<OrderDeliveryListResponse> getOrderDeliveryList(Pageable pageable, Long memberId) {
+        Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);
+
+        return ordersPage.map(ordering -> {
+            PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
+            Delivery delivery = deliveryRepository.findByOrdering(ordering);
+            return OrderDeliveryListResponse.fromEntity(ordering, product, delivery);
+        });
+    }
+
 
 
     public Page<OrderPaymentListResponse> getOrderPaymentList(Pageable pageable, Long memberId) {

@@ -22,7 +22,7 @@ public record OrderPaymentListResponse(Long receiptId,
                 .farmId(product.farmId())
                 .farmName(product.farmName())
                 .orderAt(ordering.getCreatedAt().toString())
-                .paymentMethod(receipt.getPaymentMethod().toString())
+                .paymentMethod(receipt.getPaymentMethodType().toString())
                 .totalPrice(receipt.getTotalPrice())
                 .build();
     }
