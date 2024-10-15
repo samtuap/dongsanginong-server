@@ -21,6 +21,7 @@ import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
 import org.samtuap.inong.search.document.FarmDocument;
 import org.samtuap.inong.search.service.FarmSearchService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,7 +64,12 @@ public class FarmService {
         });
     }
 
+    @Cacheable(value = "FarmDetail", key = "#farmId", cacheManager = "contentCacheManager")
     public FarmDetailGetResponse getFarmDetail(Long farmId) {
+        return FarmDetailGetResponse.fromEntity(farmRepository.findByIdOrThrow(farmId));
+    }
+    // cache 처리 전 메서드 (테스트용)
+    public FarmDetailGetResponse getFarmDetailNoCache(Long farmId) {
         return FarmDetailGetResponse.fromEntity(farmRepository.findByIdOrThrow(farmId));
     }
 
