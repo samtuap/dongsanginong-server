@@ -113,7 +113,7 @@ public class SubscriptionService {
             throw new BaseCustomException(INVALID_SUBSCRIPTION_REQUEST);
         } catch(Exception e) {
             assert subscribeRequest != null;
-            KafkaOrderRollbackRequest rollbackRequest = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId());
+            KafkaOrderRollbackRequest rollbackRequest = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId(), subscribeRequest.orderId());
             sendRollbackOrderMessage(rollbackRequest);
         }
     }
@@ -128,8 +128,7 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
     }
 
-    private void sendRollbackOrderMessage(KafkaOrderRollbackRequest subscribeRequest) {
-        KafkaOrderRollbackRequest rollbackMessage = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId());
+    private void sendRollbackOrderMessage(KafkaOrderRollbackRequest rollbackMessage) {
         kafkaTemplate.send("order-rollback-topic", rollbackMessage);
     }
 

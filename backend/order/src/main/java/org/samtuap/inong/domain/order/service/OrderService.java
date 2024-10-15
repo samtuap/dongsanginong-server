@@ -77,7 +77,7 @@ public class OrderService {
     @Transactional
     public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
         PaymentResponse paymentResponse = makeOrder(memberId, reqDto, true);
-        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId());
+        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId(), paymentResponse.orderId());
         kafkaTemplate.send("subscription-topic", request);
         return paymentResponse;
     }
@@ -293,11 +293,8 @@ public class OrderService {
     }
 
     protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) throws InterruptedException {
-        Optional<Ordering> orderOpt = orderRepository
-                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
-
-        Ordering order = orderOpt.get();
-        Receipt receipt = receiptRepository.findByOrderOrThrow(order);
+        Ordering order = orderRepository.findById(rollbackRequest.orderId()).orElseThrow();
+        Receipt receipt = receiptRepository.findByIdOrThrow(rollbackRequest.orderId());
 
         order.updateCanceledAt(LocalDateTime.now());
         order.updateCancelReason(SYSTEM_ERROR);
