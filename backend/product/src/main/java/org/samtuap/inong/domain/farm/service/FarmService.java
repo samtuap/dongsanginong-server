@@ -246,13 +246,10 @@ public class FarmService {
     @Transactional
     @KafkaListener(topics = "order-count-topic", groupId = "order-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeIssueNotification(String message /*listen 하면 스트링 형태로 메시지가 들어온다*/) {
-        log.info("line 248 >>>>> [Product Module] update order Count");
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             KafkaOrderCountUpdateRequest request = objectMapper.readValue(message, KafkaOrderCountUpdateRequest.class);
             Farm farm = farmRepository.findByIdOrThrow(request.farmId());
-
-            log.info("line 254 >>>> {}", request);
 
             switch(request.orderCountRequestType()) {
                 case INCREASE -> farm.updateOrderCount(farm.getOrderCount() + 1);
