@@ -56,4 +56,8 @@ public class Farm extends BaseEntity {
     public void updateFavoriteCount(Long favoriteCount) {
         this.favoriteCount = favoriteCount;
     }
+
+    public void updateOrderCount(Long orderCount) {
+        this.orderCount = orderCount;
+    }
 }
