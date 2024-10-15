@@ -15,7 +15,6 @@ import org.samtuap.inong.domain.farmNotice.repository.FarmNoticeRepository;
 import org.samtuap.inong.domain.farmNotice.repository.NoticeCommentRepository;
 import org.samtuap.inong.domain.seller.entity.Seller;
 import org.samtuap.inong.domain.seller.repository.SellerRepository;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
