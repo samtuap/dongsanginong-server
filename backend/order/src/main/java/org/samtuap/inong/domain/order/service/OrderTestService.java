@@ -77,7 +77,7 @@ public class OrderTestService {
     @Transactional
     public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
         PaymentResponse paymentResponse = makeOrder(memberId, reqDto, true);
-        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId());
+        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId(), paymentResponse.orderId());
         kafkaTemplate.send("subscription-topic", request);
         return paymentResponse;
     }
