@@ -29,4 +29,8 @@ public class RedisTool {
         }
         return null;
     }
+
+    public void delete(String key) {
+        redisTemplate.delete(key);
+    }
 }

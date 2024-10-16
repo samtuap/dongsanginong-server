@@ -4,7 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.samtuap.inong.domain.seller.dto.SellerSignUpRequest;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.Random;
+
+import static org.samtuap.inong.common.exceptionType.SellerExceptionType.EMAIL_SEND_FAILED;
 
 @Service
 @Transactional
@@ -23,14 +25,12 @@ public class MailService {
     private final RedisTool redisUtil;
 
 
-    public void authEmail(String email, Object dto) {
+    public void authEmail(String email) {
         Random random = new Random();
         String authKey = String.valueOf(random.nextInt(888888) + 111111);
 
         sendAuthEmail(email, authKey);
-
         redisUtil.setExpire(email, authKey, 60 * 5L);
-        redisUtil.setExpire(email+":data", dto, 60 * 5L);
     }
 
     private void sendAuthEmail(String email, String authKey) {
@@ -47,22 +47,7 @@ public class MailService {
 
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            throw new BaseCustomException(EMAIL_SEND_FAILED);
         }
     }
-
-    public boolean verifyAuthCode(String email, String code) {
-        String storedCode = redisUtil.getValue(email, String.class);
-        return code.equals(storedCode);
-    }
-
-
-    public SellerSignUpRequest getUserData(String email, Class<SellerSignUpRequest> sellerSignUpRequestClass) {
-        String key = email + ":data";
-        SellerSignUpRequest data = redisUtil.getValue(key, sellerSignUpRequestClass);
-        log.info("Fetched user data from Redis: {}", data);
-        return data;
-    }
-
-
 }
