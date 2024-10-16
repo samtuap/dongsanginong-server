@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.receipt.repository;
 
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.OrderExceptionType;
+import org.samtuap.inong.common.exceptionType.ReceiptExceptionType;
 import org.samtuap.inong.domain.order.dto.SalesDataGetResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
+import static org.samtuap.inong.common.exceptionType.ReceiptExceptionType.RECEIPT_NOT_FOUND;
 
 public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     Optional<Receipt> findByOrder(Ordering order);
@@ -45,5 +47,8 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "WHERE r.order.farmId = :farmId AND r.createdAt >= :startTime AND r.createdAt <= :endTime AND r.order.canceledAt IS NULL " +
             "ORDER BY r.createdAt DESC")
     List<Receipt> findAllByOrderFarmId(@Param("farmId") Long farmId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
-    
+
+    default Receipt findByIdOrThrow(Long id) {
+        return findById(id).orElseThrow(() -> new BaseCustomException(RECEIPT_NOT_FOUND));
+    }
 }
