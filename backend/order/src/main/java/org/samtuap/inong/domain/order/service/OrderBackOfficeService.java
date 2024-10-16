@@ -45,9 +45,9 @@ public class OrderBackOfficeService {
         return salesData;
     }
 
-    public List<SalesElementGetResponse> getSalesList(SalesTableGetRequest request, Long sellerId) {
+    public Page<SalesElementGetResponse> getSalesList(SalesTableGetRequest request, Long sellerId) {
         FarmDetailGetResponse farmInfo = productFeign.getFarmInfoWithSeller(sellerId);
-        List<Receipt> receipts = null;
+        Page<Receipt> receipts = null;
         if(!request.onlyFirstSubscription()) {
             receipts = receiptRepository.findAllByOrderFarmId(farmInfo.id(), request.startTime(), request.endTime());
         } else {
@@ -61,7 +61,7 @@ public class OrderBackOfficeService {
         List<MemberDetailResponse> memberList = memberFeign.getMemberByIdsContainDeleted(memberIds);
 
 
-        return receipts.stream().map(r -> {
+        return receipts.map(r -> {
             PackageProductResponse packageProduct = packageProductList.stream()
                     .filter(p -> p.id().equals(r.getOrder().getPackageId()))
                     .findFirst()
@@ -73,6 +73,6 @@ public class OrderBackOfficeService {
                     .orElseThrow(() -> new BaseCustomException(INVALID_MEMBER_ID));
 
             return SalesElementGetResponse.fromEntity(r, packageProduct, memberDetail);
-        }).toList();
+        });
     }
 }
