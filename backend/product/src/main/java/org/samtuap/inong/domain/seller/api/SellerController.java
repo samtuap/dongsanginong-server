@@ -1,6 +1,5 @@
 package org.samtuap.inong.domain.seller.api;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.product.dto.PackageProductUpdateRequest;
@@ -11,12 +10,14 @@ import org.samtuap.inong.domain.seller.entity.SellerRole;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
 import org.samtuap.inong.domain.seller.service.MailService;
+import org.samtuap.inong.domain.seller.service.RedisTool;
 import org.samtuap.inong.domain.seller.service.SellerService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/seller")
@@ -28,21 +29,42 @@ public class SellerController {
     private final MailService mailService;
     private final PackageProductService packageProductService;
     private final JwtService jwtService;
+    private final RedisTool redisUtil;
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<?> signup(@Valid @RequestBody SellerSignUpRequest dto) {
-        try{
-            mailService.authEmail(dto.email(), dto);
-            return new ResponseEntity<>("이메일로 인증코드를 발송 했습니다.", HttpStatus.OK);
-        } catch (MailSendException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    @PostMapping("/request-auth-code")
+    public ResponseEntity<?> requestAuthCode(@RequestBody EmailRequestDto requestDto) {
+        mailService.authEmail(requestDto.email());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody EmailRequestDto requestDto) {
+        boolean isVerified = sellerService.verifyAuthCode(requestDto.email(), requestDto.code());
+        if (isVerified) {
+            redisUtil.setExpire(requestDto.email() + ":verified", true, 60 * 10L);
+            redisUtil.delete(requestDto.email());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @PostMapping("/sign-up/verified")
-    public ResponseEntity<SellerSignUpResponse> verifyAuthCode(@RequestBody EmailRequestDto requestDto) {
-        SellerSignUpResponse response = sellerService.verifyAndSignUp(requestDto);
-        return ResponseEntity.ok(response);
+    @PostMapping("/sign-up")
+    public ResponseEntity<SellerSignUpResponse> verifyAuthCode(@RequestBody SellerSignUpRequest dto) {
+        Boolean isVerified = redisUtil.getValue(dto.email() + ":verified", Boolean.class);
+
+        if(Boolean.TRUE.equals(isVerified)) {
+            SellerSignUpResponse response = sellerService.signUp(dto);
+            return ResponseEntity.ok(response);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        boolean exists = sellerService.isEmailExists(email);
+        return ResponseEntity.ok(Map.of("exists", exists));
     }
 
 

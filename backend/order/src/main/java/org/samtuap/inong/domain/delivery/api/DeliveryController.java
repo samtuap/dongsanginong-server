@@ -6,6 +6,7 @@ import org.samtuap.inong.domain.delivery.dto.BillingNumberCreateRequest;
 import org.samtuap.inong.domain.delivery.dto.DeliveryCompletedListResponse;
 import org.samtuap.inong.domain.delivery.dto.DeliveryUpComingListResponse;
 import org.samtuap.inong.domain.delivery.service.DeliveryService;
+import org.samtuap.inong.domain.delivery.dto.DeliveryListResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -54,5 +55,12 @@ public class DeliveryController {
             @PageableDefault(size = 5, sort = {"deliveryStatus", "deliveryAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         Page<DeliveryCompletedListResponse> list = deliveryService.completedDelivery(sellerId, pageable);
         return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<Page<DeliveryListResponse>> getOrderDeliveryList(@PageableDefault(size = 8, sort = {"deliveryAt"}, direction = Sort.Direction.DESC) Pageable pageable,
+                                                                           @RequestHeader("myId") Long memberId) {
+        Page<DeliveryListResponse> myOrderDeliveryList = deliveryService.getOrderDeliveryList(pageable, memberId);
+        return new ResponseEntity<>(myOrderDeliveryList, HttpStatus.OK);
     }
 }

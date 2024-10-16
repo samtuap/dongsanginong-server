@@ -7,5 +7,6 @@ import org.samtuap.inong.domain.member.entity.PaymentMethodType;
 @Builder
 public record PaymentMethodGetResponse(PaymentMethodType paymentMethodType,
                                        String paymentMethodValue,
-                                       String billingKey) {
+                                       String billingKey,
+                                       String logoImageUrl) {
 }
