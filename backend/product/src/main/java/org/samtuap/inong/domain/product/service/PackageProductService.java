@@ -15,8 +15,8 @@ import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.samtuap.inong.domain.product.repository.PackageProductImageRepository;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
-import org.samtuap.inong.search.document.PackageProductDocument;
 import org.samtuap.inong.search.service.PackageProductSearchService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -70,6 +70,7 @@ public class PackageProductService {
         return productList;
     }
 
+    @Cacheable(value = "PackageDetail", key = "#packageProductId", cacheManager = "contentCacheManager")
     public PackageProductResponse getProductInfo(Long packageProductId) {
         PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
         List<PackageProductImage> packageProductImage = packageProductImageRepository.findAllByPackageProduct(packageProduct);
