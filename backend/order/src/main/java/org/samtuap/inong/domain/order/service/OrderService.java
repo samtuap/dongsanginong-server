@@ -38,6 +38,7 @@ import java.util.*;
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.BEFORE_DELIVERY;
+import static org.samtuap.inong.domain.order.dto.KafkaOrderCountUpdateRequest.OrderCountRequestType.INCREASE;
 import static org.samtuap.inong.domain.order.entity.CancelReason.SYSTEM_ERROR;
 
 @Slf4j
@@ -128,7 +129,8 @@ public class OrderService {
         // 5. 영수증 만들기
         makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
 
-        // TODO: 6. orderCount 증가
+        // 6. orderCount 증가 이벤트 발행
+        kafkaTemplate.send("order-count-topic", new KafkaOrderCountUpdateRequest(packageProduct.farmId(), INCREASE));
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())

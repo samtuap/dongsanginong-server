@@ -1,5 +1,7 @@
 package org.samtuap.inong.domain.farm.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -9,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.LiveFeign;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.common.exceptionType.FarmExceptionType;
 import org.samtuap.inong.common.response.FavoriteGetResponse;
 import org.samtuap.inong.domain.farm.dto.*;
 import org.samtuap.inong.domain.farm.entity.Farm;
@@ -17,6 +20,7 @@ import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
 import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
 import org.samtuap.inong.search.document.FarmDocument;
@@ -24,6 +28,7 @@ import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +38,8 @@ import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.FarmExceptionType.FARM_ALREADY_EXISTS;
 import static org.samtuap.inong.common.exceptionType.FarmExceptionType.FARM_CATEGORY_NOT_FOUND;
+import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.FCM_SEND_FAIL;
+import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.INVALID_FCM_REQUEST;
 
 @RequiredArgsConstructor
 @Service
@@ -232,6 +239,28 @@ public class FarmService {
     public void decreaseLike(Long farmId) {
         Farm farm = farmRepository.findByIdOrThrow(farmId);
         farm.updateFavoriteCount(farm.getFavoriteCount() - 1);
+    }
+
+
+    // 반정규화를 위해 넣어놓은 Farm > orderCount를 증가/감소시키는 이벤트 처리
+    @Transactional
+    @KafkaListener(topics = "order-count-topic", groupId = "order-group", containerFactory = "kafkaListenerContainerFactory")
+    public void consumeIssueNotification(String message /*listen 하면 스트링 형태로 메시지가 들어온다*/) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            KafkaOrderCountUpdateRequest request = objectMapper.readValue(message, KafkaOrderCountUpdateRequest.class);
+            Farm farm = farmRepository.findByIdOrThrow(request.farmId());
+
+            switch(request.orderCountRequestType()) {
+                case INCREASE -> farm.updateOrderCount(farm.getOrderCount() + 1);
+                case DECREASE -> farm.updateOrderCount(farm.getOrderCount() - 1);
+                default -> throw new BaseCustomException(FarmExceptionType.INVALID_ORDER_COUNT_REQUEST);
+            }
+        } catch (JsonProcessingException e) {
+            throw new BaseCustomException(INVALID_FCM_REQUEST);
+        } catch(Exception e) {
+            throw new BaseCustomException(FCM_SEND_FAIL);
+        }
     }
 
 }
