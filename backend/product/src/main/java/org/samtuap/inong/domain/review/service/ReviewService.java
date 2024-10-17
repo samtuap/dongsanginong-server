@@ -99,7 +99,6 @@ public class ReviewService {
 
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "PackageDetail", key = "#packageProductId", cacheManager = "contentCacheManager")
     public List<ReviewListResponse> getReviewsByPackageProductId(Long packageProductId) {
         List<Review> reviews = reviewRepository.findAllByPackageProductId(packageProductId);
         return reviews.stream()
