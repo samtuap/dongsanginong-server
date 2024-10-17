@@ -11,5 +11,17 @@ public record PackageProductResponse(Long id,
                                      Long price,
                                      Long farmId,
                                      String farmName,
-                                     List<String> imageUrls) {
+                                     List<String> imageUrls)
+{
+    public static PackageProductResponse from(PackageProductResponse product) {
+        return PackageProductResponse.builder()
+                .id(product.id)
+                .packageName(product.packageName)
+                .price(product.price)
+                .farmId(product.farmId)
+                .farmName(product.farmName)
+                .delivery_cycle(product.delivery_cycle)
+                .imageUrls(product.imageUrls)
+                .build();
+    }
 }

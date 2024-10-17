@@ -220,4 +220,19 @@ public class PackageProductService {
         });
         return productList;
     }
+
+    /**
+     * member에서 wishList관련 feign
+     */
+    @Transactional
+    public void increaseWish(Long packageProductId) {
+        PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
+        packageProduct.updateWishCount(packageProduct.getWishCount() + 1);
+    }
+
+    @Transactional
+    public void decreaseWish(Long packageProductId) {
+        PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
+        packageProduct.updateWishCount(packageProduct.getWishCount() - 1);
+    }
 }
