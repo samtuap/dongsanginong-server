@@ -107,7 +107,6 @@ public class FarmService {
         });
     }
 
-
     public List<FarmFavoriteResponse> getFarmFavoriteList(List<Long> farmFavoriteIds) {
         List<Farm> farmFavoriteList = farmRepository.findByIdIn(farmFavoriteIds);
         List<FarmFavoriteResponse> tmp = farmFavoriteList.stream()
@@ -115,7 +114,6 @@ public class FarmService {
                 .collect(Collectors.toList());
         return tmp;
     }
-
 
     /**
      * feign 요청용

@@ -1,6 +1,15 @@
 package org.samtuap.inong.domain.order.dto;
 
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
-public record SalesDataGetResponse(Long totalCount, Long totalSalesAmount) {
+import java.util.List;
+
+@Builder
+public record SalesDataGetResponse(Long totalCount,
+                                   Long totalSalesAmount,
+                                   List<String> labels,
+                                   List<Long> monthSaleCount,
+                                   List<Long> monthSaleAmount) {
 }
