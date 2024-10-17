@@ -127,7 +127,8 @@ public class ChatService {
         String userType = isMember ? "멤버" : "판매자";
         log.info("{} 강퇴됨: sessionId = {}, userId = {}", userType, sessionId, userId);
 
-        messagingTemplate.convertAndSend("/topic/kick/" + userId, new KickMessage(userId, "강퇴되었습니다."));
+        KickMessage kickMessage = new KickMessage(userId, "강퇴된 사용자입니다.");
+        messagingTemplate.convertAndSend("/topic/live/" + sessionId + "/kick", kickMessage);
     }
 
     private boolean isOwner(String sessionId, Long sellerId) {
