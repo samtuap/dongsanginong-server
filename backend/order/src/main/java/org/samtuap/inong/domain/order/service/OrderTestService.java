@@ -38,13 +38,12 @@ import java.util.*;
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
 import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.BEFORE_DELIVERY;
-import static org.samtuap.inong.domain.order.dto.KafkaOrderCountUpdateRequest.OrderCountRequestType.INCREASE;
 import static org.samtuap.inong.domain.order.entity.CancelReason.SYSTEM_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class OrderService {
+public class OrderTestService {
     private final OrderRepository orderRepository;
     private final MemberFeign memberFeign;
     private final ProductFeign productFeign;
@@ -123,14 +122,14 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 4. 최초 결제하기
+        // 5. 최초 결제하기
         String paymentId = kakaoPay(memberInfo, packageProduct, paidAmount, order);
 
-        // 5. 영수증 만들기
+        // 4. 영수증 만들기
         makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
 
-        // 6. orderCount 증가 이벤트 발행
-        kafkaTemplate.send("order-count-topic", new KafkaOrderCountUpdateRequest(packageProduct.farmId(), INCREASE));
+        // 5. orderCount 증가
+
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -263,7 +262,6 @@ public class OrderService {
         receiptRepository.save(receipt);
     }
 
-
     public Page<OrderPaymentListResponse> getOrderPaymentList(Pageable pageable, Long memberId) {
         Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);
 
@@ -295,8 +293,11 @@ public class OrderService {
     }
 
     protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) throws InterruptedException {
-        Ordering order = orderRepository.findById(rollbackRequest.orderId()).orElseThrow();
-        Receipt receipt = receiptRepository.findByIdOrThrow(rollbackRequest.orderId());
+        Optional<Ordering> orderOpt = orderRepository
+                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
+
+        Ordering order = orderOpt.get();
+        Receipt receipt = receiptRepository.findByOrderOrThrow(order);
 
         order.updateCanceledAt(LocalDateTime.now());
         order.updateCancelReason(SYSTEM_ERROR);

@@ -10,7 +10,8 @@ public record FarmListGetResponse(@NotNull Long id,
                                   @NotNull String imageUrl,
                                   @NotNull Long favoriteCount,
                                   @NotNull Long orderCount,
-                                  @NotNull Boolean isLiked
+                                  @NotNull Boolean isLiked,
+                                  String farmIntro
                                   ) {
 
     public static FarmListGetResponse fromEntity(Farm farm, boolean isLiked) {
@@ -21,6 +22,7 @@ public record FarmListGetResponse(@NotNull Long id,
                 .favoriteCount(farm.getFavoriteCount())
                 .orderCount(farm.getOrderCount())
                 .isLiked(isLiked)
+                .farmIntro(farm.getFarmIntro())
                 .build();
     }
 

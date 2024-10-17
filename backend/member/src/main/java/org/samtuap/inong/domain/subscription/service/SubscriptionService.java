@@ -109,11 +109,12 @@ public class SubscriptionService {
         try {
             subscribeRequest = objectMapper.readValue(message, KafkaSubscribeProductRequest.class);
             subscribePackageProduct(subscribeRequest);
+            throw new RuntimeException("!!!!!!");
         } catch (JsonProcessingException e) {
             throw new BaseCustomException(INVALID_SUBSCRIPTION_REQUEST);
         } catch(Exception e) {
             assert subscribeRequest != null;
-            KafkaOrderRollbackRequest rollbackRequest = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId());
+            KafkaOrderRollbackRequest rollbackRequest = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId(), subscribeRequest.orderId());
             sendRollbackOrderMessage(rollbackRequest);
         }
     }
@@ -128,8 +129,7 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
     }
 
-    private void sendRollbackOrderMessage(KafkaOrderRollbackRequest subscribeRequest) {
-        KafkaOrderRollbackRequest rollbackMessage = new KafkaOrderRollbackRequest(subscribeRequest.productId(), subscribeRequest.memberId(), subscribeRequest.couponId());
+    private void sendRollbackOrderMessage(KafkaOrderRollbackRequest rollbackMessage) {
         kafkaTemplate.send("order-rollback-topic", rollbackMessage);
     }
 
@@ -139,6 +139,7 @@ public class SubscriptionService {
                 .paymentMethodValue(member.getPaymentMethod().getPaymentMethodValue())
                 .paymentMethodType(member.getPaymentMethod())
                 .billingKey(member.getBillingKey())
+                .logoImageUrl(member.getPaymentMethod().getLogoImageUrl())
                 .build();
     }
 }

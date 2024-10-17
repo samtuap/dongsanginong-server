@@ -11,7 +11,8 @@ public record TopPackageGetResponse(@NotNull Long id,
                                     @NotNull String farmName,
                                     String imageUrl,
                                     @NotNull Long price,
-                                    Long orderCount) {
+                                    Long orderCount,
+                                    @NotNull Integer deliveryCycle) {
 
     public static TopPackageGetResponse fromEntity(PackageProduct packageProduct, String thumbnailUrl, Long orderCount) {
         return TopPackageGetResponse.builder()
@@ -22,6 +23,7 @@ public record TopPackageGetResponse(@NotNull Long id,
                 .imageUrl(thumbnailUrl)
                 .price(packageProduct.getPrice())
                 .orderCount(orderCount)
+                .deliveryCycle(packageProduct.getDelivery_cycle())
                 .build();
     }
 

@@ -2,7 +2,6 @@ package org.samtuap.inong.domain.receipt.dto;
 
 import lombok.Builder;
 import org.samtuap.inong.domain.delivery.dto.PackageProductResponse;
-import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 
 @Builder
@@ -31,7 +30,7 @@ public record ReceiptInfoResponse(Long orderId,
                 .beforePrice(receipt.getBeforePrice())
                 .discountPrice(receipt.getDiscountPrice())
                 .totalPrice(receipt.getTotalPrice())
-                .paymentMethod(receipt.getPaymentMethod().toString())
+                .paymentMethod(receipt.getPaymentMethodType().toString())
                 .paymentStatus(receipt.getPaymentStatus().toString())
                 .build();
     }

@@ -1,6 +1,8 @@
 package org.samtuap.inong.domain.order.repository;
 
 
+import org.samtuap.inong.domain.order.dto.PackageOrderCount;
+import org.samtuap.inong.domain.order.dto.PackageProductOrderResponse;
 import org.samtuap.inong.domain.order.dto.SalesDataGetResponse;
 import org.samtuap.inong.domain.order.dto.TopPackageResponse;
 import org.samtuap.inong.domain.order.entity.Ordering;
@@ -31,5 +33,9 @@ public interface OrderRepository extends JpaRepository<Ordering, Long> {
 
     Page<Ordering> findAllByMemberId(Long memberId, Pageable pageable);
 
+    List<Ordering> findAllByMemberId(Long memberId);
+
+    @Query("SELECT new org.samtuap.inong.domain.order.dto.PackageOrderCount(o.packageId, COUNT(o.id)) FROM Ordering o WHERE o.farmId = :farmId AND o.createdAt >= :startAt AND o.createdAt <= :endAt GROUP BY o.packageId")
+    List<PackageOrderCount> findAllByFarmIdAndBetweenStartAtAndEndAt(Long farmId, LocalDateTime startAt, LocalDateTime endAt);
 
 }

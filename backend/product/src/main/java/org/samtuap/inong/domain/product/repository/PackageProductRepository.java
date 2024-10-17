@@ -1,7 +1,7 @@
 package org.samtuap.inong.domain.product.repository;
 
 import org.samtuap.inong.common.exception.BaseCustomException;
-import org.samtuap.inong.domain.farm.entity.Farm;
+import org.samtuap.inong.domain.product.dto.PackageStatisticResponse;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.springframework.data.domain.Page;
@@ -33,8 +33,11 @@ public interface PackageProductRepository extends JpaRepository<PackageProduct, 
 
     List<PackageProduct> findAllByFarmId(Long farmId);
 
-    @Query("SELECT f FROM Farm f ORDER BY f.id DESC LIMIT :n")
+    @Query(value = "SELECT f FROM Farm f ORDER BY f.id DESC LIMIT :n", nativeQuery = true)
     List<PackageProductImage> findNPackageProducts(@Param("n") Long n);
 
     Page<PackageProduct> findAll(Specification<PackageProduct> specification, Pageable pageable);
+
+    @Query("SELECT new org.samtuap.inong.domain.product.dto.PackageStatisticResponse(p.id, p.packageName) FROM PackageProduct p WHERE p.id IN :ids")
+    List<PackageStatisticResponse> findAllByIdContainDeletedNameOnly(List<Long> ids);
 }

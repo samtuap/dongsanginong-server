@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.receipt.entity;
+package org.samtuap.inong.domain.product.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public enum PaymentMethod {
-    KAKAOPAY("카카오페이");
-
-    private String detail;
-
+public class PackageStatisticResponse {
+    private Long id;
+    private String packageName;
 }
