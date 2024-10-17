@@ -38,6 +38,6 @@ public interface PackageProductRepository extends JpaRepository<PackageProduct, 
 
     Page<PackageProduct> findAll(Specification<PackageProduct> specification, Pageable pageable);
 
-    @Query(value = "SELECT DISTINCT new org.samtuap.inong.domain.product.dto.PackageStatisticResponse(p.id, p.packageName) FROM PackageProduct p WHERE p.id IN :ids", nativeQuery = true)
+    @Query("SELECT new org.samtuap.inong.domain.product.dto.PackageStatisticResponse(p.id, p.packageName) FROM PackageProduct p WHERE p.id IN :ids")
     List<PackageStatisticResponse> findAllByIdContainDeletedNameOnly(List<Long> ids);
 }

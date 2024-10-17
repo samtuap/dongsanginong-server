@@ -84,7 +84,7 @@ public class OrderBackOfficeService {
         List<Long> monthSaleCount = new ArrayList<>();
         List<Long> monthSaleAmount = new ArrayList<>();
         Long totalCount = 0L, totalSalesAmount = 0L;
-        while(!(curTime.getYear() == endTime.getYear() && curTime.getMonthValue() == endTime.getMonthValue())) {
+        while(true) {
             int year = curTime.getYear();
             int month = curTime.getMonthValue();
             SalesDataByYearAndMonth monthSaleData = receiptRepository.findSalesDataByYearAndMonth(farmId, year, month);
@@ -100,6 +100,9 @@ public class OrderBackOfficeService {
             totalCount += monthSaleData.getCount();
             totalSalesAmount += monthSaleData.getAmount();
 
+            if(year == endTime.getYear() && month == endTime.getMonthValue()) {
+                break;
+            }
 
             curTime = curTime.plusMonths(1);
         }
@@ -158,18 +161,17 @@ public class OrderBackOfficeService {
 
     public SalesDataWithPackagesGetResponse getSalesDataWithPackages(SalesTableGetRequest request, Long sellerId) {
         FarmDetailGetResponse farmInfo = productFeign.getFarmInfoWithSeller(sellerId);
-        List<Long> packageIds = orderRepository.findAllByFarmIdAndBetweenStartAtAndEndAt(farmInfo.id(), request.startTime(), request.endTime());
+        List<PackageOrderCount> packages = orderRepository.findAllByFarmIdAndBetweenStartAtAndEndAt(farmInfo.id(), request.startTime(), request.endTime());
         Map<Long, Long> countWithPackage = new HashMap<>();
-
-        for (Long packageId : packageIds) {
-            Long packageCount = countWithPackage.getOrDefault(packageId, 0L);
-            countWithPackage.put(packageId, packageCount + 1);
+        List<Long> packageIds = new ArrayList<>();
+        for (PackageOrderCount packageDto : packages) {
+            countWithPackage.put(packageDto.getPackageId(), packageDto.getCount());
+            packageIds.add(packageDto.getPackageId());
         }
 
         List<PackageStatisticResponse> packageNames = productFeign.getPackageProductListContainDeletedNameOnly(packageIds);
         List<String> labels = new ArrayList<>();
         List<Long> count = new ArrayList<>();
-//        List<Long> amount = new ArrayList<>();
         for(PackageStatisticResponse dto : packageNames) {
             labels.add(dto.getPackageName());
             count.add(countWithPackage.get(dto.getId()));

@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class PackageStatisticResponse {
     private Long id;
     private String packageName;
-    private Long amount;
 }
