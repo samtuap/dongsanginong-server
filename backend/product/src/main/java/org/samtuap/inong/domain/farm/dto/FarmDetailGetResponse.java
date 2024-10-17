@@ -12,8 +12,7 @@ public record FarmDetailGetResponse(@NotNull Long id,
                                     @NotNull String farmName,
                                     @NotNull String bannerImageUrl,
                                     @NotNull String profileImageUrl,
-                                    @NotNull String farmIntro,
-                                    @NotNull Long favoriteCount) {
+                                    @NotNull String farmIntro) {
 
     public static FarmDetailGetResponse fromEntity(Farm farm) {
         return FarmDetailGetResponse.builder()
@@ -23,7 +22,6 @@ public record FarmDetailGetResponse(@NotNull Long id,
                 .bannerImageUrl(farm.getBannerImageUrl())
                 .profileImageUrl(farm.getProfileImageUrl())
                 .farmIntro(farm.getFarmIntro())
-                .favoriteCount(farm.getFavoriteCount())
                 .build();
     }
 }
