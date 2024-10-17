@@ -75,6 +75,13 @@ public class PackageProductController {
         return packageProductService.getProductInfoListContainDeleted(ids);
     }
 
+
+    // Feign 요청용 메서드
+    @PostMapping("/info/contain-deleted/name-only")
+    List<PackageStatisticResponse> getPackageProductListContainDeletedNameOnly(@RequestBody List<Long> ids) {
+        return packageProductService.getProductInfoListContainDeletedNameOnly(ids);
+    }
+
     @GetMapping("/no-auth/for-sale/{id}")
     public List<PackageProductForSaleListResponse> getForSalePackageProduct(@PathVariable("id") Long farmId) {
         return packageProductService.getForSalePackageProduct(farmId);

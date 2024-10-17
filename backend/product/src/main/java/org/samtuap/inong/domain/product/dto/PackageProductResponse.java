@@ -36,4 +36,5 @@ public record PackageProductResponse(Long id,
                 .origin(packageProduct.getOrigin())
                 .build();
     }
+
 }

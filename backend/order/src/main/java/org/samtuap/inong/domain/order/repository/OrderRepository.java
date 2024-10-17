@@ -33,4 +33,7 @@ public interface OrderRepository extends JpaRepository<Ordering, Long> {
 
     List<Ordering> findAllByMemberId(Long memberId);
 
+    @Query("SELECT o.packageId FROM Ordering o WHERE o.farmId = :farmId AND o.createdAt >= :startAt AND o.createdAt <= :endAt")
+    List<Long> findAllByFarmIdAndBetweenStartAtAndEndAt(Long farmId, LocalDateTime startAt, LocalDateTime endAt);
+
 }

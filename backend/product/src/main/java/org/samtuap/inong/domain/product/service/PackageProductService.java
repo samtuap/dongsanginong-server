@@ -151,6 +151,10 @@ public class PackageProductService {
         return packageProducts.stream()
                 .map(p -> PackageProductResponse.fromEntity(p, new ArrayList<>())).toList();
     }
+
+    public List<PackageStatisticResponse> getProductInfoListContainDeletedNameOnly(List<Long> ids) {
+        return packageProductRepository.findAllByIdContainDeletedNameOnly(ids);
+    }
   
     @Transactional
     public List<PackageProductSubsResponse> getProductSubsList(List<Long> subscriptionIds) {
