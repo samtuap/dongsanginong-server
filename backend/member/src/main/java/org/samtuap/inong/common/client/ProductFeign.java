@@ -39,4 +39,10 @@ public interface ProductFeign {
 
     @PostMapping("/farm/{farmId}/increase-like")
     void increaseLike(@PathVariable("farmId") Long farmId);
+
+    @PostMapping("/product/{packageProductId}/increase-wish")
+    void increaseWish(@PathVariable("packageProductId") Long packageProductId);
+
+    @PostMapping("/product/{packageProductId}/decrease-wish")
+    void decreaseWish(@PathVariable("packageProductId") Long packageProductId);
 }
