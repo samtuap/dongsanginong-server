@@ -30,7 +30,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     @Query("SELECT new org.samtuap.inong.domain.order.dto.SalesDataByYearAndMonth(COUNT(*), SUM(r.totalPrice)) " +
             "FROM Receipt r " +
             "WHERE r.order.farmId = :farmId AND YEAR(r.createdAt) = :year AND MONTH(r.createdAt) = :month AND r.order.isFirst = :isFirst AND r.order.canceledAt IS NULL")
-    SalesDataByYearAndMonth findSalesDataByYearAndMonthFirstOnly(@Param("farmId") Long farmId, @Param("year") int year, @Param("month") int month, boolean isFirst);
+    SalesDataByYearAndMonth findSalesDataByYearAndMonthFirstOnly(@Param("farmId") Long farmId, @Param("year") int year, @Param("month") int month, @Param("isFirst") boolean isFirst);
 
     @Query("SELECT new org.samtuap.inong.domain.order.dto.SalesDataByYearAndMonth(COUNT(*), SUM(r.totalPrice)) " +
             "FROM Receipt r " +
