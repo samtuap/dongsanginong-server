@@ -137,6 +137,7 @@ public class MemberService {
         List<FarmFavoriteResponse> favoriteFarmResponse = productFeign.getFarmFavoriteList(farmFavoriteIds);
         return favoriteFarmResponse.stream()
                 .map(farmFavoriteResponse -> MemberFavoriteFarmResponse.builder()
+                        .farmId(farmFavoriteResponse.farmId())
                         .farmName(farmFavoriteResponse.farmName())
                         .profileImageUrl(farmFavoriteResponse.profileImageUrl())
                         .build())
