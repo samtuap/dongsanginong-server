@@ -7,16 +7,16 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.OrderFeign;
-import org.samtuap.inong.domain.product.dto.*;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.product.dto.*;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.samtuap.inong.domain.product.entity.PackageProductImage;
 import org.samtuap.inong.domain.product.repository.PackageProductImageRepository;
 import org.samtuap.inong.domain.product.repository.PackageProductRepository;
-import org.samtuap.inong.search.document.PackageProductDocument;
 import org.samtuap.inong.search.service.PackageProductSearchService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -179,6 +179,18 @@ public class PackageProductService {
                 })
                 .collect(Collectors.toList());
     }
+    // cache 처리 전 메서드 (테스트용)
+    @Transactional
+    public List<PackageProductForSaleListResponse> getForSalePackageProductNoCache(Long farmId) {
+        List<PackageProduct> packageProducts = packageProductRepository.findAllByFarmId(farmId);
+        return packageProducts.stream()
+                .map(p -> {
+                    String imageUrl = packageProductImageRepository.findFirstByPackageProduct(p).getImageUrl();
+                    Farm farm = farmRepository.findByIdOrThrow(p.getFarm().getId());
+                    return PackageProductForSaleListResponse.fromEntity(p, imageUrl, farm);
+                })
+                .collect(Collectors.toList());
+    }
 
     public Page<AllPackageListResponse> searchProduct(Pageable pageable, String packageName) {
         Specification<PackageProduct> specification = new Specification<PackageProduct>() {
@@ -207,5 +219,20 @@ public class PackageProductService {
             return AllPackageListResponse.fromEntity(packageProduct, imageUrl, orderCount);
         });
         return productList;
+    }
+
+    /**
+     * member에서 wishList관련 feign
+     */
+    @Transactional
+    public void increaseWish(Long packageProductId) {
+        PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
+        packageProduct.updateWishCount(packageProduct.getWishCount() + 1);
+    }
+
+    @Transactional
+    public void decreaseWish(Long packageProductId) {
+        PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
+        packageProduct.updateWishCount(packageProduct.getWishCount() - 1);
     }
 }

@@ -25,6 +25,10 @@ import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
 import org.samtuap.inong.search.document.FarmDocument;
 import org.samtuap.inong.search.service.FarmSearchService;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -51,6 +55,7 @@ public class FarmService {
     private final FarmCategoryRepository farmCategoryRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final FarmSearchService farmSearchService;
+    private final CacheManager cacheManager;
 
     // 최신순, 스크랩순, 판매량 순
     public Page<FarmListGetResponse> getFarmList(Pageable pageable, Long myId) {
@@ -70,7 +75,12 @@ public class FarmService {
         });
     }
 
+    @Cacheable(value = "FarmDetail", key = "#farmId", cacheManager = "contentCacheManager")
     public FarmDetailGetResponse getFarmDetail(Long farmId) {
+        return FarmDetailGetResponse.fromEntity(farmRepository.findByIdOrThrow(farmId));
+    }
+    // cache 처리 전 메서드 (테스트용)
+    public FarmDetailGetResponse getFarmDetailNoCache(Long farmId) {
         return FarmDetailGetResponse.fromEntity(farmRepository.findByIdOrThrow(farmId));
     }
 
@@ -199,6 +209,13 @@ public class FarmService {
     @Transactional
     public void updateFarmInfo(Long sellerId, SellerFarmInfoUpdateRequest infoUpdateRequest) {
         Farm farm = farmRepository.findBySellerIdOrThrow(sellerId);
+        // 업데이트 되는 농장의 캐시가 redis 에 있다면 삭제 처리
+        Long farmId = farm.getId();
+        Cache cache = cacheManager.getCache("FarmDetail");
+        if (cache != null) {
+            cache.evict(farmId);
+        }
+
         farm.updateInfo(infoUpdateRequest);
         farmCategoryRelationRepository.deleteAllByFarm(farm);
         for (Long categoryId : infoUpdateRequest.categoryId()) {
