@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.samtuap.inong.domain.member.dto.MemberSubsCancelRequest;
 import org.samtuap.inong.domain.member.dto.MemberSubscriptionListResponse;
 import org.samtuap.inong.domain.member.dto.MemberSubscriptionResponse;
+import org.samtuap.inong.domain.member.dto.PaymentMethodGetResponse;
 import org.samtuap.inong.domain.subscription.dto.BillingKeyRegisterRequest;
 import org.samtuap.inong.domain.subscription.dto.SubscriptionListGetResponse;
 import org.samtuap.inong.domain.subscription.service.SubscriptionService;
@@ -19,12 +20,18 @@ import java.util.List;
 @RestController
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
-    @PostMapping("/register-billing-key")
-    public ResponseEntity<Void> registerBillingKey(@RequestHeader("myId") Long memberId,
+    @PostMapping("/payment/method")
+    public ResponseEntity<Void> registerPaymentMethod(@RequestHeader("myId") Long memberId,
                                                    @RequestBody @Valid BillingKeyRegisterRequest dto) {
-        subscriptionService.registerBillingKey(memberId, dto.billingKey());
+        subscriptionService.registerPaymentMethod(memberId, dto);
 
         return ResponseEntity.ok(null);
+    }
+
+    @GetMapping("/payment/method")
+    public ResponseEntity<PaymentMethodGetResponse> getPaymentMethod(@RequestHeader("myId") Long memberId) {
+        PaymentMethodGetResponse paymentMethod = subscriptionService.getPaymentMethod(memberId);
+        return ResponseEntity.ok(paymentMethod);
     }
 
     // feign 요청 용 API

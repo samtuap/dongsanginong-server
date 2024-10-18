@@ -6,6 +6,7 @@ import lombok.Builder;
 public record LiveSessionRequest(
         Long sessionId,
         String title,
-        String liveImage
+        String liveImage,
+        String category
 ) {
 }

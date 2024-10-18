@@ -34,7 +34,7 @@ public class JwtGlobalFilter implements GlobalFilter {
     private RedisTemplate<String, String> redisTemplate;
 
 
-    private final List<String> allowUrl = Arrays.asList("/member/sign-in", "/member/sign-up", "/seller/sign-in", "/seller/sign-up", "/seller/sign-up/verified", "/member/create-token",
+    private final List<String> allowUrl = Arrays.asList("/member/sign-in", "/member/sign-up", "/seller/sign-in", "/seller/request-auth-code", "/seller/verify-email", "/seller/sign-up", "/seller/check-email", "/member/create-token",
                                                         "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**", "/live/active", "/member/healthcheck", "/farm/no-auth/**", "/reviews/no-auth/**",
                                                         "/product/no-auth/**", "/seller/no-auth/**", "/ws/**", "/api/**", "/es/**");
 
@@ -62,7 +62,7 @@ public class JwtGlobalFilter implements GlobalFilter {
                 String memberId = claims.getSubject();
                 String role = claims.get("role", String.class);
                 String idName;
-                System.out.println("line 61 >>>>>>>>>> " + role + "  >>>>>>>>>>> memberID:" + memberId);
+
                 if(role.equals("SELLER")){
                     idName = "sellerId";
                 }
@@ -75,7 +75,6 @@ public class JwtGlobalFilter implements GlobalFilter {
                         .build();
                 exchange = exchange.mutate().request(request).build();
             } catch (ExpiredJwtException e) {
-//                return validateRefreshTokenAndGenerateNewAccessToken(exchange, e.getClaims().getSubject(), e.getClaims().get("role", String.class),chain);
                 return onError(exchange, "Invalid token", HttpStatus.BAD_REQUEST);
             } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
                 return onError(exchange, "Invalid token", HttpStatus.BAD_REQUEST);

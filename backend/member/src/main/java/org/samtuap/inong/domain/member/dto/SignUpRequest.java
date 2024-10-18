@@ -1,7 +1,10 @@
 package org.samtuap.inong.domain.member.dto;
 
 import org.samtuap.inong.domain.member.entity.Member;
+import org.samtuap.inong.domain.member.entity.PaymentMethodType;
 import org.samtuap.inong.domain.member.entity.SocialType;
+
+import static org.samtuap.inong.domain.member.entity.PaymentMethodType.NONE;
 
 public record SignUpRequest(SocialType socialType,
                             String name,
@@ -20,6 +23,7 @@ public record SignUpRequest(SocialType socialType,
                 .addressDetail(this.addressDetail)
                 .zipcode(this.zipcode)
                 .socialId(socialId)
+                .paymentMethod(NONE)
                 .build();
     }
 }

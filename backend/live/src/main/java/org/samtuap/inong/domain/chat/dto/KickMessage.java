@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record KickMessage(
-        Long memberId,
+        Long userId,
         String message
 ) {
 }

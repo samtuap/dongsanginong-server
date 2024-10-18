@@ -8,7 +8,9 @@ import org.samtuap.inong.domain.product.entity.PackageProduct;
 public record AllPackageListResponse(@NotNull Long id,
                                      @NotNull String packageName,
                                      @NotNull String imageUrl,
-                                     @NotNull Long orderCount
+                                     @NotNull Long orderCount,
+                                     @NotNull Integer deliveryCycle,
+                                     @NotNull Long price
                                      ) {
     public static AllPackageListResponse fromEntity(PackageProduct product, String imageUrl, Long orderCount){
         return AllPackageListResponse.builder()
@@ -16,6 +18,8 @@ public record AllPackageListResponse(@NotNull Long id,
                 .packageName(product.getPackageName())
                 .imageUrl(imageUrl)
                 .orderCount(orderCount)
+                .deliveryCycle(product.getDelivery_cycle())
+                .price(product.getPrice())
                 .build();
     }
 }

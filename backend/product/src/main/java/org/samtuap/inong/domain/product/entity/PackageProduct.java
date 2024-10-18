@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.samtuap.inong.domain.common.BaseEntity;
@@ -36,11 +37,15 @@ public class PackageProduct extends BaseEntity {
     @NotNull
     private Long price;
 
+    @Column(columnDefinition = "text")
     private String productDescription;
 
     private String productCode;
 
     private String origin;
+
+    @NotNull
+    private Long wishCount;
 
     public void updatePackageName(String packageName) {
         this.packageName = packageName;
@@ -60,5 +65,9 @@ public class PackageProduct extends BaseEntity {
 
     public void updateOrigin(String origin) {
         this.origin = origin;
+    }
+
+    public void updateWishCount(Long wishCount) {
+        this.wishCount = wishCount;
     }
 }

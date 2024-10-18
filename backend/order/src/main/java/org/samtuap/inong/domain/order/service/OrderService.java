@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
@@ -18,7 +17,7 @@ import org.samtuap.inong.domain.delivery.repository.DeliveryRepository;
 import org.samtuap.inong.domain.order.dto.*;
 import org.samtuap.inong.domain.order.entity.Ordering;
 import org.samtuap.inong.domain.order.repository.OrderRepository;
-import org.samtuap.inong.domain.receipt.entity.PaymentMethod;
+import org.samtuap.inong.domain.receipt.entity.PaymentMethodType;
 import org.samtuap.inong.domain.receipt.entity.PaymentStatus;
 import org.samtuap.inong.domain.receipt.entity.Receipt;
 import org.samtuap.inong.domain.receipt.repository.ReceiptRepository;
@@ -35,12 +34,12 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
 import static org.samtuap.inong.common.exceptionType.OrderExceptionType.*;
-import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.*;
-import static org.samtuap.inong.domain.order.entity.CancelReason.*;
+import static org.samtuap.inong.domain.delivery.entity.DeliveryStatus.BEFORE_DELIVERY;
+import static org.samtuap.inong.domain.order.dto.KafkaOrderCountUpdateRequest.OrderCountRequestType.INCREASE;
+import static org.samtuap.inong.domain.order.entity.CancelReason.SYSTEM_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -79,7 +78,7 @@ public class OrderService {
     @Transactional
     public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
         PaymentResponse paymentResponse = makeOrder(memberId, reqDto, true);
-        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId());
+        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId(), paymentResponse.orderId());
         kafkaTemplate.send("subscription-topic", request);
         return paymentResponse;
     }
@@ -124,13 +123,14 @@ public class OrderService {
             default -> throw new BaseCustomException(INVALID_PACKAGE_PRODUCT);
         }
 
-        // 5. 최초 결제하기
+        // 4. 최초 결제하기
         String paymentId = kakaoPay(memberInfo, packageProduct, paidAmount, order);
 
-        // 4. 영수증 만들기
+        // 5. 영수증 만들기
         makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
 
-
+        // 6. orderCount 증가 이벤트 발행
+        kafkaTemplate.send("order-count-topic", new KafkaOrderCountUpdateRequest(packageProduct.farmId(), INCREASE));
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
@@ -248,29 +248,20 @@ public class OrderService {
     }
 
     public void makeReceipt(Ordering order, PackageProductResponse packageProduct, Long paidAmount, String paymentId) {
-        Receipt receipt = Receipt.builder().order(order)
+        Receipt receipt = Receipt.builder()
+                .order(order)
+                .id(order.getId())
                 .paidAt(order.getCreatedAt())
                 .beforePrice(packageProduct.price())
                 .discountPrice(packageProduct.price() - paidAmount)
                 .totalPrice(packageProduct.price())
                 .paymentStatus(PaymentStatus.PAID)
-                .paymentMethod(PaymentMethod.KAKAOPAY) // TODO: 추후 확장 가능성 있음
+                .paymentMethodType(PaymentMethodType.KAKAOPAY) // TODO: 추후 확장 가능성 있음
                 .portOnePaymentId(paymentId)
                 .build();
 
         receiptRepository.save(receipt);
     }
-
-    public Page<OrderDeliveryListResponse> getOrderDeliveryList(Pageable pageable, Long memberId) {
-        Page<Ordering> ordersPage = orderRepository.findAllByMemberId(memberId, pageable);
-
-        return ordersPage.map(ordering -> {
-            PackageProductResponse product = productFeign.getPackageProduct(ordering.getPackageId());
-            Delivery delivery = deliveryRepository.findByOrdering(ordering);
-            return OrderDeliveryListResponse.fromEntity(ordering, product, delivery);
-        });
-    }
-
 
 
     public Page<OrderPaymentListResponse> getOrderPaymentList(Pageable pageable, Long memberId) {
@@ -304,11 +295,8 @@ public class OrderService {
     }
 
     protected void rollbackOrder(KafkaOrderRollbackRequest rollbackRequest) throws InterruptedException {
-        Optional<Ordering> orderOpt = orderRepository
-                .findByPackageIdAndMemberId(rollbackRequest.productId(), rollbackRequest.memberId());
-
-        Ordering order = orderOpt.get();
-        Receipt receipt = receiptRepository.findByOrderOrThrow(order);
+        Ordering order = orderRepository.findById(rollbackRequest.orderId()).orElseThrow();
+        Receipt receipt = receiptRepository.findByIdOrThrow(rollbackRequest.orderId());
 
         order.updateCanceledAt(LocalDateTime.now());
         order.updateCancelReason(SYSTEM_ERROR);

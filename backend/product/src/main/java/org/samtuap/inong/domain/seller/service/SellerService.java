@@ -1,10 +1,10 @@
 package org.samtuap.inong.domain.seller.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.farm.entity.Farm;
-import org.samtuap.inong.domain.farm.entity.FarmCategory;
 import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
@@ -15,8 +15,6 @@ import org.samtuap.inong.domain.seller.entity.SellerRole;
 import org.samtuap.inong.domain.seller.jwt.domain.JwtToken;
 import org.samtuap.inong.domain.seller.jwt.service.JwtService;
 import org.samtuap.inong.domain.seller.repository.SellerRepository;
-import org.samtuap.inong.search.document.FarmDocument;
-import org.samtuap.inong.search.service.FarmSearchService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import static org.samtuap.inong.common.exceptionType.SellerExceptionType.*;
@@ -28,25 +26,21 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 @Transactional
+@Slf4j
 public class SellerService {
 
     private final SellerRepository sellerRepository;
     private final FarmRepository farmRepository;
     private final FarmCategoryRelationRepository farmCategoryRelationRepository;
     private final JwtService jwtService;
-    private final MailService mailService;
     private final PackageProductRepository packageProductRepository;
-    private final FarmSearchService farmSearchService;
-
+    private final RedisTool redisUtil;
 
     @Transactional
-    public SellerSignUpResponse verifyAndSignUp(EmailRequestDto requestDto) {
-        if (!mailService.verifyAuthCode(requestDto.email(), requestDto.code())) {
-            throw new BaseCustomException(CODE_INVALID);
-        }
-
-        SellerSignUpRequest dto = mailService.getUserData(requestDto.email(), SellerSignUpRequest.class);
-        return signUp(dto);
+    public boolean  verifyAuthCode(String email, String code) {
+        String storedCode = redisUtil.getValue(email, String.class);
+        log.info("Verifying code {} for email {}. Stored code: {}", code, email, storedCode);
+        return code.equals(storedCode);
     }
 
     @Transactional
@@ -149,4 +143,7 @@ public class SellerService {
         seller.updatePassword(encodedNewPassword);
     }
 
+    public boolean isEmailExists(String email) {
+        return sellerRepository.existsByEmail(email);
+    }
 }

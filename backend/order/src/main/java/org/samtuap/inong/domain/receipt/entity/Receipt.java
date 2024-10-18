@@ -42,7 +42,7 @@ public class Receipt extends BaseEntity {
     private String portOnePaymentId;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private PaymentMethodType paymentMethodType;
 
 
     public void updatePaymentStatus(PaymentStatus paymentStatus) {
@@ -57,7 +57,7 @@ public class Receipt extends BaseEntity {
         this.portOnePaymentId = portOnePaymentId;
     }
 
-    public void updatePaymentMethod(PaymentMethod paymentMethod) {
-        this.paymentMethod = paymentMethod;
+    public void updatePaymentMethod(PaymentMethodType paymentMethodType) {
+        this.paymentMethodType = paymentMethodType;
     }
 }

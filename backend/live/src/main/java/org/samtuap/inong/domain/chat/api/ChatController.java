@@ -24,17 +24,21 @@ public class ChatController {
         chatService.processAndSendMessage(sessionId, messageRequest);
     }
 
-    @PostMapping("/{sessionId}/kick/{memberId}")
-    public ResponseEntity<String> kickUser(@PathVariable String sessionId,
-                                           @PathVariable Long memberId,
-                                           @RequestHeader("sellerId") Long sellerId) {
-        chatService.kickUser(sessionId, memberId, sellerId);
+    @PostMapping("/{sessionId}/kick/{userId}")
+    public ResponseEntity<String> kickUser(@PathVariable("sessionId") String sessionId,
+                                           @PathVariable("userId") Long userId,
+                                           @RequestHeader("sellerId") Long requestSellerId) {
+        if (userId == null) {
+            return ResponseEntity.badRequest().body("ID : null");
+        }
+        log.info("강퇴 요청: sessionId = {}, userId = {}, requestSellerId = {}", sessionId, userId, requestSellerId);
+        chatService.kickUser(sessionId, userId, requestSellerId);
         return ResponseEntity.ok("사용자가 강퇴되었습니다.");
     }
 
     @GetMapping("/{sessionId}/isKicked/{memberId}")
-    public ResponseEntity<Boolean> isUserKicked(@PathVariable String sessionId,
-                                                @PathVariable Long memberId) {
+    public ResponseEntity<Boolean> isUserKicked(@PathVariable("sessionId") String sessionId,
+                                                @PathVariable("memberId") Long memberId) {
         boolean isKicked = chatService.isUserKicked(sessionId, memberId);
         return ResponseEntity.ok(isKicked);
     }

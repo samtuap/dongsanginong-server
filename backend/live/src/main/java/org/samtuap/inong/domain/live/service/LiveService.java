@@ -9,6 +9,7 @@ import org.samtuap.inong.domain.live.entity.Live;
 import org.samtuap.inong.domain.live.repository.LiveRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.samtuap.inong.common.client.FarmFeign;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.samtuap.inong.common.exceptionType.LiveExceptionType.SESSION_NOT_FOUND;
 
@@ -32,6 +34,7 @@ public class LiveService {
     private final FarmFeign farmFeign;
     private final OpenVidu openVidu;
     private final SocketController socketController;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * feign 요청용
@@ -75,6 +78,7 @@ public class LiveService {
                         .ownerId(sellerId)
                         .title(request.title())
                         .liveImage(request.liveImage())
+                        .category(request.category())
                         .build();
         liveRepository.save(live); // live 시작 > 먼저 디비에 저장
 
@@ -85,7 +89,7 @@ public class LiveService {
         live.updateSessionId(session.getSessionId()); // sessionId를 라이브 시작하고 받아서 저장
         liveRepository.save(live);
 
-        return LiveSessionResponse.fromEntity(request, live, session);
+        return LiveSessionResponse.fromEntity(request, live, farm, session);
     }
 
     public LiveSessionResponse getSessionIdByLiveId(Long id) {
@@ -93,8 +97,9 @@ public class LiveService {
         if (live.getSessionId() == null) {
             throw new BaseCustomException(SESSION_NOT_FOUND);
         }
+        FarmResponse farm = farmFeign.getFarmById(live.getFarmId());
         log.info("{}로 session id 받자 : {}", id, live.getSessionId());
-        return LiveSessionResponse.liveFromEntity(live);  // 라이브의 세션 ID 반환
+        return LiveSessionResponse.liveFromEntity(live, farm);  // 라이브의 세션 ID 반환
     }
 
     /**
@@ -105,6 +110,8 @@ public class LiveService {
         // 방송이 종료되었을 때, 해당 세션의 종료 시간을 기록 (endAt)
         Live live = liveRepository.findBySessionIdOrThrow(sessionId);
         live.updateEndAt(LocalDateTime.now());
+        redisTemplate.expire("live:participants:" + sessionId, 1, TimeUnit.HOURS);
+        redisTemplate.expire("kicked:users:" + sessionId, 1, TimeUnit.HOURS);
         liveRepository.save(live);
     }
 }

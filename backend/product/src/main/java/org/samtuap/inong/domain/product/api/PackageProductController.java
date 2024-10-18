@@ -75,6 +75,13 @@ public class PackageProductController {
         return packageProductService.getProductInfoListContainDeleted(ids);
     }
 
+
+    // Feign 요청용 메서드
+    @PostMapping("/info/contain-deleted/name-only")
+    List<PackageStatisticResponse> getPackageProductListContainDeletedNameOnly(@RequestBody List<Long> ids) {
+        return packageProductService.getProductInfoListContainDeletedNameOnly(ids);
+    }
+
     @GetMapping("/no-auth/for-sale/{id}")
     public List<PackageProductForSaleListResponse> getForSalePackageProduct(@PathVariable("id") Long farmId) {
         return packageProductService.getForSalePackageProduct(farmId);
@@ -88,5 +95,18 @@ public class PackageProductController {
     @GetMapping("/no-auth/search")
     public ResponseEntity<Page<AllPackageListResponse>> searchProduct(@PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @RequestParam("packageName") String packageName){
         return ResponseEntity.ok(packageProductService.searchProduct(pageable, packageName));
+    }
+
+    /**
+     * member에서 위시리스트 관련 feign 요청
+     */
+    @PostMapping("/{packageProductId}/increase-wish")
+    void increaseWish(@PathVariable("packageProductId") Long packageProductId) {
+        packageProductService.increaseWish(packageProductId);
+    }
+
+    @PostMapping("/{packageProductId}/decrease-wish")
+    void decreaseWish(@PathVariable("packageProductId") Long packageProductId) {
+        packageProductService.decreaseWish(packageProductId);
     }
 }
