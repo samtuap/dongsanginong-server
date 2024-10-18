@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/coupons")
+@RequestMapping("/coupon")
 public class CouponController {
     private final CouponService couponService;
 
@@ -45,7 +45,7 @@ public class CouponController {
     }
 
 
-    @GetMapping("/downloaded-coupons")
+    @GetMapping("/downloaded-coupon")
     public ResponseEntity<List<MemberCouponListResponse>> getDownloadedCouponsByMember(
             @RequestHeader("myId") String memberId) {
 
