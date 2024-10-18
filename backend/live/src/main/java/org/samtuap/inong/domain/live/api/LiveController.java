@@ -42,7 +42,7 @@ public class LiveController {
     }
 
     @GetMapping("/{sessionId}/participants")
-    public ResponseEntity<Integer> getParticipantCount(@PathVariable String sessionId) {
+    public ResponseEntity<Integer> getParticipantCount(@PathVariable("sessionId") String sessionId) {
         int count = liveService.getParticipantCount(sessionId);
         return ResponseEntity.ok(count);
     }
