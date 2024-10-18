@@ -51,6 +51,7 @@ public class Member extends BaseEntity {
     @NotNull
     private String socialId;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private PaymentMethodType paymentMethod;
 
