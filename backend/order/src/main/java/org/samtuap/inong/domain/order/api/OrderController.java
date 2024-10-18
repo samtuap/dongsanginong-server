@@ -1,5 +1,6 @@
 package org.samtuap.inong.domain.order.api;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +36,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<PaymentResponse> kakaoPay(@RequestHeader("myId") Long memberId,
-                                                    @RequestBody PaymentRequest reqDto) {
+                                                    @Valid @RequestBody PaymentRequest reqDto) {
         PaymentResponse paymentResponse = orderService.makeFirstOrder(memberId, reqDto);
 
         return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);

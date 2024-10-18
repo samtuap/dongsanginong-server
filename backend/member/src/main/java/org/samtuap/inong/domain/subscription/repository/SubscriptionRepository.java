@@ -24,4 +24,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     List<Subscription> findAllByMember(Member member);
 
+    Optional<Subscription> findByMemberAndPackageId(Member member, Long packageId);
 }
