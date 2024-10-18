@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
+import org.samtuap.inong.common.exceptionType.OrderExceptionType;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
@@ -76,10 +77,22 @@ public class OrderService {
     }
 
     @Transactional
-    public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) {
+    public PaymentResponse makeFirstOrder(Long memberId, PaymentRequest reqDto) throws BaseCustomException {
+        // 이미 구독 정보가 있는지 확인
+        Optional<SubscriptionInfoGetResponse> subscriptionOpt = memberFeign.getSubscriptionByProductId(reqDto.packageId(), memberId);
+
+        if(subscriptionOpt.isPresent()) { // 이미 구독 중인 상황
+            throw new BaseCustomException(ALREADY_IN_SUBSCRIPTION);
+        }
+
         PaymentResponse paymentResponse = makeOrder(memberId, reqDto, true);
-        KafkaSubscribeProductRequest request = new KafkaSubscribeProductRequest(reqDto.packageId(), memberId, reqDto.couponId(), paymentResponse.orderId());
-        kafkaTemplate.send("subscription-topic", request);
+        SubscribeProductRequest request = SubscribeProductRequest.builder()
+                .productId(reqDto.packageId())
+                .memberId(memberId).couponId(reqDto.couponId())
+                .orderId(paymentResponse.orderId())
+                .build();
+
+        memberFeign.subscribeProduct(request);
         return paymentResponse;
     }
 
@@ -103,19 +116,18 @@ public class OrderService {
             paidAmount = originalAmount - discountAmount;
         }
 
-
         Ordering order = Ordering.builder()
                 .memberId(memberId)
                 .packageId(reqDto.packageId())
                 .farmId(packageProduct.farmId())
                 .isFirst(isFirst)
                 .build();
+
         Ordering savedOrder = orderRepository.save(order);
 
         if(coupon != null) {
             useCoupon(coupon, order, packageProduct, memberId);
         }
-
 
         // 3. 배송 정보 저장하기
         switch (packageProduct.delivery_cycle()) {
@@ -137,7 +149,6 @@ public class OrderService {
                 .createdAt(savedOrder.getCreatedAt())
                 .build();
     }
-
 
     protected String kakaoPay(MemberAllInfoResponse memberInfo,
                                 PackageProductResponse packageInfo,
@@ -318,9 +329,6 @@ public class OrderService {
     private void kakaoPayRefund(Receipt receipt) {
         String paymentId = receipt.getPortOnePaymentId();
         String url = "https://api.portone.io/payments/" + paymentId + "/cancel";
-
-        log.info("line 326: {}", paymentId);
-
 
         // 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();

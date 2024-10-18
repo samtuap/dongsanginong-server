@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.samtuap.inong.common.exceptionType.SubscriptionExceptionType.*;
 
@@ -108,7 +109,16 @@ public class SubscriptionService {
         KafkaSubscribeProductRequest subscribeRequest = null;
         try {
             subscribeRequest = objectMapper.readValue(message, KafkaSubscribeProductRequest.class);
-            subscribePackageProduct(subscribeRequest);
+
+            SubscribeProductRequest convertedRequest = SubscribeProductRequest.builder()
+                    .productId(subscribeRequest.productId())
+                    .couponId(subscribeRequest.couponId())
+                    .memberId(subscribeRequest.memberId())
+                    .orderId(subscribeRequest.orderId())
+                    .build();
+
+
+            subscribePackageProduct(convertedRequest);
         } catch (JsonProcessingException e) {
             throw new BaseCustomException(INVALID_SUBSCRIPTION_REQUEST);
         } catch(Exception e) {
@@ -118,7 +128,7 @@ public class SubscriptionService {
         }
     }
 
-    private void subscribePackageProduct(KafkaSubscribeProductRequest subscribeRequest) {
+    public void subscribePackageProduct(SubscribeProductRequest subscribeRequest) {
         Member member = memberRepository.findByIdOrThrow(subscribeRequest.memberId());
         Subscription subscription = Subscription.builder()
                 .packageId(subscribeRequest.productId())
@@ -140,5 +150,16 @@ public class SubscriptionService {
                 .billingKey(member.getBillingKey())
                 .logoImageUrl(member.getPaymentMethod().getLogoImageUrl())
                 .build();
+    }
+
+    public Optional<SubscriptionGetResponse> getSubscriptionByProductId(Long productId, Long memberId) {
+        Member member = memberRepository.findByIdOrThrow(memberId);
+        Optional<Subscription> subscriptionOpt = subscriptionRepository.findByMemberAndPackageId(member, productId);
+
+        if(subscriptionOpt.isPresent()) {
+            return Optional.of(SubscriptionGetResponse.fromEntity(subscriptionOpt.get()));
+        } else {
+            return Optional.empty();
+        }
     }
 }

@@ -7,6 +7,8 @@ import org.samtuap.inong.domain.member.dto.MemberSubscriptionListResponse;
 import org.samtuap.inong.domain.member.dto.MemberSubscriptionResponse;
 import org.samtuap.inong.domain.member.dto.PaymentMethodGetResponse;
 import org.samtuap.inong.domain.subscription.dto.BillingKeyRegisterRequest;
+import org.samtuap.inong.domain.subscription.dto.SubscribeProductRequest;
+import org.samtuap.inong.domain.subscription.dto.SubscriptionGetResponse;
 import org.samtuap.inong.domain.subscription.dto.SubscriptionListGetResponse;
 import org.samtuap.inong.domain.subscription.service.SubscriptionService;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("/subscription")
 @RequiredArgsConstructor
@@ -53,10 +56,23 @@ public class SubscriptionController {
         return new ResponseEntity<>(subscriptionList, HttpStatus.OK);
     }
 
-    @PostMapping("/cancel")
+    @PostMapping("/cancel") // TODO: Delete Mapping으로 수정 필요
     public ResponseEntity<MemberSubsCancelRequest> cancelSubscription(@RequestHeader("myId") Long memberId, @RequestParam("id") Long subsId){
         MemberSubsCancelRequest cancelSubscription = subscriptionService.cancelSubscription(memberId, subsId);
         return new ResponseEntity<>(cancelSubscription, HttpStatus.OK);
     }
 
+    // feign 요청 용. 구독 정보 추가
+    @PostMapping
+    public ResponseEntity<Void> subscribeProduct(@Valid @RequestBody SubscribeProductRequest request) {
+        subscriptionService.subscribePackageProduct(request);
+        return new ResponseEntity<>(null, HttpStatus.CREATED);
+    }
+
+
+    // feign 요청 용. 구독 내용 단건 조회
+    @GetMapping("/product/{productId}")
+    public Optional<SubscriptionGetResponse> subscribeProduct(@PathVariable("productId") Long productId, @RequestHeader("myId") Long memberId) {
+        return subscriptionService.getSubscriptionByProductId(productId, memberId);
+    }
 }

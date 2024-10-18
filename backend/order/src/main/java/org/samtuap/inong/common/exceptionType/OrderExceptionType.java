@@ -12,7 +12,8 @@ public enum OrderExceptionType  implements ExceptionType{
     FAIL_TO_ROLLBACK_ORDER(HttpStatus.INTERNAL_SERVER_ERROR, "주문 취소에 실패했습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문이 존재하지 않습니다."),
     INVALID_PACKAGE_ID(HttpStatus.NOT_FOUND, "해당 아이디의 상품이 존재하지 않습니다."),
-    INVALID_MEMBER_ID(HttpStatus.NOT_FOUND, "해당 아이디의 회원이 존재하지 않습니다.");
+    INVALID_MEMBER_ID(HttpStatus.NOT_FOUND, "해당 아이디의 회원이 존재하지 않습니다."),
+    ALREADY_IN_SUBSCRIPTION(HttpStatus.BAD_REQUEST, "이미 구독 정보가 존재합니다.");
     private final HttpStatus status;
     private final String message;
 
