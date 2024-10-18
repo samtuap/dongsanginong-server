@@ -19,7 +19,7 @@ public class FcmController {
     private final FcmService fcmService;
     @PostMapping("/token")
     public ResponseEntity<Void> saveFcmToken(@RequestHeader Long myId,
-                                             @RequestBody @Valid FcmTokenSaveRequest fcmTokenSaveRequest) {
+                                             @RequestBody FcmTokenSaveRequest fcmTokenSaveRequest) {
         fcmService.saveFcmToken(myId, fcmTokenSaveRequest);
         return ResponseEntity.ok(null);
     }
