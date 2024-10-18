@@ -40,4 +40,10 @@ public class LiveController {
     public List<FavoritesLiveListResponse> getFavoritesFarmLiveList(@RequestBody List<Long> favoriteFarmList) {
         return liveService.getFavoritesFarmLiveList(favoriteFarmList);
     }
+
+    @GetMapping("/{sessionId}/participants")
+    public ResponseEntity<Integer> getParticipantCount(@PathVariable String sessionId) {
+        int count = liveService.getParticipantCount(sessionId);
+        return ResponseEntity.ok(count);
+    }
 }
