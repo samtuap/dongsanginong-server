@@ -35,6 +35,7 @@ public class LiveService {
     private final OpenVidu openVidu;
     private final SocketController socketController;
     private final RedisTemplate<String, Object> redisTemplate;
+    private static final String LIVE_PARTICIPANTS_KEY_PREFIX = "live:participants:";
 
     /**
      * feign 요청용
@@ -113,5 +114,11 @@ public class LiveService {
         redisTemplate.expire("live:participants:" + sessionId, 1, TimeUnit.HOURS);
         redisTemplate.expire("kicked:users:" + sessionId, 1, TimeUnit.HOURS);
         liveRepository.save(live);
+    }
+
+    public int getParticipantCount(String sessionId) {
+        String key = LIVE_PARTICIPANTS_KEY_PREFIX + sessionId;
+        Integer count = (Integer) redisTemplate.opsForValue().get(key);
+        return (count != null) ? count : 0;
     }
 }
