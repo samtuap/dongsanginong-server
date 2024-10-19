@@ -89,7 +89,7 @@ public class FcmService {
     }
 
     //== Kafka를 통한 알림 전송 비동기 처리 ==//
-    @KafkaListener(topics = "send-notification-topic", groupId = "order-group", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "seller-notification-topic", groupId = "seller-notification-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeIssueNotification(String message /*listen 하면 스트링 형태로 메시지가 들어온다*/) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {

@@ -80,7 +80,7 @@ public class DeliveryService {
                 .content("상품명: " + packageProduct.packageName())
                 .build();
 
-        kafkaTemplate.send("send-notification-topic", notification);
+        kafkaTemplate.send("member-notification-topic", notification);
     }
 
     /**
