@@ -1,6 +1,5 @@
 package org.samtuap.inong.domain.discount.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
@@ -13,7 +12,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.ProductExceptionType.*;
 
@@ -72,6 +74,21 @@ public class DiscountService {
         Discount existingDiscount = discountRepository.findById(discountId)
                 .orElseThrow(() -> new BaseCustomException(FIELD_NOT_FOUND));
         discountRepository.delete(existingDiscount);
+    }
+
+    // 할인 리스트 조회
+    @Transactional(readOnly = true)
+    public List<DiscountResponse> getDiscountList() {
+        List<Discount> discounts = discountRepository.findAll();
+        return discounts.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    // 할인 디테일 조회
+    @Transactional(readOnly = true)
+    public DiscountResponse getDiscountDetail(Long discountId) {
+        Discount discount = discountRepository.findById(discountId)
+                .orElseThrow(() -> new BaseCustomException(FIELD_NOT_FOUND));
+        return toDto(discount);
     }
 
     // Discount를 DTO로 변환

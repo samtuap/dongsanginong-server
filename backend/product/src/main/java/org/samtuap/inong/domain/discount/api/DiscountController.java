@@ -8,6 +8,8 @@ import org.samtuap.inong.domain.discount.service.DiscountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/discounts")
 @RequiredArgsConstructor
@@ -38,5 +40,19 @@ public class DiscountController {
     public ResponseEntity<Void> deleteDiscount(@PathVariable Long discountId) {
         discountService.deleteDiscount(discountId);
         return ResponseEntity.noContent().build();
+    }
+
+    // 할인 리스트 조회
+    @GetMapping("/list")
+    public ResponseEntity<List<DiscountResponse>> getDiscountList() {
+        List<DiscountResponse> discountList = discountService.getDiscountList();
+        return ResponseEntity.ok(discountList);
+    }
+
+    // 할인 디테일 조회
+    @GetMapping("/{discountId}/detail")
+    public ResponseEntity<DiscountResponse> getDiscountDetail(@PathVariable Long discountId) {
+        DiscountResponse discountDetail = discountService.getDiscountDetail(discountId);
+        return ResponseEntity.ok(discountDetail);
     }
 }
