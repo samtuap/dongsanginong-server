@@ -1,6 +1,7 @@
 package org.samtuap.inong.domain.discount.repository;
 
 import org.samtuap.inong.domain.discount.entity.Discount;
+import org.samtuap.inong.domain.product.entity.PackageProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -10,4 +11,7 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
     List<Discount> findAllByStartAt(LocalDate now);
 
     List<Discount> findAllByEndAtBefore(LocalDate now);
+
+    boolean existsByPackageProductAndStartAtAndEndAt(PackageProduct packageProduct, LocalDate startAt, LocalDate endAt);
+
 }

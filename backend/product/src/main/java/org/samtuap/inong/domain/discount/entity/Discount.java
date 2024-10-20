@@ -1,19 +1,19 @@
 package org.samtuap.inong.domain.discount.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 
 import java.time.LocalDate;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,14 +30,4 @@ public class Discount {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id")
     private PackageProduct packageProduct;
-
-
-    public void activateDiscount() {
-        this.discountActive = true;
-    }
-
-    public void deactivateDiscount() {
-        this.discountActive = false;
-    }
-
 }

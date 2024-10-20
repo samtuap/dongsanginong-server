@@ -2,6 +2,7 @@ package org.samtuap.inong.domain.discount.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.samtuap.inong.domain.discount.dto.DiscountUtil;
 import org.samtuap.inong.domain.discount.entity.Discount;
 import org.samtuap.inong.domain.discount.repository.DiscountRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,7 +29,7 @@ public class DiscountScheduler {
         List<Discount> discountsToActivate = discountRepository.findAllByStartAt(now);
         for (Discount discount : discountsToActivate) {
             log.info("할인이 활성화되는 제품 ID: {}", discount.getPackageProduct().getId());
-            discount.activateDiscount();  // 할인 활성화 (discountActive 필드를 true로 변경)
+            DiscountUtil.activateDiscount(discount);  // 할인 활성화 (discountActive 필드를 true로 변경)
             discountRepository.save(discount);  // 변경된 할인 정보 저장
         }
 
@@ -36,7 +37,7 @@ public class DiscountScheduler {
         List<Discount> discountsToDeactivate = discountRepository.findAllByEndAtBefore(now);
         for (Discount discount : discountsToDeactivate) {
             log.info("할인이 비활성화되는 제품 ID: {}", discount.getPackageProduct().getId());
-            discount.deactivateDiscount();  // 할인 비활성화 (discountActive 필드를 false로 변경)
+            DiscountUtil.deactivateDiscount(discount);  // 할인 비활성화 (discountActive 필드를 false로 변경)
             discountRepository.save(discount);  // 변경된 할인 정보 저장
         }
     }
