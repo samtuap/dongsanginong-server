@@ -31,9 +31,8 @@ public class DiscountService {
         PackageProduct packageProduct = packageProductRepository.findById(packageProductId)
                 .orElseThrow(() -> new BaseCustomException(PRODUCT_NOT_FOUND));
 
-        // 중복 체크 로직 추가
-        boolean discountExists = discountRepository.existsByPackageProductAndStartAtAndEndAt(
-                packageProduct, request.getStartAt(), request.getEndAt());
+        // packageProduct 중복 체크 로직 추가
+        boolean discountExists = discountRepository.existsByPackageProduct(packageProduct);
         if (discountExists) {
             throw new BaseCustomException(DISCOUNT_ALREADY_EXISTS);
         }
@@ -48,6 +47,7 @@ public class DiscountService {
         Discount savedDiscount = discountRepository.save(discount);
         return toDto(savedDiscount);
     }
+
 
     // 할인 수정
     @Transactional

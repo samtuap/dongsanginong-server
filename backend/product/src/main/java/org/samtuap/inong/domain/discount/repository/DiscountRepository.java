@@ -14,6 +14,7 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
 
     List<Discount> findAll();
 
-    boolean existsByPackageProductAndStartAtAndEndAt(PackageProduct packageProduct, LocalDate startAt, LocalDate endAt);
+    boolean existsByPackageProduct(PackageProduct packageProduct);
+
 
 }
