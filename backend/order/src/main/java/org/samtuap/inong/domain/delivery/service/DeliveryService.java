@@ -78,6 +78,7 @@ public class DeliveryService {
                 .memberId(memberId)
                 .title("상품 배송이 시작됐어요!")
                 .content("상품명: " + packageProduct.packageName())
+                .url("/member/delivery/list")
                 .build();
 
         kafkaTemplate.send("member-notification-topic", notification);

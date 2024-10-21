@@ -150,6 +150,7 @@ public class OrderService {
                 .memberId(memberId)
                 .title(packageProduct.packageName() + "상품의 정기 결제가 완료되었어요!")
                 .content("다음 결제일은 " + LocalDate.now().plusDays(28) + "입니다.")
+                .url("/member/payment/list")
                 .build();
 
         kafkaTemplate.send("member-notification-topic", notification);

@@ -190,6 +190,7 @@ public class FarmNoticeService {
                     .memberId(memberId)
                     .title(farm.getFarmName() + " 농장에 공지 글이 등록 되었어요!")
                     .content(dto.title())
+                    .url("/farm/" + farm.getId() + "/notice/list")
                     .build();
         kafkaTemplate.send("member-notification-topic", notification);
         }
