@@ -18,8 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.samtuap.inong.common.exceptionType.SubscriptionExceptionType.*;
 
@@ -73,12 +76,15 @@ public class SubscriptionService {
 
     public List<MemberSubscriptionListResponse> getSubscriptionList(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
-        List<Long> subscriptionIds = subscriptionRepository.findAllByMember(member).stream()
-                .map(Subscription::getPackageId)
-                .toList();
-        List<PackageProductSubsResponse> subscriptionList = productFeign.getProductSubsList(subscriptionIds);
+        List<Subscription> subscriptions = subscriptionRepository.findAllByMember(member);
+        // subid와 pacakgeId를 map 형태로 찾아 받아옴
+        Map<Long, Long> packageIdToSubscriptionId = subscriptions.stream()
+                .collect(Collectors.toMap(Subscription::getPackageId, Subscription::getId));
+
+        List<PackageProductSubsResponse> subscriptionList = productFeign.getProductSubsList(new ArrayList<>(packageIdToSubscriptionId.keySet()));
         return subscriptionList.stream()
                 .map(subscriptionProductList -> MemberSubscriptionListResponse.builder()
+                        .id(packageIdToSubscriptionId.get(subscriptionProductList.packageId())) // packageProductId에 맞는 subId를 할당
                         .packageId(subscriptionProductList.packageId())
                         .packageName(subscriptionProductList.packageName())
                         .imageUrl(subscriptionProductList.imageUrl())
@@ -98,7 +104,7 @@ public class SubscriptionService {
         }
 
         subscriptionRepository.delete(subscription);
-        return MemberSubsCancelRequest.from(cancelPackage);
+        return MemberSubsCancelRequest.from(cancelPackage, subscription.getId());
     }
 
     //== Kafka를 통한 정기 구독 비동기 처리 ==//
