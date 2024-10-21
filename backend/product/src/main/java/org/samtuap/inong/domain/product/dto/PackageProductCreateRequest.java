@@ -28,6 +28,7 @@ public record PackageProductCreateRequest(
                 .productCode("P-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .origin(request.origin)
                 .wishCount(0L)
+                .orderCount(0L)
                 .build();
     }
 }

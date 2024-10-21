@@ -143,7 +143,7 @@ public class OrderService {
         makeReceipt(savedOrder, packageProduct, paidAmount, paymentId);
 
         // 6. orderCount 증가 이벤트 발행
-        kafkaTemplate.send("order-count-topic", new KafkaOrderCountUpdateRequest(packageProduct.farmId(), INCREASE));
+        kafkaTemplate.send("order-count-topic", new KafkaOrderCountUpdateRequest(packageProduct.farmId(), packageProduct.id(), INCREASE));
 
         // 7. 알림 발송
         KafkaNotificationRequest notification = KafkaNotificationRequest.builder()

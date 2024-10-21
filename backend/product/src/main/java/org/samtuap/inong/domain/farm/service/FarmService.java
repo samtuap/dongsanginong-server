@@ -20,6 +20,9 @@ import org.samtuap.inong.domain.farm.entity.FarmCategoryRelation;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRelationRepository;
 import org.samtuap.inong.domain.farm.repository.FarmCategoryRepository;
 import org.samtuap.inong.domain.farm.repository.FarmRepository;
+import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
+import org.samtuap.inong.domain.product.entity.PackageProduct;
+import org.samtuap.inong.domain.product.repository.PackageProductRepository;
 import org.samtuap.inong.domain.seller.dto.FarmCategoryResponse;
 import org.samtuap.inong.domain.seller.dto.SellerFarmInfoUpdateRequest;
 import org.samtuap.inong.search.service.FarmSearchService;
@@ -47,6 +50,7 @@ import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.I
 @Slf4j
 public class FarmService {
     private final FarmRepository farmRepository;
+    private final PackageProductRepository packageProductRepository;
     private final LiveFeign liveFeign;
     private final MemberFeign memberFeign;
     private final FarmCategoryRepository farmCategoryRepository;
@@ -254,7 +258,7 @@ public class FarmService {
     }
 
 
-    // 반정규화를 위해 넣어놓은 Farm > orderCount를 증가/감소시키는 이벤트 처리
+    // 반정규화를 위해 넣어놓은 Farm, PackageProduct > orderCount를 증가/감소시키는 이벤트 처리
     @Transactional
     @KafkaListener(topics = "order-count-topic", groupId = "order-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeIssueNotification(String message /*listen 하면 스트링 형태로 메시지가 들어온다*/) {
@@ -262,12 +266,19 @@ public class FarmService {
         try {
             KafkaOrderCountUpdateRequest request = objectMapper.readValue(message, KafkaOrderCountUpdateRequest.class);
             Farm farm = farmRepository.findByIdOrThrow(request.farmId());
+            PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(request.productId());
 
             switch(request.orderCountRequestType()) {
-                case INCREASE -> farm.updateOrderCount(farm.getOrderCount() + 1);
-                case DECREASE -> farm.updateOrderCount(farm.getOrderCount() - 1);
+                case INCREASE -> {
+                    farm.updateOrderCount(farm.getOrderCount() + 1);
+                    packageProduct.updateOrderCount(packageProduct.getOrderCount() + 1);
+                }
+                case DECREASE -> {
+                    farm.updateOrderCount(farm.getOrderCount() - 1);
+                    packageProduct.updateOrderCount(packageProduct.getOrderCount() - 1);
+                }
                 default -> throw new BaseCustomException(FarmExceptionType.INVALID_ORDER_COUNT_REQUEST);
-            }
+            };
         } catch (JsonProcessingException e) {
             throw new BaseCustomException(INVALID_FCM_REQUEST);
         } catch(Exception e) {

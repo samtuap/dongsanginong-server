@@ -47,6 +47,9 @@ public class PackageProduct extends BaseEntity {
     @NotNull
     private Long wishCount;
 
+    @NotNull
+    private Long orderCount;
+
     public void updatePackageName(String packageName) {
         this.packageName = packageName;
     }
@@ -69,5 +72,9 @@ public class PackageProduct extends BaseEntity {
 
     public void updateWishCount(Long wishCount) {
         this.wishCount = wishCount;
+    }
+
+    public void updateOrderCount(Long orderCount) {
+        this.orderCount = orderCount;
     }
 }
