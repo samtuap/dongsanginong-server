@@ -7,6 +7,7 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.coupon.dto.*;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
+import org.samtuap.inong.domain.coupon.repository.CouponRedisRepository;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
 import org.samtuap.inong.domain.coupon.repository.MemberCouponRelationRepository;
 import org.samtuap.inong.domain.delivery.dto.FarmDetailGetResponse;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.samtuap.inong.common.exceptionType.CouponExceptionType.*;
@@ -26,15 +26,20 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final MemberCouponRelationRepository memberCouponRelationRepository;
     private final ProductFeign productFeign;
+    private final CouponRedisRepository couponRedisRepository;
 
     @Transactional
-    public void createCoupon(Long sellerId, CouponCreateRequest request) {
+    public Long createCoupon(Long sellerId, CouponCreateRequest request) {
 
         FarmDetailGetResponse farm = productFeign.getFarmInfoWithSeller(sellerId);
 
         // Coupon 엔티티 생성
         Coupon coupon = request.toEntity(request, farm.id());
         couponRepository.save(coupon);
+
+        couponRedisRepository.setCouponQuantity(coupon.getId(), coupon.getQuantity());
+
+        return coupon.getId();
     }
 
     @Transactional
@@ -47,9 +52,8 @@ public class CouponService {
         return couponRepository.findAllByFarmId(farmId);
     }
 
-
     @Transactional
-    public MemberCouponRelationResponse downloadCoupon(Long couponId, String memberId) {
+    public void processCouponIssue(Long couponId, Long memberId) {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new BaseCustomException(COUPON_NOT_FOUND));
 
@@ -58,18 +62,22 @@ public class CouponService {
             throw new BaseCustomException(COUPON_EXPIRED);
         }
         // 중복 다운로드 검증
-        boolean isAlreadyDownloaded = memberCouponRelationRepository.existsByCouponIdAndMemberId(couponId, Long.parseLong(memberId));
+        boolean isAlreadyDownloaded = memberCouponRelationRepository.existsByCouponIdAndMemberId(couponId, memberId);
         if (isAlreadyDownloaded) {
             throw new BaseCustomException(ALREADY_DOWNLOADED_COUPON);
         }
 
-        MemberCouponRelationRequest request = new MemberCouponRelationRequest(Long.parseLong(memberId), "N" );
+        MemberCouponRelationRequest request = new MemberCouponRelationRequest(memberId, "N" );
         MemberCouponRelation memberCouponRelation = request.toEntity(coupon);
         memberCouponRelationRepository.save(memberCouponRelation);
 
-        return MemberCouponRelationResponse.fromEntity(memberCouponRelation);
-    }
+        if (coupon.getQuantity() != -1) { // 무제한 쿠폰은 수량 감소하지 않음
+            coupon.decreaseQuantity();
+            couponRepository.save(coupon);
+        }
 
+        log.info("쿠폰 ID: {} - 남은 수량: {}", couponId, coupon.getQuantity());
+    }
 
     @Transactional(readOnly = true)
     public List<MemberCouponListResponse> getDownloadedCouponsByMember(Long memberId) {

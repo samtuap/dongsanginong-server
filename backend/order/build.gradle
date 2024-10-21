@@ -40,6 +40,9 @@ dependencies {
 	// redis shedlock
 	implementation 'net.javacrumbs.shedlock:shedlock-spring:4.44.0'
 	implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:4.44.0'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
 }
 
 dependencyManagement {
