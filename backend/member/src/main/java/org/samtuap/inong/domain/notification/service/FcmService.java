@@ -17,7 +17,9 @@ import org.samtuap.inong.domain.notification.dto.FcmTokenSaveRequest;
 import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
 import org.samtuap.inong.domain.notification.dto.NotificationIssueRequest;
 import org.samtuap.inong.domain.notification.entity.FcmToken;
+import org.samtuap.inong.domain.notification.entity.Notification;
 import org.samtuap.inong.domain.notification.repository.FcmTokenRepository;
+import org.samtuap.inong.domain.notification.repository.NotificationRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.I
 public class FcmService {
     private final MemberRepository memberRepository;
     private final FcmTokenRepository fcmTokenRepository;
+    private final NotificationRepository notificationRepository;
     @Transactional
     public void saveFcmToken(Long memberId, FcmTokenSaveRequest fcmTokenSaveRequest) {
         Member member = memberRepository.findByIdOrThrow(memberId);
@@ -49,9 +52,11 @@ public class FcmService {
         fcmTokenRepository.save(fcmToken);
     }
 
+    @Transactional
     public void issueNotice(NotificationIssueRequest notiRequest) {
         List<Long> targets = notiRequest.targets();
         for (Long memberId : targets) {
+            Member member = memberRepository.findByIdOrThrow(memberId);
             issueMessage(memberId, notiRequest.title(), notiRequest.content());
         }
     }
@@ -59,6 +64,8 @@ public class FcmService {
     private void issueMessage(Long memberId, String title, String content) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         List<FcmToken> fcmTokens = fcmTokenRepository.findAllByMember(member);
+        Notification noti = NotificationIssueRequest.of(title, content, member);
+        notificationRepository.save(noti);
 
         for (FcmToken fcmToken : fcmTokens) {
             String token = fcmToken.getToken();
