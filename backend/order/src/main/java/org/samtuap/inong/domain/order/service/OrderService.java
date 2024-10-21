@@ -153,7 +153,15 @@ public class OrderService {
                 .url("/member/payment/list")
                 .build();
 
+        KafkaNotificationRequest sellerNotification = KafkaNotificationRequest.builder()
+                .memberId(packageProduct.farmId())
+                .title("새로운 주문!")
+                .content(packageProduct.packageName() + "상품의 주문이 들어왔어요!")
+                .url("/seller/delivery-management")
+                .build();
+
         kafkaTemplate.send("member-notification-topic", notification);
+        kafkaTemplate.send("seller-notification-topic", sellerNotification);
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())
