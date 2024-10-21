@@ -8,6 +8,7 @@ import org.samtuap.inong.common.client.MemberFeign;
 import org.samtuap.inong.common.client.ProductFeign;
 import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.common.exceptionType.OrderExceptionType;
+import org.samtuap.inong.common.request.KafkaNotificationRequest;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.samtuap.inong.domain.coupon.repository.CouponRepository;
@@ -143,6 +144,24 @@ public class OrderService {
 
         // 6. orderCount 증가 이벤트 발행
         kafkaTemplate.send("order-count-topic", new KafkaOrderCountUpdateRequest(packageProduct.farmId(), INCREASE));
+
+        // 7. 알림 발송
+        KafkaNotificationRequest notification = KafkaNotificationRequest.builder()
+                .memberId(memberId)
+                .title(packageProduct.packageName() + "상품의 정기 결제가 완료되었어요!")
+                .content("다음 결제일은 " + LocalDate.now().plusDays(28) + "입니다.")
+                .url("/member/payment/list")
+                .build();
+
+        KafkaNotificationRequest sellerNotification = KafkaNotificationRequest.builder()
+                .memberId(packageProduct.farmId())
+                .title("새로운 주문!")
+                .content(packageProduct.packageName() + "상품의 주문이 들어왔어요!")
+                .url("/seller/delivery-management")
+                .build();
+
+        kafkaTemplate.send("member-notification-topic", notification);
+        kafkaTemplate.send("seller-notification-topic", sellerNotification);
 
         return PaymentResponse.builder()
                 .orderId(savedOrder.getId())

@@ -29,6 +29,8 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    private String url;
+    
     private boolean isRead;
 
     public void updateIsRead(boolean isRead) {
