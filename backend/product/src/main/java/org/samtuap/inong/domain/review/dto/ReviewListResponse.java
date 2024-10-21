@@ -14,7 +14,8 @@ public record ReviewListResponse(
         Integer rating,
         String contents,
         List<String> imageUrls,
-        LocalDateTime updateAt
+        LocalDateTime updateAt,
+        Long memberId
 ) {
     public static ReviewListResponse fromEntity(Review review, List<ReviewImage> reviewImages) {
 
@@ -29,6 +30,7 @@ public record ReviewListResponse(
                 .contents(review.getContents())
                 .imageUrls(imageUrls)
                 .updateAt(review.getUpdatedAt())
+                .memberId(review.getMemberId())
                 .build();
     }
 }
