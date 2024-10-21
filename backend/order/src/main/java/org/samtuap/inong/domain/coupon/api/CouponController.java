@@ -1,12 +1,12 @@
 package org.samtuap.inong.domain.coupon.api;
 
-import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.samtuap.inong.domain.coupon.dto.AvailableCouponListGetResponse;
 import org.samtuap.inong.domain.coupon.dto.CouponCreateRequest;
 import org.samtuap.inong.domain.coupon.dto.MemberCouponListResponse;
-import org.samtuap.inong.domain.coupon.dto.MemberCouponRelationResponse;
 import org.samtuap.inong.domain.coupon.entity.Coupon;
+import org.samtuap.inong.domain.coupon.producer.CouponProducer;
 import org.samtuap.inong.domain.coupon.service.CouponService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +16,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/coupon")
 public class CouponController {
     private final CouponService couponService;
+    private final CouponProducer couponProducer;
 
     @PostMapping("/create")
     public ResponseEntity<?> createCoupon(
@@ -39,11 +41,15 @@ public class CouponController {
     }
 
 
-    @PostMapping("/{id}/download")
-    public ResponseEntity<MemberCouponRelationResponse> downloadCoupon(@PathVariable("id") Long couponId,
-                                                                       @RequestHeader("myId") String memberId) {
-        MemberCouponRelationResponse response = couponService.downloadCoupon(couponId, memberId);
-        return new ResponseEntity<>(response ,HttpStatus.OK);
+    @PostMapping("/{couponId}/download")
+    public ResponseEntity<String> downloadCoupon(@PathVariable("couponId") Long couponId, @RequestHeader("myId") Long memberId) {
+        try {
+            couponProducer.requestCoupon(couponId, memberId);
+            return new ResponseEntity<>("쿠폰 발급 신청이 완료되었습니다.", HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            log.error("쿠폰 다운로드 중 예외 발생: {}", e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
 

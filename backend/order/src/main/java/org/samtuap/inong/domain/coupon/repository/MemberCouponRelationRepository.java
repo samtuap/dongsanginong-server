@@ -1,12 +1,10 @@
 package org.samtuap.inong.domain.coupon.repository;
 
-import org.samtuap.inong.domain.coupon.entity.Coupon;
 import org.samtuap.inong.domain.coupon.entity.MemberCouponRelation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,4 +21,5 @@ public interface MemberCouponRelationRepository extends JpaRepository<MemberCoup
     List<MemberCouponRelation> findAllByMemberIdAndFarmIdAndUsedAtIsNull(@Param("memberId") Long memberId, @Param("farmId") Long farmId);
 
 
+    int countByCouponId(Long couponId);
 }

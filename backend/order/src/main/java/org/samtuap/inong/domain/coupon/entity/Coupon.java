@@ -8,9 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.common.BaseEntity;
 
 import java.time.LocalDateTime;
+
+import static org.samtuap.inong.common.exceptionType.CouponExceptionType.COUPON_SOLD_OUT;
 
 @Entity
 @SQLDelete(sql = "UPDATE coupon SET deleted_at = now() WHERE id = ?")
@@ -38,5 +41,16 @@ public class Coupon extends BaseEntity {
 
     @NotNull
     private Long farmId; // 농장 id
+
+    public void decreaseQuantity() {
+        if (this.quantity == -1) {
+            // 무제한 발급이므로 수량을 감소시키지 않음
+            return;
+        }
+        if (this.quantity <= 0) {
+            throw new BaseCustomException(COUPON_SOLD_OUT);
+        }
+        this.quantity--;
+    }
 
 }
