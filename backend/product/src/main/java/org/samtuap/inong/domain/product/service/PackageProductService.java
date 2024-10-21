@@ -70,6 +70,7 @@ public class PackageProductService {
         return productList;
     }
 
+    @Cacheable(value = "PackageDetail", key = "#packageProductId", cacheManager = "contentCacheManager")
     public PackageProductResponse getProductInfo(Long packageProductId) {
         PackageProduct packageProduct = packageProductRepository.findByIdOrThrow(packageProductId);
         List<PackageProductImage> packageProductImage = packageProductImageRepository.findAllByPackageProduct(packageProduct);

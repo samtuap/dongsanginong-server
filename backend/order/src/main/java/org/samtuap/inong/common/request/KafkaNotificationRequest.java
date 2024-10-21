@@ -1,4 +1,4 @@
-package org.samtuap.inong.domain.farmNotice.dto;
+package org.samtuap.inong.common.request;
 
 import lombok.Builder;
 

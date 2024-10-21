@@ -17,7 +17,9 @@ import org.samtuap.inong.domain.notification.dto.FcmTokenSaveRequest;
 import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
 import org.samtuap.inong.domain.notification.dto.NotificationIssueRequest;
 import org.samtuap.inong.domain.notification.entity.FcmToken;
+import org.samtuap.inong.domain.notification.entity.Notification;
 import org.samtuap.inong.domain.notification.repository.FcmTokenRepository;
+import org.samtuap.inong.domain.notification.repository.NotificationRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ import static org.samtuap.inong.common.exceptionType.NotificationExceptionType.I
 public class FcmService {
     private final MemberRepository memberRepository;
     private final FcmTokenRepository fcmTokenRepository;
+    private final NotificationRepository notificationRepository;
     @Transactional
     public void saveFcmToken(Long memberId, FcmTokenSaveRequest fcmTokenSaveRequest) {
         Member member = memberRepository.findByIdOrThrow(memberId);
@@ -49,16 +52,20 @@ public class FcmService {
         fcmTokenRepository.save(fcmToken);
     }
 
+    @Transactional
     public void issueNotice(NotificationIssueRequest notiRequest) {
         List<Long> targets = notiRequest.targets();
         for (Long memberId : targets) {
-            issueMessage(memberId, notiRequest.title(), notiRequest.content());
+            Member member = memberRepository.findByIdOrThrow(memberId);
+            issueMessage(memberId, notiRequest.title(), notiRequest.content(), "");
         }
     }
 
-    private void issueMessage(Long memberId, String title, String content) {
+    private void issueMessage(Long memberId, String title, String content, String url) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         List<FcmToken> fcmTokens = fcmTokenRepository.findAllByMember(member);
+        Notification noti = NotificationIssueRequest.of(title, content, member, url);
+        notificationRepository.save(noti);
 
         for (FcmToken fcmToken : fcmTokens) {
             String token = fcmToken.getToken();
@@ -91,12 +98,12 @@ public class FcmService {
     }
 
     //== Kafka를 통한 알림 전송 비동기 처리 ==//
-    @KafkaListener(topics = "send-notification-topic", groupId = "product-group", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "member-notification-topic", groupId = "member-notification-group", containerFactory = "kafkaListenerContainerFactory")
     public void consumeIssueNotification(String message /*listen 하면 스트링 형태로 메시지가 들어온다*/) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             KafkaNotificationRequest notificationRequest = objectMapper.readValue(message, KafkaNotificationRequest.class);
-            this.issueMessage(notificationRequest.memberId(), notificationRequest.title(), notificationRequest.content());
+            this.issueMessage(notificationRequest.memberId(), notificationRequest.title(), notificationRequest.content(), notificationRequest.url());
         } catch (JsonProcessingException e) {
             throw new BaseCustomException(INVALID_FCM_REQUEST);
         } catch(Exception e) {

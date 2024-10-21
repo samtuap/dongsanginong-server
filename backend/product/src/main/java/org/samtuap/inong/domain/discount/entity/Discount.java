@@ -1,15 +1,13 @@
 package org.samtuap.inong.domain.discount.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.samtuap.inong.domain.product.entity.PackageProduct;
 
 import java.time.LocalDate;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,14 +28,4 @@ public class Discount {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id")
     private PackageProduct packageProduct;
-
-
-    public void activateDiscount() {
-        this.discountActive = true;
-    }
-
-    public void deactivateDiscount() {
-        this.discountActive = false;
-    }
-
 }

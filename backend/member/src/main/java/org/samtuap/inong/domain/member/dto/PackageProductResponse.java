@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record PackageProductResponse(Long id,
+public record PackageProductResponse(Long id, // 상품id
                                      String packageName,
                                      Integer delivery_cycle,
                                      Long price,
