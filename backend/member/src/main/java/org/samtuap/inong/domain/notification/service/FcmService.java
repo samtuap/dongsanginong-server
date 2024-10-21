@@ -57,14 +57,14 @@ public class FcmService {
         List<Long> targets = notiRequest.targets();
         for (Long memberId : targets) {
             Member member = memberRepository.findByIdOrThrow(memberId);
-            issueMessage(memberId, notiRequest.title(), notiRequest.content());
+            issueMessage(memberId, notiRequest.title(), notiRequest.content(), "");
         }
     }
 
-    private void issueMessage(Long memberId, String title, String content) {
+    private void issueMessage(Long memberId, String title, String content, String url) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         List<FcmToken> fcmTokens = fcmTokenRepository.findAllByMember(member);
-        Notification noti = NotificationIssueRequest.of(title, content, member);
+        Notification noti = NotificationIssueRequest.of(title, content, member, url);
         notificationRepository.save(noti);
 
         for (FcmToken fcmToken : fcmTokens) {
@@ -103,7 +103,7 @@ public class FcmService {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             KafkaNotificationRequest notificationRequest = objectMapper.readValue(message, KafkaNotificationRequest.class);
-            this.issueMessage(notificationRequest.memberId(), notificationRequest.title(), notificationRequest.content());
+            this.issueMessage(notificationRequest.memberId(), notificationRequest.title(), notificationRequest.content(), notificationRequest.url());
         } catch (JsonProcessingException e) {
             throw new BaseCustomException(INVALID_FCM_REQUEST);
         } catch(Exception e) {

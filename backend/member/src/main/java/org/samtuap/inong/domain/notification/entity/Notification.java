@@ -30,6 +30,7 @@ public class Notification extends BaseEntity {
     private Member member;
 
     private String url;
+    
     private boolean isRead;
 
     public void updateIsRead(boolean isRead) {
