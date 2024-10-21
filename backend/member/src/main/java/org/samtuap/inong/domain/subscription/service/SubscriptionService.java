@@ -9,6 +9,7 @@ import org.samtuap.inong.common.exception.BaseCustomException;
 import org.samtuap.inong.domain.member.dto.*;
 import org.samtuap.inong.domain.member.entity.Member;
 import org.samtuap.inong.domain.member.repository.MemberRepository;
+import org.samtuap.inong.domain.notification.dto.KafkaNotificationRequest;
 import org.samtuap.inong.domain.subscription.dto.*;
 import org.samtuap.inong.domain.subscription.entity.Subscription;
 import org.samtuap.inong.domain.subscription.repository.SubscriptionRepository;
@@ -37,6 +38,15 @@ public class SubscriptionService {
     public void registerPaymentMethod(Long memberId, BillingKeyRegisterRequest request) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         member.updatePaymentMethod(request.paymentMethodType(), request.billingKey());
+
+        // 알림 발송
+        KafkaNotificationRequest notification = KafkaNotificationRequest.builder()
+                .memberId(memberId)
+                .title("정기 결제 수단이 변경되었어요.")
+                .content("본인이 바꾸신 게 아니라면 즉시 고객센터로 문의 바랍니다.")
+                .url("/member/subscribe-management")
+                .build();
+        kafkaTemplate.send("member-notification-topic", notification);
     }
 
 
