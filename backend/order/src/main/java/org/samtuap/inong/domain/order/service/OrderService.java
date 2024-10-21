@@ -226,7 +226,7 @@ public class OrderService {
             Delivery delivery = Delivery.builder()
                     .ordering(ordering)
                     .deliveryStatus(BEFORE_DELIVERY)
-                    .deliveryDueDate(LocalDate.now().plusDays(time))
+                    .deliveryDueDate(LocalDate.now().plusDays((long) time * packageProduct.delivery_cycle()))
                     .courier("CJ") // FIXME: 논의 필요
                     .build();
             deliveryRepository.save(delivery);

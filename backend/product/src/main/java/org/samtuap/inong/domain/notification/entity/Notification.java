@@ -21,4 +21,9 @@ public class Notification extends BaseEntity {
     private Seller seller;
 
     private String url;
+    private boolean isRead;
+
+    public void updateIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 }

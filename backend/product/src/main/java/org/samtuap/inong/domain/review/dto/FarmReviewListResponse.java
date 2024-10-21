@@ -15,7 +15,8 @@ public record FarmReviewListResponse(
         String contents,
         List<String> imageUrls,
         LocalDateTime updateAt,
-        String packageName
+        String packageName,
+        Long memberId
 ) {
     public static FarmReviewListResponse fromEntity(Review review, List<ReviewImage> reviewImages, String packageName) {
 
@@ -31,6 +32,7 @@ public record FarmReviewListResponse(
                 .imageUrls(imageUrls)
                 .updateAt(review.getUpdatedAt())
                 .packageName(packageName)
+                .memberId(review.getMemberId())
                 .build();
     }
 }
