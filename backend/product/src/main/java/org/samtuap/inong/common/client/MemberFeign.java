@@ -3,6 +3,7 @@ package org.samtuap.inong.common.client;
 import org.samtuap.inong.common.response.FavoriteGetResponse;
 import org.samtuap.inong.config.FeignConfig;
 import org.samtuap.inong.domain.farmNotice.dto.FollowersGetResponse;
+import org.samtuap.inong.domain.farmNotice.dto.KafkaNotificationRequest;
 import org.samtuap.inong.domain.farmNotice.dto.MemberDetailResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -24,4 +25,7 @@ public interface MemberFeign {
 
     @GetMapping(value = "/favorites/farm/{farmId}")
     FavoriteGetResponse getFavorite(@RequestParam(value = "memberId", required = false) Long memberId, @PathVariable(value = "farmId") Long farmId);
+
+    @PostMapping(value = "/notification/member/{memberId}")
+    void sendNotification(@PathVariable Long memberId, @RequestBody KafkaNotificationRequest notification);
 }

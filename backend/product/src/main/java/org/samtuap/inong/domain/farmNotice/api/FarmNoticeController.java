@@ -110,4 +110,6 @@ public class FarmNoticeController {
         farmNoticeService.deleteNotice(noticeId, sellerId);
     }
 
+
+
 }

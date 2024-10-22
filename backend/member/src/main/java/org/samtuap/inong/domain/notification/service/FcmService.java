@@ -91,10 +91,11 @@ public class FcmService {
                 e.printStackTrace();
                 throw new BaseCustomException(FCM_SEND_FAIL);
             }
-
         }
+    }
 
-
+    public void issueNoticeSync(Long memberId, KafkaNotificationRequest request) {
+        issueMessage(memberId, request.title(), request.content(), request.url());
     }
 
     //== Kafka를 통한 알림 전송 비동기 처리 ==//
