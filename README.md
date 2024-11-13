@@ -1,4 +1,4 @@
-![KakaoTalk_20241020_232028824 (1)](https://github.com/user-attachments/assets/9c071627-d56c-4de6-b26a-e51c45f276be)
+![KakaoTalk_20241020_232028824 (1)](https://github.com/user-attachments/assets/ebddec83-3ba9-4b0e-8782-79c936fc5b75)
 
 <div align=center>
   
@@ -24,7 +24,7 @@
 <br><br>
 
 ## 📝 요구 사항 명세서
-![요구사항2](https://github.com/user-attachments/assets/109232ba-7e48-4144-8557-48c9c8474d3e)
+![요구사항2](https://github.com/user-attachments/assets/43ee6794-4718-45e6-acca-9bacc78dfb39)
 
 <div align=center>
 
@@ -34,7 +34,7 @@
 <br><br>
 
 ## 🗓️ WBS
-![image](https://github.com/user-attachments/assets/a2bfcb17-2d78-400f-ac9b-5d1f91d53079)
+![image](https://github.com/user-attachments/assets/db3d8340-3da9-4268-8da9-be6f87512711)
 
 <div align=center>
 
@@ -44,7 +44,7 @@
 <br><br>
 
 ## ☁️ ERD
-![dongsanginong-erd](https://github.com/user-attachments/assets/a2dba445-44e0-4ef4-afc8-32f5b776a46e)
+![dongsanginong-erd](https://github.com/user-attachments/assets/2a2cbefa-3494-4382-b800-d6f03dd82ea0)
 <div align=center>
   
   [⬆️ERD CLOUD 바로가기](https://www.erdcloud.com/d/AgNZCZGaBx6NE8JhL)
@@ -53,29 +53,29 @@
 <br><br>
 
 ## ⚙️ 시스템 아키텍처
-<img width="1324" alt="시스템 아키텍쳐" src="https://github.com/user-attachments/assets/8d9ab59d-10fe-4c53-a1b4-9edad39ffc05">
+<img width="1324" alt="전체" src="https://github.com/user-attachments/assets/58138f35-17d1-4811-bdb8-8a5a9fb98f7c">
 
 <details>
   <summary>WebRTC + OpenVidu 다이어그램</summary>
   <br>
-  
-  ![webrtc](https://github.com/user-attachments/assets/3e09db79-a91a-4b73-a991-de4f50ccd41d)
+
+  <img src="https://github.com/user-attachments/assets/ae488213-562f-4c3c-b248-210d3befd383" width=800>
   <br>
 </details>
 
 <details>
   <summary>OpenSearch 다이어그램</summary>
   <br>
-  
-  ![opensearch](https://github.com/user-attachments/assets/4ce3600f-4da9-4eb3-ba0f-3221cfec1a58)
+
+  <img src="https://github.com/user-attachments/assets/2fee3d31-4374-42be-a7e2-14874df80933" width=800>
   
 </details>
 
 <details>
   <summary>PortOne 결제 다이어그램</summary>
   <br>
-  
-  ![portone](https://github.com/user-attachments/assets/62502ead-5b33-4670-869a-39d1d6f5e2e7)
+
+  <img src="https://github.com/user-attachments/assets/f29b44a3-a614-4295-b0e8-c82487c3b1a5" width=800>
   
 </details>
 
@@ -84,7 +84,7 @@
 ## 📈 프로그램사양서
 <div align=center>
 
-  <img src="https://github.com/user-attachments/assets/7f95cf0b-de2a-46cf-bbb8-5dae99077bbd" width=250>
+  <img src="https://github.com/user-attachments/assets/a9d7bdc9-7773-4769-89d2-0e4797d1b094" width=250>
   
   [⬆️API 명세서 보기](https://documenter.getpostman.com/view/37325338/2sAXxLDEqJ#9c2ba4c5-6901-44e7-ad72-8bc8495ab8e0)
 </div>
@@ -99,7 +99,8 @@
   <br>
 
   * 메인페이지<br>
-    ![main](https://github.com/user-attachments/assets/a909fd42-cfc7-46ff-9c33-014967b5fcda)
+    ![main](https://github.com/user-attachments/assets/80c58314-f735-49df-bd09-4eb76a0d580c)
+
 
 
 
@@ -111,9 +112,9 @@
   <br>
 
   * 농장 및 패키지 상품 검색하기<br>
-    ![오픈서치4](https://github.com/user-attachments/assets/61f1f3ab-646f-4810-84a0-becb4ec7a527)
+    ![오픈서치4](https://github.com/user-attachments/assets/caa78397-5b4c-4077-83e2-d7277a4613c8)
     <br>
-    ![오픈서치5](https://github.com/user-attachments/assets/5bdcd24a-27d4-4e4f-a5d2-53f138d96328)
+    ![오픈서치5](https://github.com/user-attachments/assets/9f78aad5-15a5-4275-af9f-a0430f6b1376)
     
 </details>
 
@@ -122,9 +123,9 @@
   <br>
 
   * 구매자 공지글 알림 - 스크랩 한 농장에 공지글이 올라오면 알림<br>
-    ![공지알림](https://github.com/user-attachments/assets/523ad4cd-fbad-4656-b12f-8c28c3ada30c)
+    ![공지알림](https://github.com/user-attachments/assets/443d6190-8ca5-4cf7-80d1-3c7669d14e04)
   * 판매자 구매 알림 - 새로운 주문이 들어오면 알림 <br>
-    ![구매알림](https://github.com/user-attachments/assets/cad50b83-8d68-4468-8e6a-2b8762672d6a)
+    ![구매알림](https://github.com/user-attachments/assets/158f6d88-6695-4cf3-b472-f94b11958e51)
   * 판매자 배송 알림 - 다가오는 배송 알림 <br>
     
     
@@ -137,13 +138,14 @@
   <br>
 
   * member > 내 배송 목록 조회 <br>
-    ![deliverylist](https://github.com/user-attachments/assets/c5b61eaf-7677-4f27-9ec2-11246b3d7863)
+    ![배송](https://github.com/user-attachments/assets/46e7f8c5-ed92-429e-924f-f54d010158e1)
   * member > 결제 조회 & 영수증 다운로드 <br>
-    ![receipt](https://github.com/user-attachments/assets/b816326f-0958-4f34-be16-c635b4052fcc)
+    ![결제-영수증](https://github.com/user-attachments/assets/c65d5644-dd37-46bf-aaf1-d1c448a8d5d0)
   * member > 후기 작성 <br>
-    ![writereview](https://github.com/user-attachments/assets/867c9aeb-333d-4a29-aee4-01f89467c8ee)
+   ![writereview](https://github.com/user-attachments/assets/329bbf2b-123a-44a1-9b9b-73300e1424be)
+
   * member > 내 구독 조회 & 구독 취소 <br>
-    ![sublist](https://github.com/user-attachments/assets/d095fef6-765f-43d2-bf11-ae4cad021783)
+    ![마이페이지-구독취소](https://github.com/user-attachments/assets/2f1b1dc2-1c69-4deb-8a4c-01ed264431fd)
     
 </details>
 
@@ -160,7 +162,7 @@
   * seller > 상품 삭제 <br>
     ![상품 삭제](https://github.com/user-attachments/assets/9343bac0-5db7-4307-9ee1-d95554f7d968)
   * seller > 리뷰 리스트, 디테일, 삭제 <br>
-    ![리뷰](https://github.com/user-attachments/assets/2cfd0b61-ad16-4d04-b88a-c333ed385619)
+    ![리뷰](https://github.com/user-attachments/assets/4e51ba79-32d5-40bc-9423-3c15eb8a4b27)
   * seller > 쿠폰 리스트, 등록 <br>
     ![쿠폰 등록 리스트](https://github.com/user-attachments/assets/ec77a404-069e-45ee-8ba5-92d4bbf796aa)
 
@@ -186,7 +188,7 @@
   <br>
 
   * 라이브 목록 + 카테고리 필터링<br>
-    ![livelist](https://github.com/user-attachments/assets/9a53736d-1355-44ec-b62a-50a715bb4cf3)
+    ![라이브 목록-카테고리](https://github.com/user-attachments/assets/a5dd9af1-c48e-413e-9dfa-7e44649a229b)
     
 </details>
 
@@ -195,17 +197,17 @@
   <br>
 
   * seller > 라이브 시작하기 <br>
-    ![livestart](https://github.com/user-attachments/assets/459e0965-ab6a-4710-af36-d1ea8f58ee5b)
+    ![라이브-시작](https://github.com/user-attachments/assets/2fbd618b-3b85-4aae-836f-2f04b571f7c0)
   * seller > 라이브 중 쿠폰 등록 <br>
-    ![livecoupon](https://github.com/user-attachments/assets/dd5aadce-c70c-4db7-be12-a0db12c9e524)
+    ![라이브-쿠폰등록](https://github.com/user-attachments/assets/fc21f579-99c4-4089-bc94-b25e137dae8a)
   * member > 쿠폰 다운로드 <br>
-    ![coupondownload](https://github.com/user-attachments/assets/0466c645-675d-46f2-ae5e-a827daac635f)
+    ![라이브-쿠폰발급](https://github.com/user-attachments/assets/ebc2e41b-0e4c-4fb1-bd64-968720dd3cdc)
   * 라이브 중 member와 seller 채팅  <br>
-    ![livechat](https://github.com/user-attachments/assets/c9769580-6992-4bd4-a79f-9cfa088d5439)
+    ![라이브-채팅](https://github.com/user-attachments/assets/abea9d09-9373-4ebe-8ff5-c554c4823360)
   * member 강퇴시키기  <br>
-    ![quitmember](https://github.com/user-attachments/assets/26506970-4d19-4104-9240-58d767acf2e8)
+    ![라이브-강퇴](https://github.com/user-attachments/assets/dd40b70c-1f5e-4b31-b14f-35d9a5ac6785)
   * 라이브에서 강퇴당한 뒤 구매자의 화면
-    ![quitseller](https://github.com/user-attachments/assets/2ee17a61-4ad3-4156-b519-a0b13e717167)
+    ![quitseller](https://github.com/user-attachments/assets/36d22316-d8b6-4180-ae1c-13032349a709)
     
 </details>
 
@@ -216,13 +218,15 @@
   <br>
 
   * 상품 디테일 조회 <br>
-    ![packageDetail2](https://github.com/user-attachments/assets/426f08db-4a66-41ca-ac36-edb4dbc35bd1)
+    ![packageDetail2](https://github.com/user-attachments/assets/74ec0917-2add-4ea2-abc1-787dea54d87e)
+
 
   * 상품 디테일 > 리뷰 조회
-    ![packageDetail-review](https://github.com/user-attachments/assets/30b9cac8-5f8f-45c0-a01a-9593864e0409)
+    ![packageDetail-review](https://github.com/user-attachments/assets/35a8ef51-fcb2-4450-a8de-4704bdce7b86)
+
   
   * 상품 주문/결제 <br>
-    ![ordering](https://github.com/user-attachments/assets/246f3ef5-5316-4be4-9def-b1658a56c082)
+    ![상품목록-결제](https://github.com/user-attachments/assets/5bee0300-831f-45af-834c-165c5b26d468)
 
 </details>
 
@@ -233,17 +237,20 @@
   <br>
 
   * 농장 목록 및 스크랩 <br>
-    ![farmListLike](https://github.com/user-attachments/assets/b50646da-fd26-452f-98b8-44271d990a2a)
+  ![farmListLike](https://github.com/user-attachments/assets/a2a52d6f-fc0b-4101-b3eb-2c28d37b1848)
+
 
     
   * 농장 목록 카테고리 필터링 <br>
-    ![farmCategory](https://github.com/user-attachments/assets/173783b8-8c18-40e4-ae20-ca75a2bcb45c)
+  ![farmCategory](https://github.com/user-attachments/assets/c6337843-b34f-4cf9-88f5-94207043392e)
 
   * 농장 목록 정렬 <br>
-    ![farmSort](https://github.com/user-attachments/assets/3adcefeb-d381-4a76-90a4-a11e4415c3f1)
+    ![farmSort](https://github.com/user-attachments/assets/e5709b1a-1142-4bd3-8b71-7f567d5d1ddb)
+
 
   * 농장 목록 검색
-    ![farmSearch](https://github.com/user-attachments/assets/cfc2fd40-36d4-4b69-8c33-e5660a43b101)
+    ![farmSearch](https://github.com/user-attachments/assets/a3ed035a-b5cc-4f4d-8a7f-8b1593569609)
+
 
 
     
@@ -254,11 +261,13 @@
   <br>
 
   * 농장 디테일 - 패키지 목록 <br>
-    ![farmProduct](https://github.com/user-attachments/assets/bfcdd9f2-3ebe-492e-a764-351a76258703)
+    ![farmProduct](https://github.com/user-attachments/assets/c200ee14-7751-48b1-b4a9-42b7c1612dc6)
+
   * 농장 디테일 - 공지 조회 및 댓글달기 <br>
-    ![댓글2](https://github.com/user-attachments/assets/c9ec7455-19bb-4b8c-8812-be99b5a54bf2)
+    ![댓글2](https://github.com/user-attachments/assets/3de30bd6-f0a1-480b-b73a-5c84661317b0)
   * 농장 디테일 - 리뷰 조회 및 수정 <br>
-    ![리뷰](https://github.com/user-attachments/assets/9a8e22ac-3864-43fc-960f-234401b742b2)
+    ![packageDetail-review](https://github.com/user-attachments/assets/821997a5-a64d-48ff-bd8f-44e267e81f23)
+
     
     
 </details>
@@ -268,14 +277,17 @@
   <br>
 
   * 패키지 상품 목록 조회 & 위시리스트<br>
-    ![packageList](https://github.com/user-attachments/assets/dd41293b-6369-44ff-bd10-3c426b2450cf)
+  ![packageList](https://github.com/user-attachments/assets/6b646ad8-3e8c-4fcf-83b3-bd8cb78149dd)
+
 
   * 패키지 상품 정렬 <br>
-    ![package sort](https://github.com/user-attachments/assets/b28ba1c3-9c3d-4d92-b80b-ffd0c6476d44)
+  ![package sort](https://github.com/user-attachments/assets/99df104d-f530-413b-a6e3-366df984dfb7)
+
 
   
   * 패키지 상품 검색 <br>
-    ![Package search](https://github.com/user-attachments/assets/23f4b70f-2b25-4946-9ac4-bfbebacffc8e)
+  ![Package search](https://github.com/user-attachments/assets/e18df0f4-8a6d-4ef6-8474-6383ac6bd42e)
+
 
 </details>
 <br>
