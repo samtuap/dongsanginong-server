@@ -53,7 +53,8 @@
 <br><br>
 
 ## ⚙️ 시스템 아키텍처
-<img width="1324" alt="전체" src="https://github.com/user-attachments/assets/58138f35-17d1-4811-bdb8-8a5a9fb98f7c">
+<img width="953" alt="스크린샷 2024-11-11 오후 4 53 42" src="https://github.com/user-attachments/assets/b53a292d-5003-4985-a060-4842aabbf67d">
+
 
 <details>
   <summary>WebRTC + OpenVidu 다이어그램</summary>
